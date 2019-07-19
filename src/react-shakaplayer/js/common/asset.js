@@ -16,7 +16,7 @@
  */
 
 import shakaAssets from './assets';
-require('google-closure-library');
+// require('google-closure-library');
 
 const noop = () => {};
 goog.provide('ShakaDemoAssetInfo');
@@ -377,3 +377,5 @@ const ShakaDemoAssetInfo = class {
 		return asset;
 	}
 };
+
+export default ShakaDemoAssetInfo;

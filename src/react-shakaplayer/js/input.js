@@ -19,7 +19,8 @@
  * Creates and contains the MDL elements of a type of input.
  */
 
-import Awesomplete from 'Awesomplete';
+// import Awesomplete from 'Awesomplete';
+import Awesomplete from 'awesomplete/awesomplete.min.js';
 
 class ShakaDemoInput {
 	/**
@@ -183,15 +184,19 @@ class ShakaDemoDatalistInput extends ShakaDemoTextInput {
 		// all platforms (and they also have no MDL style support).
 		// Instead, this is using the third-party "awesomplete" module, which acts
 		// as a text field with autocomplete selection.
-		const awesomplete = new Awesomplete(this.input_);
-		awesomplete.list = values.slice(); // Make a local copy of the values list.
-		awesomplete.minChars = 0;
-		this.input_.addEventListener('focus', () => {
-			// By default, awesomplete does not show suggestions on focusing on the
-			// input, only on typing something.
-			// This manually updates the suggestions, so that they will show up.
-			awesomplete.evaluate();
-		});
+		try {
+			const awesomplete = new Awesomplete(this.input_);
+			awesomplete.list = values.slice(); // Make a local copy of the values list.
+			awesomplete.minChars = 0;
+			this.input_.addEventListener('focus', () => {
+				// By default, awesomplete does not show suggestions on focusing on the
+				// input, only on typing something.
+				// This manually updates the suggestions, so that they will show up.
+				awesomplete.evaluate();
+			});
+		} catch (error) {
+			console.log({ Awesomplete });
+		}
 	}
 }
 

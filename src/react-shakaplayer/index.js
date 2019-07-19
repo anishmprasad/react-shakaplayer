@@ -29,8 +29,8 @@ import '../dist/shaka-player.ui.debug.js';
 import '../dist/demo.compiled.debug.js';
 
 // Bootstrap the Shaka Player library through the Closure library.
-import '../third_party/closure/goog/base.js';
-import '../dist/deps.js';
+import './third_party/closure/goog/base.js';
+import './dist/deps.js';
 // This is required for goog.asserts.
 import '../lib/debug/asserts.js';
 // This file contains goog.require calls for all exported library classes.

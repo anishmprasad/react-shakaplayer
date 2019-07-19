@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
+import ShakaDemoAssetInfo from './asset'
 
-goog.require('ShakaDemoAssetInfo');
+// goog.require('ShakaDemoAssetInfo');
 
 
 // Types and enums {{{
@@ -129,7 +130,7 @@ shakaAssets.Feature = {
  * @property {(string|undefined)} codecs
  *   (optional) The codecs string, if needed to refine the MIME type.
  */
-shakaAssets.ExtraText;
+shakaAssets.ExtraText = {};
 // End types and enums }}}
 
 
@@ -151,7 +152,7 @@ shakaAssets.lastUplynkPrefix = '';
  * @param {shaka.extern.Response} response
  */
 shakaAssets.UplynkResponseFilter = (type, response) => {
-  if (type == shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+  if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
     // Parse a custom header that contains a value needed to build a proper
     // license server URL.
     if (response.headers['x-uplynk-prefix']) {
@@ -170,7 +171,7 @@ shakaAssets.UplynkResponseFilter = (type, response) => {
  * @param {shaka.extern.Request} request
  */
 shakaAssets.UplynkRequestFilter = (type, request) => {
-  if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+  if (type === shaka.net.NetworkingEngine.RequestType.LICENSE) {
     // Modify the license request URL based on our cookie.
     if (request.uris[0].includes('wv') && shakaAssets.lastUplynkPrefix) {
       request.uris[0] = shakaAssets.lastUplynkPrefix.concat('/wv');
