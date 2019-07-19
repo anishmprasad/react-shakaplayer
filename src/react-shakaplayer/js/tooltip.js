@@ -19,7 +19,7 @@ import tippy from 'tippy.js';
 /**
  * Creates and contains the MDL elements of a tooltip.
  */
-export default class ShakaDemoTooltips {
+class ShakaDemoTooltips {
 	/**
 	 * @param {!Element} labeledElement
 	 * @param {string} message
@@ -36,3 +36,6 @@ export default class ShakaDemoTooltips {
 		// tooltip info should instead be encoded into the object.
 	}
 }
+
+const ShakaTooltip = new ShakaDemoTooltips();
+export default ShakaTooltip;

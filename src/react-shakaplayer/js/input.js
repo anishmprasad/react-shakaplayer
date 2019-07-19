@@ -18,6 +18,9 @@
 /**
  * Creates and contains the MDL elements of a type of input.
  */
+
+import Awesomplete from 'Awesomplete';
+
 class ShakaDemoInput {
 	/**
 	 * @param {!ShakaDemoInputContainer} parentContainer

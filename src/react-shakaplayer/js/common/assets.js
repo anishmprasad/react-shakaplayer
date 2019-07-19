@@ -968,3 +968,7 @@ shakaAssets.testAssets = [
       .setResponseFilter(shakaAssets.UplynkResponseFilter),
   // End Verizon Digital Media Services (VDMS) assets }}}
 ];
+
+
+
+export default shakaAssets

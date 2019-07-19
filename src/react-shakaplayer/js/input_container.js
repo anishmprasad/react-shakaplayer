@@ -23,6 +23,9 @@
  * It also has an optional header, which can contain style-dependent
  * functionality.
  */
+
+import ShakaDemoTooltips from './tooltip';
+
 class ShakaDemoInputContainer {
 	/**
 	 * @param {!Element} parentDiv

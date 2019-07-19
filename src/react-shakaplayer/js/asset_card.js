@@ -19,6 +19,10 @@
  * Creates and contains an MDL card that presents info about the given asset.
  * @final
  */
+
+import ShakaDemoTooltips from './tooltip';
+import shakaAssets from './common/assets';
+
 class AssetCard {
 	/**
 	 * @param {!Element} parentDiv
@@ -154,6 +158,8 @@ class AssetCard {
 					break;
 				case KeySystem.PLAYREADY:
 					this.addFeatureIcon_('playready', 'PlayReady DRM');
+					break;
+				default:
 					break;
 			}
 		}
@@ -356,3 +362,6 @@ class AssetCard {
 		return button;
 	}
 }
+
+const ShakaAssetCard = new AssetCard();
+export default ShakaAssetCard;
