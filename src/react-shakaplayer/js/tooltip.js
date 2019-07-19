@@ -1,3 +1,4 @@
+import tippy from 'tippy.js';
 /**
  * @license
  * Copyright 2016 Google Inc.
@@ -18,7 +19,7 @@
 /**
  * Creates and contains the MDL elements of a tooltip.
  */
-class ShakaDemoTooltips {
+export default class ShakaDemoTooltips {
 	/**
 	 * @param {!Element} labeledElement
 	 * @param {string} message

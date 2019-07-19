@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 /**
  * A custom UI button, to allow users to close the video element.
  * This cannot actually extend shaka.ui.Element, as that class does not exist
@@ -23,38 +22,38 @@
  * @implements {shaka.extern.IUIElement}
  */
 class CloseButton {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    /** @protected {!HTMLElement} */
-    this.parent = parent;
+	/**
+	 * @param {!HTMLElement} parent
+	 * @param {!shaka.ui.Controls} controls
+	 */
+	constructor(parent, controls) {
+		/** @protected {!HTMLElement} */
+		this.parent = parent;
 
-    this.button_ = document.createElement('button');
-    this.button_.classList.add('material-icons');
-    this.button_.classList.add('close-button');
-    this.button_.textContent = 'close'; // Close icon.
-    this.parent.appendChild(this.button_);
+		this.button_ = document.createElement('button');
+		this.button_.classList.add('material-icons');
+		this.button_.classList.add('close-button');
+		this.button_.textContent = 'close'; // Close icon.
+		this.parent.appendChild(this.button_);
 
-    this.button_.addEventListener('click', () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
-      if (document.pictureInPictureElement) {
-        document.exitPictureInPicture();
-      }
-      shakaDemoMain.unload();
-    });
+		this.button_.addEventListener('click', () => {
+			if (document.fullscreenElement) {
+				document.exitFullscreen();
+			}
+			if (document.pictureInPictureElement) {
+				document.exitPictureInPicture();
+			}
+			shakaDemoMain.unload();
+		});
 
-    // TODO: Make sure that the screenreader description of this control is
-    // localized!
-  }
+		// TODO: Make sure that the screenreader description of this control is
+		// localized!
+	}
 
-  /** @override */
-  destroy() {
-    return Promise.resolve();
-  }
+	/** @override */
+	destroy() {
+		return Promise.resolve();
+	}
 }
 
 /**
@@ -62,10 +61,10 @@ class CloseButton {
  * @final
  */
 CloseButton.Factory = class {
-  /** @override */
-  create(rootElement, controls) {
-    return new CloseButton(rootElement, controls);
-  }
+	/** @override */
+	create(rootElement, controls) {
+		return new CloseButton(rootElement, controls);
+	}
 };
 
 // This button is registered inside setup in ShakaDemoMain, rather than
