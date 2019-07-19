@@ -16,10 +16,10 @@
  */
 
 import shakaAssets from './assets';
-// require('google-closure-library');
 
 const noop = () => {};
-goog.provide('ShakaDemoAssetInfo');
+
+// goog.provide('ShakaDemoAssetInfo');
 
 /**
  * An object that contains information about an asset.

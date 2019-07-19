@@ -19,7 +19,7 @@ import 'tippy.js/umd/index.min.js';
 // <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
 
 // The compiled library, with UI.
-import '../dist/shaka-player.ui.js';
+// import '../dist/shaka-player.ui.js';
 // The compiled demo.
 import '../dist/demo.compiled.js';
 
