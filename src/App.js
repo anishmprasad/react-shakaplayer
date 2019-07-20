@@ -6,7 +6,7 @@ import './App.css';
 // import './react-shakaplayer/js/load';
 
 import './react-shakaplayer/lib/deprecate/deprecate';
-import './react-shakaplayer/lib/Player';
+import './react-shakaplayer/lib/player';
 import './react-shakaplayer/lib/abr/simple_abr_manager';
 import './react-shakaplayer/lib/cast/cast_proxy';
 import './react-shakaplayer/lib/cast/cast_receiver';
