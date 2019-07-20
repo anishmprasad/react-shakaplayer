@@ -20,6 +20,8 @@ import shakaDemoMain from './main';
 import shakaAssets from './common/assets';
 import ShakaDemoInputContainer from './input_container';
 
+const shaka = window.shaka;
+
 let shakaDemoSearch;
 
 /**
@@ -142,6 +144,8 @@ class ShakaDemoSearch {
 				}
 				this.desiredFeatures_.push(/** @type {shakaAssets.Feature} */ (term));
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -164,6 +168,8 @@ class ShakaDemoSearch {
 				if (index != -1) {
 					this.desiredFeatures_.splice(index, 1);
 				}
+				break;
+			default:
 				break;
 		}
 	}
@@ -331,7 +337,7 @@ class ShakaDemoSearch {
 }
 
 /** @typedef {shakaAssets.Feature|shakaAssets.Source} */
-ShakaDemoSearch.SearchTerm;
+ShakaDemoSearch.SearchTerm = {};
 
 /** @enum {string} */
 ShakaDemoSearch.TermType = {

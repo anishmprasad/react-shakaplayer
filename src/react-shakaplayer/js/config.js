@@ -20,6 +20,8 @@
 import shakaDemoMain from './main';
 import ShakaDemoInputContainer from './input_container';
 
+var shaka = window.shaka;
+
 let shakaDemoConfig;
 
 /**

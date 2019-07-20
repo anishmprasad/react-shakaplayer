@@ -24,6 +24,8 @@ import ShakaDemoTooltips from './tooltip';
 import shakaAssets from './common/assets';
 import shakaDemoMain from './main';
 
+var shaka = window.shaka;
+
 class AssetCard {
 	/**
 	 * @param {!Element} parentDiv

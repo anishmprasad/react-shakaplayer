@@ -21,6 +21,8 @@ import shakaDemoMain from './main';
 import shakaAssets from './common/assets';
 import AssetCard from './asset_card';
 
+var shaka = window.shaka;
+
 let shakaDemoFront;
 
 /**

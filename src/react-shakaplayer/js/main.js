@@ -25,6 +25,8 @@
 import shakaAssets from './common/assets';
 import ShakaDemoCustom from './custom'
 
+const shaka  = window.shaka
+
 
 class ShakaDemoMain {
   constructor() {

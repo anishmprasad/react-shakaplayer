@@ -17,6 +17,8 @@
  */
 
 import ShakaDemoAssetInfo from './asset'
+const shaka = window.shaka
+
 
 // goog.require('ShakaDemoAssetInfo');
 

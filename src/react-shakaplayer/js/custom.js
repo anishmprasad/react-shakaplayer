@@ -18,6 +18,9 @@
 /** @type {?ShakaDemoCustom} */
 import shakaDemoMain from './main';
 
+const shaka  = window.shaka
+
+
 let shakaDemoCustom;
 
 /**

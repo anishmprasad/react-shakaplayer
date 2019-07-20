@@ -17,6 +17,8 @@
 
 import shakaAssets from './assets';
 
+var shaka = window.shaka;
+
 const noop = () => {};
 
 // goog.provide('ShakaDemoAssetInfo');

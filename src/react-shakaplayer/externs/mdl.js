@@ -20,17 +20,15 @@
  * @externs
  */
 
-
 /** @const */
 const componentHandler = class {
-  /** @const */
-  static upgradeDom() {}
+	/** @const */
+	static upgradeDom() {}
 };
-
 
 /** @constructor */
 const MaterialLayout = class {
-  toggleDrawer() {}
+	toggleDrawer() {}
 };
 
 /** @const {?MaterialLayout} */
