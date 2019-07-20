@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
+
 // goog.provide('shaka.cast.CastProxy');
 
 goog.require('goog.asserts');

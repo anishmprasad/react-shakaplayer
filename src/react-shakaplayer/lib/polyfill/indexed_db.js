@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 // goog.provide('shaka.polyfill.IndexedDB');
 
 // goog.require('goog.asserts');

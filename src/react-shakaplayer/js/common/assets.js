@@ -880,6 +880,6 @@ shakaAssets.testAssets = [
 
 
 
-console.log(shakaAssets)
+console.log({shakaAssets})
 
 export default shakaAssets

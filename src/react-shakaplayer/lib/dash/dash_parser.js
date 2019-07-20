@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
+
 // goog.provide('shaka.dash.DashParser');
 
 goog.require('goog.asserts');

@@ -16,7 +16,7 @@
  */
 
 import shakaAssets from './assets';
-import { KeySystem } from './config';
+import { Source, KeySystem } from './config';
 
 console.log({ shakaAssets });
 
@@ -353,7 +353,7 @@ const ShakaDemoAssetInfo = class {
 			/* name= */ '',
 			/* iconUri= */ '',
 			/* manifestUri= */ '',
-			/* source= */ shakaAssets.Source.CUSTOM
+			/* source= */ Source.CUSTOM
 		);
 	}
 

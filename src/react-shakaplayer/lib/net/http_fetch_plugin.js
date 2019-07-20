@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 // goog.provide('shaka.net.HttpFetchPlugin');
 
 // goog.require('goog.asserts');

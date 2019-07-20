@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 // goog.provide('shaka.text.Mp4VttParser');
 
 // goog.require('goog.asserts');

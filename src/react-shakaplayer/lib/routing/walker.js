@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 // goog.provide('shaka.routing.Walker');
 // goog.provide('shaka.routing.Walker.Implementation');
 

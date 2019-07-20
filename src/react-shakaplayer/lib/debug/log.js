@@ -19,6 +19,8 @@
 
 // goog.require('goog.asserts');
 
+/*eslint-disable */
+
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
 window.goog = window.goog || {};

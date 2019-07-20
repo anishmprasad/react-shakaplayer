@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 // goog.provide('shaka.polyfill.MediaSource');
 
 // goog.require('shaka.log');
