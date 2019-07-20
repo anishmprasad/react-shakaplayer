@@ -25,6 +25,13 @@
 // goog.require('shaka.offline.OfflineUri');
 // goog.require('shaka.util.ManifestParserUtils');
 
+import { InitSegmentReference } from '../media/segment_reference';
+import PresentationTimeline from '../media/presentation_timeline';
+import SegmentIndex from '../media/segment_index';
+import { SegmentReference } from '../media/segment_reference';
+import OfflineUri from '../offline/offline_uri';
+import ManifestParserUtils from '../util/manifest_parser_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -33,7 +40,7 @@ var goog = window.goog;
  * player-ready objects. Used by the offline system to convert on-disk
  * objects back to the in-memory objects.
  */
-shaka.offline.ManifestConverter = class {
+class ManifestConverter {
 	/**
 	 * Create a new manifest converter. Need to know the mechanism and cell that
 	 * the manifest is from so that all segments paths can be created.
@@ -56,7 +63,7 @@ shaka.offline.ManifestConverter = class {
 	 * @return {shaka.extern.Manifest}
 	 */
 	fromManifestDB(manifestDB) {
-		const timeline = new shaka.media.PresentationTimeline(null, 0);
+		const timeline = new PresentationTimeline(null, 0);
 		timeline.setDuration(manifestDB.duration);
 
 		const periods = manifestDB.periods.map(period => this.fromPeriodDB(period, timeline));
@@ -187,7 +194,7 @@ shaka.offline.ManifestConverter = class {
 		const segments = streamDB.segments.map((segment, index) => this.fromSegmentDB_(index, segment));
 
 		/** @type {!shaka.media.SegmentIndex} */
-		const segmentIndex = new shaka.media.SegmentIndex(segments);
+		const segmentIndex = new SegmentIndex(segments);
 
 		/** @type {shaka.extern.Stream} */
 		const stream = {
@@ -233,9 +240,9 @@ shaka.offline.ManifestConverter = class {
 	 */
 	fromSegmentDB_(index, segmentDB) {
 		/** @type {!shaka.offline.OfflineUri} */
-		const uri = shaka.offline.OfflineUri.segment(this.mechanism_, this.cell_, segmentDB.dataKey);
+		const uri = OfflineUri.segment(this.mechanism_, this.cell_, segmentDB.dataKey);
 
-		return new shaka.media.SegmentReference(
+		return new SegmentReference(
 			index,
 			segmentDB.startTime,
 			segmentDB.endTime,
@@ -252,9 +259,9 @@ shaka.offline.ManifestConverter = class {
 	 */
 	fromInitSegmentDB_(key) {
 		/** @type {!shaka.offline.OfflineUri} */
-		const uri = shaka.offline.OfflineUri.segment(this.mechanism_, this.cell_, key);
+		const uri = OfflineUri.segment(this.mechanism_, this.cell_, key);
 
-		return new shaka.media.InitSegmentReference(() => [uri.toString()], 0 /* startBytes*/, null /* endBytes */);
+		return new InitSegmentReference(() => [uri.toString()], 0 /* startBytes*/, null /* endBytes */);
 	}
 
 	/**
@@ -273,7 +280,7 @@ shaka.offline.ManifestConverter = class {
 	 * @private
 	 */
 	isVideo_(stream) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 		return stream.contentType == ContentType.VIDEO;
 	}
 
@@ -283,7 +290,7 @@ shaka.offline.ManifestConverter = class {
 	 * @private
 	 */
 	isText_(stream) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 		return stream.contentType == ContentType.TEXT;
 	}
 
@@ -307,4 +314,6 @@ shaka.offline.ManifestConverter = class {
 			allowedByKeySystem: true
 		};
 	}
-};
+}
+
+export default ManifestConverter;

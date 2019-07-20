@@ -37,7 +37,7 @@ var shaka = window.shaka;
  * @property {string} cell
  *  The name of the cell in the mechanism.
  */
-shaka.offline.StorageCellPath;
+shaka.offline.StorageCellPath = {};
 
 /**
  * @typedef {{
@@ -50,7 +50,7 @@ shaka.offline.StorageCellPath;
  * @property {shaka.extern.StorageCell} cell
  *   The storage cell that the path points to within the storage muxer.
  */
-shaka.offline.StorageCellHandle;
+shaka.offline.StorageCellHandle = {};
 
 /**
  * StorageMuxer is responsible for managing StorageMechanisms and addressing
@@ -68,7 +68,7 @@ shaka.offline.StorageCellHandle;
  *
  * @implements {shaka.util.IDestroyable}
  */
-shaka.offline.StorageMuxer = class {
+class StorageMuxer {
 	constructor() {
 		/**
 		 * A key in this map is the name given when registering a StorageMechanism.
@@ -308,7 +308,7 @@ shaka.offline.StorageMuxer = class {
 	 * @export
 	 */
 	static register(name, factory) {
-		shaka.offline.StorageMuxer.registry_.set(name, factory);
+		StorageMuxer.registry_.set(name, factory);
 	}
 
 	/**
@@ -320,7 +320,7 @@ shaka.offline.StorageMuxer = class {
 	 * @export
 	 */
 	static unregister(name) {
-		shaka.offline.StorageMuxer.registry_.delete(name);
+		StorageMuxer.registry_.delete(name);
 	}
 
 	/**
@@ -331,7 +331,7 @@ shaka.offline.StorageMuxer = class {
 	 * @return {boolean}
 	 */
 	static support() {
-		const registry = shaka.offline.StorageMuxer.getRegistry_();
+		const registry = StorageMuxer.getRegistry_();
 		// Make sure that we will have SOME mechanisms created by creating a
 		// mechanism and immediately destroying it.
 		for (const create of registry.values()) {
@@ -353,14 +353,14 @@ shaka.offline.StorageMuxer = class {
 	 * @param {Map.<string, function():shaka.extern.StorageMechanism>} map
 	 */
 	static overrideSupport(map) {
-		shaka.offline.StorageMuxer.override_ = map;
+		StorageMuxer.override_ = map;
 	}
 
 	/**
 	 * Undo a previous call to |overrideSupport|.
 	 */
 	static clearOverride() {
-		shaka.offline.StorageMuxer.override_ = null;
+		StorageMuxer.override_ = null;
 	}
 
 	/**
@@ -371,23 +371,25 @@ shaka.offline.StorageMuxer = class {
 	 * @private
 	 */
 	static getRegistry_() {
-		const override = shaka.offline.StorageMuxer.override_;
-		const registry = shaka.offline.StorageMuxer.registry_;
+		const override = StorageMuxer.override_;
+		const registry = StorageMuxer.registry_;
 
-		if (COMPILED) {
+		if (window.COMPILED) {
 			return registry;
 		} else {
 			return override || registry;
 		}
 	}
-};
+}
 
 /**
  * @private {Map.<string, function():shaka.extern.StorageMechanism>}
  */
-shaka.offline.StorageMuxer.override_ = null;
+StorageMuxer.override_ = null;
 
 /**
  * @private {!Map.<string, function():shaka.extern.StorageMechanism>}
  */
-shaka.offline.StorageMuxer.registry_ = new Map();
+StorageMuxer.registry_ = new Map();
+
+export default StorageMuxer;

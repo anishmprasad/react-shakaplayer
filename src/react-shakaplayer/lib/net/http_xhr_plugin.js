@@ -23,6 +23,10 @@
 // goog.require('shaka.util.AbortableOperation');
 // goog.require('shaka.util.Error');
 
+import HttpPluginUtils from '../net/http_plugin_utils';
+import NetworkingEngine from '../net/networking_engine';
+import AbortableOperation from '../util/abortable_operation';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -30,7 +34,7 @@ var goog = window.goog;
  * @summary A networking plugin to handle http and https URIs via XHR.
  * @export
  */
-shaka.net.HttpXHRPlugin = class {
+class HttpXHRPlugin {
 	/**
 	 * @param {string} uri
 	 * @param {shaka.extern.Request} request
@@ -41,7 +45,7 @@ shaka.net.HttpXHRPlugin = class {
 	 * @export
 	 */
 	static parse(uri, request, requestType, progressUpdated) {
-		const xhr = new shaka.net.HttpXHRPlugin.Xhr_();
+		const xhr = new HttpXHRPlugin.Xhr_();
 
 		// Last time stamp when we got a progress event.
 		let lastTime = Date.now();
@@ -82,7 +86,7 @@ shaka.net.HttpXHRPlugin = class {
 				}
 
 				try {
-					const response = shaka.net.HttpPluginUtils.makeResponse(
+					const response = HttpPluginUtils.makeResponse(
 						headers,
 						target.response,
 						target.status,
@@ -140,12 +144,12 @@ shaka.net.HttpXHRPlugin = class {
 			xhr.send(request.body);
 		});
 
-		return new shaka.util.AbortableOperation(promise, () => {
+		return new AbortableOperation(promise, () => {
 			xhr.abort();
 			return Promise.resolve();
 		});
 	}
-};
+}
 
 /**
  * Overridden in unit tests, but compiled out in production.
@@ -153,15 +157,9 @@ shaka.net.HttpXHRPlugin = class {
  * @const {function(new: XMLHttpRequest)}
  * @private
  */
-shaka.net.HttpXHRPlugin.Xhr_ = window.XMLHttpRequest;
+HttpXHRPlugin.Xhr_ = window.XMLHttpRequest;
 
-shaka.net.NetworkingEngine.registerScheme(
-	'http',
-	shaka.net.HttpXHRPlugin.parse,
-	shaka.net.NetworkingEngine.PluginPriority.FALLBACK
-);
-shaka.net.NetworkingEngine.registerScheme(
-	'https',
-	shaka.net.HttpXHRPlugin.parse,
-	shaka.net.NetworkingEngine.PluginPriority.FALLBACK
-);
+NetworkingEngine.registerScheme('http', HttpXHRPlugin.parse, NetworkingEngine.PluginPriority.FALLBACK);
+NetworkingEngine.registerScheme('https', HttpXHRPlugin.parse, NetworkingEngine.PluginPriority.FALLBACK);
+
+export default HttpXHRPlugin;

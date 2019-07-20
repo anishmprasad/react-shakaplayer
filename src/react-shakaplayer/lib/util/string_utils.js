@@ -29,7 +29,7 @@ var goog = window.goog;
  * @summary A set of string utility functions.
  * @exportDoc
  */
-shaka.util.StringUtils = class {
+export default class StringUtils {
 	/**
 	 * Creates a string from the given buffer as UTF-8 encoding.
 	 *
@@ -50,7 +50,7 @@ shaka.util.StringUtils = class {
 		}
 
 		// http://stackoverflow.com/a/13691499
-		const utf8 = shaka.util.StringUtils.fromCharCode(uint8);
+		const utf8 = StringUtils.fromCharCode(uint8);
 		// This converts each character in the string to an escape sequence.  If the
 		// character is in the ASCII range, it is not converted; otherwise it is
 		// converted to a URI escape sequence.
@@ -221,7 +221,7 @@ shaka.util.StringUtils = class {
 	static fromCharCode(array) {
 		// Check the browser for what chunk sizes it supports.  Cache the result
 		// in an impl method to avoid checking several times.
-		if (!shaka.util.StringUtils.fromCharCodeImpl_) {
+		if (!StringUtils.fromCharCodeImpl_) {
 			const supportsChunkSize = size => {
 				try {
 					const buffer = new Uint8Array(size);
@@ -241,7 +241,7 @@ shaka.util.StringUtils = class {
 			// 64k is supported on all major desktop browsers.
 			for (let size = 64 * 1024; size > 0; size /= 2) {
 				if (supportsChunkSize(size)) {
-					shaka.util.StringUtils.fromCharCodeImpl_ = buffer => {
+					StringUtils.fromCharCodeImpl_ = buffer => {
 						let ret = '';
 						for (let i = 0; i < buffer.length; i += size) {
 							const subArray = buffer.subarray(i, i + size);
@@ -254,10 +254,10 @@ shaka.util.StringUtils = class {
 			}
 		}
 
-		goog.asserts.assert(shaka.util.StringUtils.fromCharCodeImpl_, 'Unable to create a fromCharCode method');
-		return shaka.util.StringUtils.fromCharCodeImpl_(array);
+		goog.asserts.assert(StringUtils.fromCharCodeImpl_, 'Unable to create a fromCharCode method');
+		return StringUtils.fromCharCodeImpl_(array);
 	}
-};
+}
 
 /** @private {?function(!TypedArray):string} */
-shaka.util.StringUtils.fromCharCodeImpl_ = null;
+StringUtils.fromCharCodeImpl_ = null;

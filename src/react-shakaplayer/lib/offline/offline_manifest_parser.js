@@ -25,6 +25,11 @@
 // goog.require('shaka.offline.StorageMuxer');
 // goog.require('shaka.util.Error');
 
+import ManifestParser from '../media/manifest_parser';
+import ManifestConverter from '../offline/manifest_converter';
+import OfflineUri from '../offline/offline_uri';
+import StorageMuxer from '../offline/storage_muxer';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -32,7 +37,7 @@ var goog = window.goog;
  * @summary Creates a new offline manifest parser.
  * @implements {shaka.extern.ManifestParser}
  */
-shaka.offline.OfflineManifestParser = class {
+class OfflineManifestParser {
 	constructor() {
 		/** @private {shaka.offline.OfflineUri} */
 		this.uri_ = null;
@@ -46,7 +51,7 @@ shaka.offline.OfflineManifestParser = class {
 	/** @override */
 	async start(uriString, playerInterface) {
 		/** @type {shaka.offline.OfflineUri} */
-		const uri = shaka.offline.OfflineUri.parse(uriString);
+		const uri = OfflineUri.parse(uriString);
 		this.uri_ = uri;
 
 		if (uri == null || !uri.isManifest()) {
@@ -59,7 +64,7 @@ shaka.offline.OfflineManifestParser = class {
 		}
 
 		/** @type {!shaka.offline.StorageMuxer} */
-		const muxer = new shaka.offline.StorageMuxer();
+		const muxer = new StorageMuxer();
 
 		try {
 			await muxer.init();
@@ -69,7 +74,7 @@ shaka.offline.OfflineManifestParser = class {
 			const manifests = await cell.getManifests([uri.key()]);
 			const manifest = manifests[0];
 
-			const converter = new shaka.offline.ManifestConverter(uri.mechanism(), uri.cell());
+			const converter = new ManifestConverter(uri.mechanism(), uri.cell());
 
 			return converter.fromManifestDB(manifest);
 		} finally {
@@ -95,7 +100,7 @@ shaka.offline.OfflineManifestParser = class {
 		const uri = this.uri_;
 
 		/** @type {!shaka.offline.StorageMuxer} */
-		const muxer = new shaka.offline.StorageMuxer();
+		const muxer = new StorageMuxer();
 
 		try {
 			await muxer.init();
@@ -119,6 +124,8 @@ shaka.offline.OfflineManifestParser = class {
 			await muxer.destroy();
 		}
 	}
-};
+}
 
-shaka.media.ManifestParser.registerParserByMime('application/x-offline-manifest', shaka.offline.OfflineManifestParser);
+ManifestParser.registerParserByMime('application/x-offline-manifest', shaka.offline.OfflineManifestParser);
+
+export default OfflineManifestParser;

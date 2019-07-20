@@ -21,6 +21,8 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.StringUtils');
 
+import StringUtils from '../util/string_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -28,7 +30,7 @@ var goog = window.goog;
  * @summary A set of http networking utility functions.
  * @exportDoc
  */
-shaka.net.HttpPluginUtils = class {
+export default class HttpPluginUtils {
 	/**
 	 * @param {!Object.<string,string>} headers
 	 * @param {?ArrayBuffer} data
@@ -53,7 +55,7 @@ shaka.net.HttpPluginUtils = class {
 		} else {
 			let responseText = null;
 			try {
-				responseText = shaka.util.StringUtils.fromBytesAutoDetect(data);
+				responseText = StringUtils.fromBytesAutoDetect(data);
 			} catch (exception) {}
 			shaka.log.debug('HTTP error text:', responseText);
 
@@ -73,4 +75,4 @@ shaka.net.HttpPluginUtils = class {
 			);
 		}
 	}
-};
+}

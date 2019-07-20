@@ -27,6 +27,10 @@
 // goog.require('shaka.util.MapUtils');
 // goog.require('shaka.util.Timer');
 
+import NetworkingEngine from '../net/networking_engine';
+// import HttpPluginUtils from
+// import AbortableOperation from
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -34,7 +38,7 @@ var goog = window.goog;
  * @summary A networking plugin to handle http and https URIs via the Fetch API.
  * @export
  */
-shaka.net.HttpFetchPlugin = class {
+class HttpFetchPlugin {
 	/**
 	 * @param {string} uri
 	 * @param {shaka.extern.Request} request
@@ -44,12 +48,12 @@ shaka.net.HttpFetchPlugin = class {
 	 * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
 	 */
 	static parse(uri, request, requestType, progressUpdated) {
-		const headers = new shaka.net.HttpFetchPlugin.Headers_();
+		const headers = new HttpFetchPlugin.Headers_();
 		shaka.util.MapUtils.asMap(request.headers).forEach((value, key) => {
 			headers.append(key, value);
 		});
 
-		const controller = new shaka.net.HttpFetchPlugin.AbortController_();
+		const controller = new HttpFetchPlugin.AbortController_();
 
 		/** @type {!RequestInit} */
 		const init = {
@@ -67,7 +71,7 @@ shaka.net.HttpFetchPlugin = class {
 			timedOut: false
 		};
 
-		const pendingRequest = shaka.net.HttpFetchPlugin.request_(uri, requestType, init, abortStatus, progressUpdated);
+		const pendingRequest = HttpFetchPlugin.request_(uri, requestType, init, abortStatus, progressUpdated);
 
 		/** @type {!shaka.util.AbortableOperation} */
 		const op = new shaka.util.AbortableOperation(pendingRequest, () => {
@@ -107,8 +111,8 @@ shaka.net.HttpFetchPlugin = class {
 	 * @private
 	 */
 	static async request_(uri, requestType, init, abortStatus, progressUpdated) {
-		const fetch = shaka.net.HttpFetchPlugin.fetch_;
-		const ReadableStream = shaka.net.HttpFetchPlugin.ReadableStream_;
+		const fetch = HttpFetchPlugin.fetch_;
+		const ReadableStream = HttpFetchPlugin.ReadableStream_;
 		let response;
 		let arrayBuffer;
 		let loaded = 0;
@@ -245,7 +249,7 @@ shaka.net.HttpFetchPlugin = class {
 		}
 		return !!(window.fetch && window.AbortController);
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -257,7 +261,7 @@ shaka.net.HttpFetchPlugin = class {
  * @property {boolean} timedOut
  *   Indicates if the request timed out.
  */
-shaka.net.HttpFetchPlugin.AbortStatus;
+HttpFetchPlugin.AbortStatus = {};
 
 /**
  * Overridden in unit tests, but compiled out in production.
@@ -265,7 +269,7 @@ shaka.net.HttpFetchPlugin.AbortStatus;
  * @const {function(string, !RequestInit)}
  * @private
  */
-shaka.net.HttpFetchPlugin.fetch_ = window.fetch;
+HttpFetchPlugin.fetch_ = window.fetch;
 
 /**
  * Overridden in unit tests, but compiled out in production.
@@ -273,7 +277,7 @@ shaka.net.HttpFetchPlugin.fetch_ = window.fetch;
  * @const {function(new: AbortController)}
  * @private
  */
-shaka.net.HttpFetchPlugin.AbortController_ = window.AbortController;
+HttpFetchPlugin.AbortController_ = window.AbortController;
 
 /**
  * Overridden in unit tests, but compiled out in production.
@@ -281,7 +285,7 @@ shaka.net.HttpFetchPlugin.AbortController_ = window.AbortController;
  * @const {function(new: ReadableStream, !Object)}
  * @private
  */
-shaka.net.HttpFetchPlugin.ReadableStream_ = window.ReadableStream;
+HttpFetchPlugin.ReadableStream_ = window.ReadableStream;
 
 /**
  * Overridden in unit tests, but compiled out in production.
@@ -289,17 +293,11 @@ shaka.net.HttpFetchPlugin.ReadableStream_ = window.ReadableStream;
  * @const {function(new: Headers)}
  * @private
  */
-shaka.net.HttpFetchPlugin.Headers_ = window.Headers;
+HttpFetchPlugin.Headers_ = window.Headers;
 
-if (shaka.net.HttpFetchPlugin.isSupported()) {
-	shaka.net.NetworkingEngine.registerScheme(
-		'http',
-		shaka.net.HttpFetchPlugin.parse,
-		shaka.net.NetworkingEngine.PluginPriority.PREFERRED
-	);
-	shaka.net.NetworkingEngine.registerScheme(
-		'https',
-		shaka.net.HttpFetchPlugin.parse,
-		shaka.net.NetworkingEngine.PluginPriority.PREFERRED
-	);
+if (HttpFetchPlugin.isSupported()) {
+	NetworkingEngine.registerScheme('http', HttpFetchPlugin.parse, NetworkingEngine.PluginPriority.PREFERRED);
+	NetworkingEngine.registerScheme('https', HttpFetchPlugin.parse, NetworkingEngine.PluginPriority.PREFERRED);
 }
+
+export default HttpFetchPlugin;
