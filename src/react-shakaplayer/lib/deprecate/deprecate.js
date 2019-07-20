@@ -21,6 +21,8 @@
 // goog.require('shaka.deprecate.Enforcer');
 // goog.require('shaka.deprecate.Version');
 
+import Enforcer from './enforcer';
+import Version from './version';
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -52,8 +54,8 @@ shaka.Deprecate = class {
 	static init(versionString) {
 		goog.asserts.assert(shaka.Deprecate.enforcer_ == null, 'Deprecate.init should only be called once.');
 
-		shaka.Deprecate.enforcer_ = new shaka.deprecate.Enforcer(
-			shaka.deprecate.Version.parse(versionString),
+		shaka.Deprecate.enforcer_ = new Enforcer(
+			Version.parse(versionString),
 			shaka.Deprecate.onPending_,
 			shaka.Deprecate.onExpired_
 		);

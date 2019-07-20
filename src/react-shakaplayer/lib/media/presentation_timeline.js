@@ -28,7 +28,7 @@ var goog = window.goog;
  * PresentationTimeline.
  * @export
  */
-shaka.media.PresentationTimeline = class {
+class PresentationTimeline {
 	/**
 	 * @param {?number} presentationStartTime The wall-clock time, in seconds,
 	 *   when the presentation started or will start. Only required for live.
@@ -470,4 +470,6 @@ shaka.media.PresentationTimeline = class {
 			}
 		}
 	}
-};
+}
+
+export default PresentationTimeline;

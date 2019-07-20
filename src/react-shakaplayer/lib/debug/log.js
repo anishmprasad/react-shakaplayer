@@ -123,7 +123,7 @@ shaka.log.Level = {
 /**
  * @define {number} the maximum log level.
  */
-goog.define('shaka.log.MAX_LOG_LEVEL', 3);
+shaka.log.MAX_LOG_LEVEL = 3;
 
 // IE8 has no console unless it is opened in advance.
 // IE9 console methods are not Functions and have no bind.

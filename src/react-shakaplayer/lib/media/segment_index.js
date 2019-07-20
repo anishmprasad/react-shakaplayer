@@ -22,6 +22,8 @@
 // goog.require('shaka.media.SegmentReference');
 // goog.require('shaka.util.IDestroyable');
 
+import { SegmentReference } from './segment_reference';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -31,7 +33,7 @@ var goog = window.goog;
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-shaka.media.SegmentIndex = class {
+export default class SegmentIndex {
 	/**
 	 * @param {!Array.<!shaka.media.SegmentReference>} references The list of
 	 *   SegmentReferences, which must be sorted first by their start times
@@ -40,7 +42,7 @@ shaka.media.SegmentIndex = class {
 	 */
 	constructor(references) {
 		if (goog.DEBUG) {
-			shaka.media.SegmentIndex.assertCorrectReferences_(references);
+			SegmentIndex.assertCorrectReferences_(references);
 		}
 
 		/** @private {Array.<!shaka.media.SegmentReference>} */
@@ -167,7 +169,7 @@ shaka.media.SegmentIndex = class {
 						r2.endTime > r1.endTime && i == this.references_.length - 1 && j == references.length - 1,
 						'This should be an update of the last segment in a period'
 					);
-					const r = new shaka.media.SegmentReference(
+					const r = new SegmentReference(
 						r1.position,
 						r2.startTime,
 						r2.endTime,
@@ -195,7 +197,7 @@ shaka.media.SegmentIndex = class {
 			let nextPosition = newReferences[newReferences.length - 1].position + 1;
 			while (j < references.length) {
 				const r = references[j++];
-				const r2 = new shaka.media.SegmentReference(
+				const r2 = new SegmentReference(
 					nextPosition++,
 					r.startTime,
 					r.endTime,
@@ -285,7 +287,7 @@ shaka.media.SegmentIndex = class {
 
 		// Adjust the last SegmentReference.
 		const lastReference = this.references_[this.references_.length - 1];
-		this.references_[this.references_.length - 1] = new shaka.media.SegmentReference(
+		this.references_[this.references_.length - 1] = new SegmentReference(
 			lastReference.position,
 			lastReference.startTime,
 			/* endTime */ periodDuration,
@@ -294,7 +296,7 @@ shaka.media.SegmentIndex = class {
 			lastReference.endByte
 		);
 	}
-};
+}
 
 if (goog.DEBUG) {
 	/**

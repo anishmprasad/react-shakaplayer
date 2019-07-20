@@ -20,7 +20,7 @@
 
 // goog.provide('shaka.dash.DashParser');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.abr.Ewma');
 // goog.require('shaka.dash.ContentProtection');
 // goog.require('shaka.dash.MpdUtils');
@@ -44,7 +44,9 @@ goog.require('goog.asserts');
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.XmlUtils');
 
+import ManifestParser from '../media/manifest_parser'
 const shaka  = window.shaka
+var goog = window.goog
 
 
 /**
@@ -53,7 +55,7 @@ const shaka  = window.shaka
  * @implements {shaka.extern.ManifestParser}
  * @export
  */
-window.shaka.dash.DashParser = class {
+export default class DashParser {
   /** Creates a new DASH parser. */
   constructor() {
     /** @private {?shaka.extern.ManifestConfiguration} */
@@ -1571,7 +1573,7 @@ window.shaka.dash.DashParser = class {
  * @private
  * @const {number}
  */
-shaka.dash.DashParser.MIN_UPDATE_PERIOD_ = 3;
+DashParser.MIN_UPDATE_PERIOD_ = 3;
 
 
 /**
@@ -1579,7 +1581,7 @@ shaka.dash.DashParser.MIN_UPDATE_PERIOD_ = 3;
  *   function(!Array.<string>, ?number, ?number):!Promise.<!ArrayBuffer>
  * }
  */
-shaka.dash.DashParser.RequestInitSegmentCallback;
+DashParser.RequestInitSegmentCallback ={};
 
 
 /**
@@ -1630,7 +1632,7 @@ shaka.dash.DashParser.RequestInitSegmentCallback;
  * @property {?number} numChannels
  *   The number of audio channels, or null if unknown.
  */
-shaka.dash.DashParser.InheritanceFrame;
+DashParser.InheritanceFrame={};
 
 
 /**
@@ -1665,7 +1667,7 @@ shaka.dash.DashParser.InheritanceFrame;
  * @property {boolean} indexRangeWarningGiven
  *   True if the warning about SegmentURL@indexRange has been printed.
  */
-shaka.dash.DashParser.Context;
+DashParser.Context={}
 
 
 /**
@@ -1689,7 +1691,7 @@ shaka.dash.DashParser.Context;
  * @property {boolean} isLastPeriod
  *   Whether this Period is the last one in the manifest.
  */
-shaka.dash.DashParser.PeriodInfo;
+DashParser.PeriodInfo={}
 
 
 /**
@@ -1726,7 +1728,7 @@ shaka.dash.DashParser.PeriodInfo;
  * @property {!Array.<string>} representationIds
  *   An array of the IDs of the Representations this AdaptationSet contains.
  */
-shaka.dash.DashParser.AdaptationInfo;
+DashParser.AdaptationInfo = {}
 
 
 /**
@@ -1747,7 +1749,7 @@ shaka.dash.DashParser.AdaptationInfo;
  * @property {shaka.extern.GetSegmentReferenceFunction} getSegmentReference
  *   The getSegmentReference function.
  */
-shaka.dash.DashParser.SegmentIndexFunctions;
+DashParser.SegmentIndexFunctions ={}
 
 
 /**
@@ -1774,10 +1776,10 @@ shaka.dash.DashParser.SegmentIndexFunctions;
  * @property {number} scaledPresentationTimeOffset
  *   The presentation time offset for the stream, in seconds.
  */
-shaka.dash.DashParser.StreamInfo;
+DashParser.StreamInfo = {};
 
 
-shaka.media.ManifestParser.registerParserByExtension(
-    'mpd', shaka.dash.DashParser);
-shaka.media.ManifestParser.registerParserByMime(
-    'application/dash+xml', shaka.dash.DashParser);
+ManifestParser.registerParserByExtension(
+    'mpd', DashParser);
+ManifestParser.registerParserByMime(
+    'application/dash+xml', DashParser);

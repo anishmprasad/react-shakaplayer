@@ -28,6 +28,7 @@
 // goog.require('shaka.util.IDestroyable');
 // goog.require('shaka.util.ObjectUtils');
 // goog.require('shaka.util.OperationManager');
+import FakeEventTarget from '../util/fake_event_target';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -52,7 +53,7 @@ var goog = window.goog;
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-shaka.net.NetworkingEngine = class extends shaka.util.FakeEventTarget {
+class NetworkingEngine extends FakeEventTarget {
 	/**
 	 * @param {function(number, number)=} onProgressUpdated Called when a progress
 	 *   event is triggered. Passed the duration, in milliseconds, that the
@@ -314,11 +315,7 @@ shaka.net.NetworkingEngine = class extends shaka.util.FakeEventTarget {
 		// Return the pending request, which carries the response operation, and the
 		// number of bytes remaining to be downloaded, updated by the progress
 		// events.  Add the operation to the manager for later cleanup.
-		const pendingRequest = new shaka.net.NetworkingEngine.PendingRequest(
-			op.promise,
-			op.onAbort_,
-			numBytesRemainingObj
-		);
+		const pendingRequest = new NetworkingEngine.PendingRequest(op.promise, op.onAbort_, numBytesRemainingObj);
 		this.operationManager_.manage(pendingRequest);
 		return pendingRequest;
 	}
@@ -543,7 +540,7 @@ shaka.net.NetworkingEngine = class extends shaka.util.FakeEventTarget {
 	static getLocationProtocol_() {
 		return location.protocol;
 	}
-};
+}
 
 /**
  * A wrapper class for the number of bytes remaining to be downloaded for the
@@ -554,7 +551,7 @@ shaka.net.NetworkingEngine = class extends shaka.util.FakeEventTarget {
  *
  * @export
  */
-shaka.net.NetworkingEngine.NumBytesRemainingClass = class {
+NetworkingEngine.NumBytesRemainingClass = class {
 	/**
 	 * Constructor
 	 */
@@ -586,7 +583,7 @@ shaka.net.NetworkingEngine.NumBytesRemainingClass = class {
  * @extends {shaka.util.AbortableOperation}
  * @export
  */
-shaka.net.NetworkingEngine.PendingRequest = class extends shaka.util.AbortableOperation {
+NetworkingEngine.PendingRequest = class extends AbortableOperation {
 	/**
 	 * @param {!Promise} promise
 	 *   A Promise which represents the underlying operation.  It is resolved
@@ -623,7 +620,7 @@ shaka.net.NetworkingEngine.PendingRequest = class extends shaka.util.AbortableOp
  * @enum {number}
  * @export
  */
-shaka.net.NetworkingEngine.RequestType = {
+NetworkingEngine.RequestType = {
 	MANIFEST: 0,
 	SEGMENT: 1,
 	LICENSE: 2,
@@ -639,7 +636,7 @@ shaka.net.NetworkingEngine.RequestType = {
  * @enum {number}
  * @export
  */
-shaka.net.NetworkingEngine.PluginPriority = {
+NetworkingEngine.PluginPriority = {
 	FALLBACK: 1,
 	PREFERRED: 2,
 	APPLICATION: 3
@@ -655,14 +652,14 @@ shaka.net.NetworkingEngine.PluginPriority = {
  * @property {number} priority
  *   The plugin's priority.
  */
-shaka.net.NetworkingEngine.SchemeObject;
+NetworkingEngine.SchemeObject = {};
 
 /**
  * Contains the scheme plugins.
  *
  * @private {!Object.<string, shaka.net.NetworkingEngine.SchemeObject>}
  */
-shaka.net.NetworkingEngine.schemes_ = {};
+NetworkingEngine.schemes_ = {};
 
 /**
  * @typedef {{
@@ -678,4 +675,6 @@ shaka.net.NetworkingEngine.schemes_ = {};
  * @property {boolean} gotProgress
  * @private
  */
-shaka.net.NetworkingEngine.ResponseAndGotProgress;
+NetworkingEngine.ResponseAndGotProgress = {};
+
+export default NetworkingEngine;

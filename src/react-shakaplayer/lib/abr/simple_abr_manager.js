@@ -19,12 +19,13 @@
 
 // goog.provide('shaka.abr.SimpleAbrManager');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.abr.EwmaBandwidthEstimator');
 // goog.require('shaka.log');
 // goog.require('shaka.util.StreamUtils');
 
 var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * @summary
@@ -47,7 +48,7 @@ var shaka = window.shaka;
  * @implements {shaka.extern.AbrManager}
  * @export
  */
-window.shaka.abr.SimpleAbrManager = class {
+export default class SimpleAbrManager {
 	constructor() {
 		/** @private {?shaka.extern.AbrManager.SwitchCallback} */
 		this.switch_ = null;
@@ -271,4 +272,4 @@ window.shaka.abr.SimpleAbrManager = class {
 			return v1.bandwidth - v2.bandwidth;
 		});
 	}
-};
+}

@@ -22,8 +22,14 @@
 // goog.require('shaka.util.FakeEvent');
 // goog.require('shaka.util.MultiMap');
 
+/*eslint-disable*/
+window.shaka = window.shaka || {};
 var shaka = window.shaka;
+var util = shaka.util || {};
+window.goog = window.goog || {};
 var goog = window.goog;
+
+console.log(window.shaka);
 
 /**
  * @summary A work-alike for EventTarget.  Only DOM elements may be true
@@ -33,7 +39,7 @@ var goog = window.goog;
  * @implements {EventTarget}
  * @exportInterface
  */
-shaka.util.FakeEventTarget = class {
+export default class FakeEventTarget {
 	constructor() {
 		/**
 		 * @private {!shaka.util.MultiMap.<shaka.util.FakeEventTarget.ListenerType>}
@@ -126,11 +132,13 @@ shaka.util.FakeEventTarget = class {
 
 		return event.defaultPrevented;
 	}
-};
+}
 
 /**
  * These are the listener types defined in the closure extern for EventTarget.
  * @typedef {EventListener|function(!Event):*}
  * @exportInterface
  */
-shaka.util.FakeEventTarget.ListenerType;
+// shaka.util.FakeEventTarget.ListenerType;
+
+// export { FakeEventTarget, ListenerType };

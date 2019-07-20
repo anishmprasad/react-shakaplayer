@@ -31,7 +31,7 @@ var goog = window.goog;
  * @summary An interface to register manifest parsers.
  * @exportDoc
  */
-shaka.media.ManifestParser = class {
+class ManifestParser {
 	/**
 	 * Registers a manifest parser by file extension.
 	 *
@@ -41,7 +41,7 @@ shaka.media.ManifestParser = class {
 	 * @export
 	 */
 	static registerParserByExtension(extension, parserFactory) {
-		shaka.media.ManifestParser.parsersByExtension[extension] = parserFactory;
+		ManifestParser.parsersByExtension[extension] = parserFactory;
 	}
 
 	/**
@@ -53,7 +53,7 @@ shaka.media.ManifestParser = class {
 	 * @export
 	 */
 	static registerParserByMime(mimeType, parserFactory) {
-		shaka.media.ManifestParser.parsersByMime[mimeType] = parserFactory;
+		ManifestParser.parsersByMime[mimeType] = parserFactory;
 	}
 
 	/**
@@ -257,29 +257,31 @@ shaka.media.ManifestParser = class {
 			return false;
 		}
 
-		if (mimeType in shaka.media.ManifestParser.parsersByMime) {
+		if (mimeType in ManifestParser.parsersByMime) {
 			return true;
 		}
 
-		const extension = shaka.media.ManifestParser.getExtension(uri);
-		if (extension in shaka.media.ManifestParser.parsersByExtension) {
+		const extension = ManifestParser.getExtension(uri);
+		if (extension in ManifestParser.parsersByExtension) {
 			return true;
 		}
 
 		return false;
 	}
-};
+}
 
 /**
  * Contains the parser factory functions indexed by MIME type.
  *
  * @type {!Object.<string, shaka.extern.ManifestParser.Factory>}
  */
-shaka.media.ManifestParser.parsersByMime = {};
+ManifestParser.parsersByMime = {};
 
 /**
  * Contains the parser factory functions indexed by file extension.
  *
  * @type {!Object.<string, shaka.extern.ManifestParser.Factory>}
  */
-shaka.media.ManifestParser.parsersByExtension = {};
+ManifestParser.parsersByExtension = {};
+
+export default ManifestParser;

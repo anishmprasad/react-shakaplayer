@@ -32,7 +32,7 @@ var shaka = window.shaka;
  *
  * @final
  */
-shaka.deprecate.Enforcer = class {
+export default class Enforcer {
 	/**
 	 * @param {!shaka.deprecate.Version} libraryVersion
 	 * @param {shaka.deprecate.Listener} onPending
@@ -67,7 +67,7 @@ shaka.deprecate.Enforcer = class {
 		const callback = isPending ? this.onPending_ : this.onExpired_;
 		callback(this.libraryVersion_, expiresOn, name, description);
 	}
-};
+}
 
 /**
  * A callback for listening to deprecation events.
@@ -90,4 +90,4 @@ shaka.deprecate.Enforcer = class {
  *    string,
  *    string)}
  */
-shaka.deprecate.Listener;
+// shaka.deprecate.Listener;

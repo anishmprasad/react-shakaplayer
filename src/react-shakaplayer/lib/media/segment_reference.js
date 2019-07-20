@@ -17,7 +17,6 @@
 
 /*eslint-disable */
 
-
 // goog.provide('shaka.media.InitSegmentReference');
 // goog.provide('shaka.media.SegmentReference');
 
@@ -32,7 +31,7 @@ var goog = window.goog;
  *
  * @export
  */
-shaka.media.InitSegmentReference = class {
+class InitSegmentReference {
 	/**
 	 * @param {function():!Array.<string>} uris A function that creates the URIs
 	 *   of the resource containing the segment.
@@ -97,7 +96,7 @@ shaka.media.InitSegmentReference = class {
 			return null;
 		}
 	}
-};
+}
 
 /**
  * SegmentReference provides the start time, end time, and location to a media
@@ -105,7 +104,7 @@ shaka.media.InitSegmentReference = class {
  *
  * @export
  */
-shaka.media.SegmentReference = class {
+class SegmentReference {
 	/**
 	 * @param {number} position The segment's position within a particular Period.
 	 *   The following should hold true between any two SegmentReferences from the
@@ -224,11 +223,13 @@ shaka.media.SegmentReference = class {
 			return null;
 		}
 	}
-};
+}
 
 /**
  * A convenient typedef for when either type of reference is acceptable.
  *
  * @typedef {shaka.media.InitSegmentReference|shaka.media.SegmentReference}
  */
-shaka.media.AnySegmentReference;
+let AnySegmentReference = {};
+
+export { InitSegmentReference, SegmentReference };

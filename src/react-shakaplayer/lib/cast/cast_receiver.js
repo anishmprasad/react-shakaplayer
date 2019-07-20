@@ -31,6 +31,7 @@
 // goog.require('shaka.util.Platform');
 // goog.require('shaka.util.Timer');
 
+import FakeEventTarget from '../util/fake_event_target'
 const shaka  = window.shaka
 
 /**
@@ -40,7 +41,7 @@ const shaka  = window.shaka
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-window.shaka.cast.CastReceiver = class extends shaka.util.FakeEventTarget {
+class CastReceiver extends FakeEventTarget {
   /**
    * @param {!HTMLMediaElement} video The local video element associated with
    *   the local Player instance.
@@ -838,17 +839,19 @@ window.shaka.cast.CastReceiver = class extends shaka.util.FakeEventTarget {
 };
 
 /** @type {number} The interval, in seconds, to poll for changes. */
-shaka.cast.CastReceiver.POLL_INTERVAL = 0.5;
+CastReceiver.POLL_INTERVAL = 0.5;
 
 /** @type {number} The interval, in seconds, to go "idle". */
-shaka.cast.CastReceiver.IDLE_INTERVAL = 5;
+CastReceiver.IDLE_INTERVAL = 5;
 
 /**
  * @enum {string}
  */
-shaka.cast.CastReceiver.PLAY_STATE = {
+CastReceiver.PLAY_STATE = {
   IDLE: 'IDLE',
   PLAYING: 'PLAYING',
   BUFFERING: 'BUFFERING',
   PAUSED: 'PAUSED',
 };
+
+export default CastReceiver

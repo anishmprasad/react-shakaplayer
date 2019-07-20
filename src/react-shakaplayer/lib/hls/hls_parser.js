@@ -50,6 +50,7 @@
 // goog.require('shaka.util.OperationManager');
 // goog.require('shaka.util.Timer');
 
+import ManifestParser from '../media/manifest_parser'
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -60,7 +61,7 @@ var goog = window.goog;
  * @implements {shaka.extern.ManifestParser}
  * @export
  */
-shaka.hls.HlsParser = class {
+class HlsParser {
   /**
    * Creates an Hls Parser object.
    */
@@ -2258,7 +2259,7 @@ shaka.hls.HlsParser = class {
  * @property {number} duration
  *   The duration of the playlist.  Used for VOD only.
  */
-shaka.hls.HlsParser.StreamInfo;
+HlsParser.StreamInfo ={}
 
 
 /**
@@ -2267,7 +2268,7 @@ shaka.hls.HlsParser.StreamInfo;
  * @const {!Array.<!RegExp>}
  * @private
  */
-shaka.hls.HlsParser.VIDEO_CODEC_REGEXPS_ = [
+HlsParser.VIDEO_CODEC_REGEXPS_ = [
   /^avc/,
   /^hev/,
   /^hvc/,
@@ -2282,7 +2283,7 @@ shaka.hls.HlsParser.VIDEO_CODEC_REGEXPS_ = [
  * @const {!Array.<!RegExp>}
  * @private
  */
-shaka.hls.HlsParser.AUDIO_CODEC_REGEXPS_ = [
+HlsParser.AUDIO_CODEC_REGEXPS_ = [
   /^vorbis$/,
   /^opus$/,
   /^flac$/,
@@ -2297,7 +2298,7 @@ shaka.hls.HlsParser.AUDIO_CODEC_REGEXPS_ = [
  * @const {!Array.<!RegExp>}
  * @private
  */
-shaka.hls.HlsParser.TEXT_CODEC_REGEXPS_ = [
+HlsParser.TEXT_CODEC_REGEXPS_ = [
   /^vtt$/,
   /^wvtt/,
   /^stpp/,
@@ -2308,10 +2309,10 @@ shaka.hls.HlsParser.TEXT_CODEC_REGEXPS_ = [
  * @const {!Object.<string, !Array.<!RegExp>>}
  * @private
  */
-shaka.hls.HlsParser.CODEC_REGEXPS_BY_CONTENT_TYPE_ = {
-  'audio': shaka.hls.HlsParser.AUDIO_CODEC_REGEXPS_,
-  'video': shaka.hls.HlsParser.VIDEO_CODEC_REGEXPS_,
-  'text': shaka.hls.HlsParser.TEXT_CODEC_REGEXPS_,
+HlsParser.CODEC_REGEXPS_BY_CONTENT_TYPE_ = {
+  'audio': HlsParser.AUDIO_CODEC_REGEXPS_,
+  'video': HlsParser.VIDEO_CODEC_REGEXPS_,
+  'text': HlsParser.TEXT_CODEC_REGEXPS_,
 };
 
 
@@ -2319,7 +2320,7 @@ shaka.hls.HlsParser.CODEC_REGEXPS_BY_CONTENT_TYPE_ = {
  * @const {!Object.<string, string>}
  * @private
  */
-shaka.hls.HlsParser.AUDIO_EXTENSIONS_TO_MIME_TYPES_ = {
+HlsParser.AUDIO_EXTENSIONS_TO_MIME_TYPES_ = {
   'mp4': 'audio/mp4',
   'm4s': 'audio/mp4',
   'm4i': 'audio/mp4',
@@ -2333,7 +2334,7 @@ shaka.hls.HlsParser.AUDIO_EXTENSIONS_TO_MIME_TYPES_ = {
  * @const {!Object.<string, string>}
  * @private
  */
-shaka.hls.HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_ = {
+HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_ = {
   'mp4': 'video/mp4',
   'm4s': 'video/mp4',
   'm4i': 'video/mp4',
@@ -2346,7 +2347,7 @@ shaka.hls.HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_ = {
  * @const {!Object.<string, string>}
  * @private
  */
-shaka.hls.HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_ = {
+HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_ = {
   'mp4': 'application/mp4',
   'm4s': 'application/mp4',
   'm4i': 'application/mp4',
@@ -2359,10 +2360,10 @@ shaka.hls.HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_ = {
  * @const {!Object.<string, !Object.<string, string>>}
  * @private
  */
-shaka.hls.HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_ = {
-  'audio': shaka.hls.HlsParser.AUDIO_EXTENSIONS_TO_MIME_TYPES_,
-  'video': shaka.hls.HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_,
-  'text': shaka.hls.HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_,
+HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_ = {
+  'audio': HlsParser.AUDIO_EXTENSIONS_TO_MIME_TYPES_,
+  'video': HlsParser.VIDEO_EXTENSIONS_TO_MIME_TYPES_,
+  'text': HlsParser.TEXT_EXTENSIONS_TO_MIME_TYPES_,
 };
 
 
@@ -2370,20 +2371,20 @@ shaka.hls.HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_ = {
  * @typedef {function(!shaka.hls.Tag):?shaka.extern.DrmInfo}
  * @private
  */
-shaka.hls.HlsParser.DrmParser_;
+HlsParser.DrmParser_;
 
 
 /**
  * @const {!Object.<string, shaka.hls.HlsParser.DrmParser_>}
  * @private
  */
-shaka.hls.HlsParser.KEYFORMATS_TO_DRM_PARSERS_ = {
+HlsParser.KEYFORMATS_TO_DRM_PARSERS_ = {
   /* TODO: https://github.com/google/shaka-player/issues/382
   'com.apple.streamingkeydelivery':
       shaka.hls.HlsParser.fairplayDrmParser_,
   */
   'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed':
-      shaka.hls.HlsParser.widevineDrmParser_,
+      HlsParser.widevineDrmParser_,
 };
 
 
@@ -2391,7 +2392,7 @@ shaka.hls.HlsParser.KEYFORMATS_TO_DRM_PARSERS_ = {
  * @enum {string}
  * @private
  */
-shaka.hls.HlsParser.PresentationType_ = {
+HlsParser.PresentationType_ = {
   VOD: 'VOD',
   EVENT: 'EVENT',
   LIVE: 'LIVE',
@@ -2402,7 +2403,7 @@ shaka.hls.HlsParser.PresentationType_ = {
  * @const {number}
  * @private
  */
-shaka.hls.HlsParser.TS_TIMESCALE_ = 90000;
+HlsParser.TS_TIMESCALE_ = 90000;
 
 
 /**
@@ -2410,7 +2411,7 @@ shaka.hls.HlsParser.TS_TIMESCALE_ = 90000;
  * @const {number}
  * @private
  */
-shaka.hls.HlsParser.TS_ROLLOVER_ = 0x200000000;
+HlsParser.TS_ROLLOVER_ = 0x200000000;
 
 
 /**
@@ -2421,12 +2422,14 @@ shaka.hls.HlsParser.TS_ROLLOVER_ = 0x200000000;
  * @const {number}
  * @private
  */
-shaka.hls.HlsParser.PARTIAL_SEGMENT_SIZE_ = 2048;
+HlsParser.PARTIAL_SEGMENT_SIZE_ = 2048;
+
+export default HlsParser
 
 
-shaka.media.ManifestParser.registerParserByExtension(
-    'm3u8', shaka.hls.HlsParser);
-shaka.media.ManifestParser.registerParserByMime(
-    'application/x-mpegurl', shaka.hls.HlsParser);
-shaka.media.ManifestParser.registerParserByMime(
-    'application/vnd.apple.mpegurl', shaka.hls.HlsParser);
+ManifestParser.registerParserByExtension(
+    'm3u8', HlsParser);
+ManifestParser.registerParserByMime(
+    'application/x-mpegurl', HlsParser);
+ManifestParser.registerParserByMime(
+    'application/vnd.apple.mpegurl', HlsParser);

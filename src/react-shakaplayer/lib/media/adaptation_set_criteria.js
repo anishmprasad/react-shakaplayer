@@ -31,7 +31,7 @@ var shaka = window.shaka;
  *
  * @interface
  */
-shaka.media.AdaptationSetCriteria = class {
+class AdaptationSetCriteria {
 	/**
 	 * Take a set of variants, and return a subset of variants that can be
 	 * adapted between.
@@ -40,13 +40,13 @@ shaka.media.AdaptationSetCriteria = class {
 	 * @return {!shaka.media.AdaptationSet}
 	 */
 	create(variants) {}
-};
+}
 
 /**
  * @implements {shaka.media.AdaptationSetCriteria}
  * @final
  */
-shaka.media.ExampleBasedCriteria = class {
+class ExampleBasedCriteria {
 	/**
 	 * @param {shaka.extern.Variant} example
 	 */
@@ -60,7 +60,7 @@ shaka.media.ExampleBasedCriteria = class {
 		const channelCount = example.audio && example.audio.channelsCount ? example.audio.channelsCount : 0;
 
 		/** @private {!shaka.media.AdaptationSetCriteria} */
-		this.fallback_ = new shaka.media.PreferenceBasedCriteria(example.language, role, channelCount);
+		this.fallback_ = new PreferenceBasedCriteria(example.language, role, channelCount);
 	}
 
 	/** @override */
@@ -80,13 +80,13 @@ shaka.media.ExampleBasedCriteria = class {
 			return this.fallback_.create(variants);
 		}
 	}
-};
+}
 
 /**
  * @implements {shaka.media.AdaptationSetCriteria}
  * @final
  */
-shaka.media.PreferenceBasedCriteria = class {
+class PreferenceBasedCriteria {
 	/**
 	 * @param {string} language
 	 * @param {string} role
@@ -195,4 +195,6 @@ shaka.media.PreferenceBasedCriteria = class {
 			);
 		});
 	}
-};
+}
+
+export { PreferenceBasedCriteria, ExampleBasedCriteria, AdaptationSetCriteria };

@@ -32,7 +32,7 @@ var goog = window.goog;
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs
  * @export
  */
-shaka.net.DataUriPlugin = class {
+export default class DataUriPlugin {
 	/**
 	 * @param {string} uri
 	 * @param {shaka.extern.Request} request
@@ -44,7 +44,7 @@ shaka.net.DataUriPlugin = class {
 	 */
 	static parse(uri, request, requestType, progressUpdated) {
 		try {
-			const parsed = shaka.net.DataUriPlugin.parseRaw(uri);
+			const parsed = DataUriPlugin.parseRaw(uri);
 
 			/** @type {shaka.extern.Response} */
 			const response = {
@@ -120,6 +120,6 @@ shaka.net.DataUriPlugin = class {
 
 		return { data: data, contentType: typeAndEncoding[0] };
 	}
-};
+}
 
-shaka.net.NetworkingEngine.registerScheme('data', shaka.net.DataUriPlugin.parse);
+NetworkingEngine.registerScheme('data', DataUriPlugin.parse);

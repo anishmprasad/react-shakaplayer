@@ -20,7 +20,7 @@
 
 // goog.provide('shaka.cast.CastProxy');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.Deprecate');
 // goog.require('shaka.cast.CastSender');
 // goog.require('shaka.cast.CastUtils');
@@ -32,6 +32,7 @@ goog.require('goog.asserts');
 // goog.require('shaka.util.IDestroyable');
 
 const shaka = window.shaka
+var goog = window.goog
 
 
 
@@ -44,6 +45,8 @@ const shaka = window.shaka
  * @exportDoc
  */
 
+import FakeEventTarget from '../util/fake_event_target'
+
 
 /**
  * @summary A proxy to switch between local and remote playback for Chromecast
@@ -52,7 +55,7 @@ const shaka = window.shaka
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-window.shaka.cast.CastProxy = class extends shaka.util.FakeEventTarget {
+export default class CastProxy extends FakeEventTarget {
   /**
    * @param {!HTMLMediaElement} video The local video element associated with
    *   the local Player instance.

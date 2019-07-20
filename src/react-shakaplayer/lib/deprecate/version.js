@@ -26,7 +26,7 @@ var shaka = window.shaka;
  *
  * @final
  */
-shaka.deprecate.Version = class {
+export default class Version {
 	/**
 	 * @param {number} major
 	 * @param {number} minor
@@ -81,6 +81,6 @@ shaka.deprecate.Version = class {
 		// For example: 'a.b.c.d'.split('.', 2) == ['a', 'b']
 		const components = versionString.substring(1).split('.', /* limit= */ 2);
 
-		return new shaka.deprecate.Version(Number(components[0]), Number(components[1]));
+		return new Version(Number(components[0]), Number(components[1]));
 	}
-};
+}
