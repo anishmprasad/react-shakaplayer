@@ -20,12 +20,11 @@
  * @externs
  */
 
-
 /** @const */
-const dialogPolyfill = class {
-  /**
-   * @param {!Element} dialog
-   * @const
-   */
-  static registerDialog(dialog) {}
+export const dialogPolyfill = class {
+	/**
+	 * @param {!Element} dialog
+	 * @const
+	 */
+	static registerDialog(dialog) {}
 };

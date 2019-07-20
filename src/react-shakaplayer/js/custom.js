@@ -17,9 +17,9 @@
 
 /** @type {?ShakaDemoCustom} */
 import shakaDemoMain from './main';
+import { ShakaDemoTextInput } from '../js/input';
 
-const shaka  = window.shaka
-
+const shaka = window.shaka;
 
 let shakaDemoCustom;
 

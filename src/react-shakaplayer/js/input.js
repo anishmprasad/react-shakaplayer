@@ -239,3 +239,12 @@ class ShakaDemoNumberInput extends ShakaDemoTextInput {
 		}
 	}
 }
+
+export {
+	ShakaDemoBoolInput,
+	ShakaDemoNumberInput,
+	ShakaDemoDatalistInput,
+	ShakaDemoSelectInput,
+	ShakaDemoInput,
+	ShakaDemoTextInput
+};

@@ -23,6 +23,7 @@
 import ShakaDemoTooltips from './tooltip';
 import shakaAssets from './common/assets';
 import shakaDemoMain from './main';
+import { dialogPolyfill } from '../externs/dialog_polyfill';
 
 var shaka = window.shaka;
 

@@ -19,6 +19,14 @@
 
 import shakaDemoMain from './main';
 import ShakaDemoInputContainer from './input_container';
+import { componentHandler } from '../externs/mdl';
+import {
+	ShakaDemoBoolInput,
+	ShakaDemoTextInput,
+	ShakaDemoNumberInput,
+	ShakaDemoDatalistInput,
+	ShakaDemoSelectInput
+} from '../js/input';
 
 var shaka = window.shaka;
 

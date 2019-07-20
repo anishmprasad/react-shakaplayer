@@ -33,3 +33,5 @@ const MaterialLayout = class {
 
 /** @const {?MaterialLayout} */
 Element.prototype.MaterialLayout;
+
+export { componentHandler, MaterialLayout };

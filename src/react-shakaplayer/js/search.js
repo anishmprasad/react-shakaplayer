@@ -19,6 +19,8 @@
 import shakaDemoMain from './main';
 import shakaAssets from './common/assets';
 import ShakaDemoInputContainer from './input_container';
+import AssetCard from './asset_card';
+import { ShakaDemoBoolInput, ShakaDemoSelectInput } from '../js/input';
 
 const shaka = window.shaka;
 
