@@ -21,6 +21,7 @@
  * be shared by multiple page layouts (loading assets, setting/checking
  * configuration, etc).
  */
+/*eslint-disable */
 
 import shakaAssets from './common/assets';
 import ShakaDemoCustom from './custom'

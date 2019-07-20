@@ -16,6 +16,7 @@
  */
 
 /** @type {?ShakaDemoConfig} */
+/*eslint-disable */
 
 import shakaDemoMain from './main';
 import ShakaDemoInputContainer from './input_container';
@@ -147,18 +148,18 @@ class ShakaDemoConfig {
 			// All robustness fields of a given type are set at once.
 			this.addDatalistInput_(name, robustnessSuggestions, input => {
 				// Add in any common drmSystem not currently in advanced.
-				for (const drmSystem of ShakaDemoMain.commonDrmSystems) {
-					if (!(drmSystem in advanced)) {
-						advanced[drmSystem] = {
-							distinctiveIdentifierRequired: false,
-							persistentStateRequired: false,
-							videoRobustness: '',
-							audioRobustness: '',
-							serverCertificate: null,
-							individualizationServer: ''
-						};
-					}
-				}
+				// for (const drmSystem of ShakaDemoMain.commonDrmSystems) {
+				// 	if (!(drmSystem in advanced)) {
+				// 		advanced[drmSystem] = {
+				// 			distinctiveIdentifierRequired: false,
+				// 			persistentStateRequired: false,
+				// 			videoRobustness: '',
+				// 			audioRobustness: '',
+				// 			serverCertificate: null,
+				// 			individualizationServer: ''
+				// 		};
+				// 	}
+				// }
 				// Set the robustness.
 				for (const drmSystem in advanced) {
 					advanced[drmSystem][valueName] = input.value;

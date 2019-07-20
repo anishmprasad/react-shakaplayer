@@ -24,6 +24,8 @@
  * functionality.
  */
 
+/*eslint-disable */
+
 import ShakaDemoTooltips from './tooltip';
 
 export default class ShakaDemoInputContainer {

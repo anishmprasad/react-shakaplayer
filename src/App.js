@@ -1,8 +1,8 @@
 import React from 'react';
-import logo from './logo.svg';
 import ReactShakaPlayer from './react-shakaplayer';
 import './App.css';
-
+window.goog = {};
+window.shaka = {};
 function App() {
 	return (
 		<div className='App'>

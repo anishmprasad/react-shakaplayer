@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
+
+window.goog = window.goog || {};
+var goog = window.goog;
 
 /**
  * A Chromecast receiver demo app.

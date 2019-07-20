@@ -16,7 +16,11 @@
  */
 
 import shakaAssets from './assets';
+import { KeySystem } from './config';
 
+console.log({ shakaAssets });
+
+window.shaka = window.shaka || {};
 var shaka = window.shaka;
 
 const noop = () => {};
@@ -60,7 +64,7 @@ const ShakaDemoAssetInfo = class {
 		/** @type {boolean} */
 		this.isFeatured = false;
 		/** @type {!Array.<!shakaAssets.KeySystem>} */
-		this.drm = [shakaAssets.KeySystem.CLEAR];
+		this.drm = [KeySystem.CLEAR];
 		/** @type {!Array.<!shakaAssets.Feature>} */
 		this.features = [];
 		/** @type {!Map.<string, string>} */
@@ -140,7 +144,7 @@ const ShakaDemoAssetInfo = class {
 	 * @return {!ShakaDemoAssetInfo}
 	 */
 	addKeySystem(keySystem) {
-		if (this.drm.length === 1 && this.drm[0] === shakaAssets.KeySystem.CLEAR) {
+		if (this.drm.length === 1 && this.drm[0] === KeySystem.CLEAR) {
 			// Once an asset has an actual key system, it's no longer a CLEAR asset.
 			this.drm = [];
 		}
@@ -379,5 +383,7 @@ const ShakaDemoAssetInfo = class {
 		return asset;
 	}
 };
-
+// console.log({ ShakaDemoAssetInfo });
 export default ShakaDemoAssetInfo;
+
+// export default class k {}

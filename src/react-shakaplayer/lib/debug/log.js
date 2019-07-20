@@ -19,7 +19,9 @@
 
 // goog.require('goog.asserts');
 
+window.shaka = window.shaka || {};
 var shaka = window.shaka;
+window.goog = window.goog || {};
 var goog = window.goog;
 
 /**

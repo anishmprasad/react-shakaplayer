@@ -17,8 +17,8 @@
 
 // goog.provide('goog.asserts');
 
+window.goog = window.goog || {};
 var goog = window.goog;
-
 /**
  * @summary An assertion framework which is compiled out for deployment.
  *   NOTE: this is not the closure library version.  This uses the same name so
@@ -36,7 +36,7 @@ goog.asserts = class {
 /**
  * @define {boolean} true to enable asserts, false otherwise.
  */
-goog.define('goog.asserts.ENABLE_ASSERTS', goog.DEBUG);
+// goog.define('goog.asserts.ENABLE_ASSERTS', goog.DEBUG);
 
 // Install assert functions.
 if (goog.asserts.ENABLE_ASSERTS) {

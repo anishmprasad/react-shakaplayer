@@ -20,6 +20,8 @@
  * @externs
  */
 
+/*eslint-disable */
+
 /** @const */
 const componentHandler = class {
 	/** @const */

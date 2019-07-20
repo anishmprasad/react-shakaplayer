@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 /** @type {?ShakaDemoCustom} */
 import shakaDemoMain from './main';
 import { ShakaDemoTextInput } from '../js/input';
