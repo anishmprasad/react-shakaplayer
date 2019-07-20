@@ -15,12 +15,16 @@
  * limitations under the License.
  */
 
+// goog.provide('shaka.ui.Spacer');
 
-goog.provide('shaka.ui.Spacer');
+// goog.require('shaka.ui.Element');
+// goog.require('shaka.util.Dom');
 
-goog.require('shaka.ui.Element');
-goog.require('shaka.util.Dom');
-
+/*eslint-disable*/
+window.shaka = window.shaka || {};
+var shaka = window.shaka;
+window.goog = window.goog || {};
+var goog = window.goog;
 
 /**
  * @extends {shaka.ui.Element}
@@ -28,20 +32,20 @@ goog.require('shaka.util.Dom');
  * @export
  */
 shaka.ui.Spacer = class extends shaka.ui.Element {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    super(parent, controls);
+	/**
+	 * @param {!HTMLElement} parent
+	 * @param {!shaka.ui.Controls} controls
+	 */
+	constructor(parent, controls) {
+		super(parent, controls);
 
-    /** @private {!HTMLElement} */
-    const div = shaka.util.Dom.createHTMLElement('div');
-    div.classList.add('shaka-spacer');
-    // Make screen readers ignore the spacer
-    div.setAttribute('aria-hidden', true);
-    this.parent.appendChild(div);
-  }
+		/** @private {!HTMLElement} */
+		const div = shaka.util.Dom.createHTMLElement('div');
+		div.classList.add('shaka-spacer');
+		// Make screen readers ignore the spacer
+		div.setAttribute('aria-hidden', true);
+		this.parent.appendChild(div);
+	}
 };
 
 /**
@@ -49,11 +53,10 @@ shaka.ui.Spacer = class extends shaka.ui.Element {
  * @final
  */
 shaka.ui.Spacer.Factory = class {
-  /** @override */
-  create(rootElement, controls) {
-    return new shaka.ui.Spacer(rootElement, controls);
-  }
+	/** @override */
+	create(rootElement, controls) {
+		return new shaka.ui.Spacer(rootElement, controls);
+	}
 };
 
-shaka.ui.Controls.registerElement(
-    'spacer', new shaka.ui.Spacer.Factory());
+shaka.ui.Controls.registerElement('spacer', new shaka.ui.Spacer.Factory());

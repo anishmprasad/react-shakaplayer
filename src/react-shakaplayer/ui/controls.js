@@ -16,21 +16,27 @@
  */
 
 
-goog.provide('shaka.ui.Controls');
-goog.provide('shaka.ui.ControlsPanel');
+// goog.provide('shaka.ui.Controls');
+// goog.provide('shaka.ui.ControlsPanel');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.ui.Constants');
-goog.require('shaka.ui.Enums');
-goog.require('shaka.ui.Locales');
-goog.require('shaka.ui.Localization');
-goog.require('shaka.ui.Utils');
-goog.require('shaka.util.Dom');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.Timer');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.ui.Constants');
+// goog.require('shaka.ui.Enums');
+// goog.require('shaka.ui.Locales');
+// goog.require('shaka.ui.Localization');
+// goog.require('shaka.ui.Utils');
+// goog.require('shaka.util.Dom');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.FakeEventTarget');
+// goog.require('shaka.util.Timer');
+
+/*eslint-disable*/
+window.shaka = window.shaka || {}
+var shaka = window.shaka
+window.goog = window.goog || {}
+var goog = window.goog
 
 
 /**

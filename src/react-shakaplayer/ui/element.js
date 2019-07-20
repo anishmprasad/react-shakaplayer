@@ -15,11 +15,15 @@
  * limitations under the License.
  */
 
+// goog.provide('shaka.ui.Element');
 
-goog.provide('shaka.ui.Element');
+// goog.require('shaka.util.EventManager');
 
-goog.require('shaka.util.EventManager');
-
+/*eslint-disable*/
+window.shaka = window.shaka || {};
+var shaka = window.shaka;
+window.goog = window.goog || {};
+var goog = window.goog;
 
 /**
  * @implements {shaka.extern.IUIElement}
@@ -27,44 +31,44 @@ goog.require('shaka.util.EventManager');
  * @export
  */
 shaka.ui.Element = class {
-  /**
-   * @param {!HTMLElement} parent
-   * @param {!shaka.ui.Controls} controls
-   */
-  constructor(parent, controls) {
-    /** @protected {HTMLElement} */
-    this.parent = parent;
+	/**
+	 * @param {!HTMLElement} parent
+	 * @param {!shaka.ui.Controls} controls
+	 */
+	constructor(parent, controls) {
+		/** @protected {HTMLElement} */
+		this.parent = parent;
 
-    /** @protected {shaka.ui.Controls} */
-    this.controls = controls;
+		/** @protected {shaka.ui.Controls} */
+		this.controls = controls;
 
-    /** @protected {shaka.util.EventManager} */
-    this.eventManager = new shaka.util.EventManager();
+		/** @protected {shaka.util.EventManager} */
+		this.eventManager = new shaka.util.EventManager();
 
-    /** @protected {shaka.ui.Localization} */
-    this.localization = this.controls.getLocalization();
+		/** @protected {shaka.ui.Localization} */
+		this.localization = this.controls.getLocalization();
 
-    /** @protected {shaka.Player} */
-    this.player = this.controls.getPlayer();
+		/** @protected {shaka.Player} */
+		this.player = this.controls.getPlayer();
 
-    /** @protected {HTMLMediaElement} */
-    this.video = this.controls.getVideo();
-  }
+		/** @protected {HTMLMediaElement} */
+		this.video = this.controls.getVideo();
+	}
 
-  /**
-   * @override
-   * @export
-   */
-  destroy() {
-    this.eventManager.release();
+	/**
+	 * @override
+	 * @export
+	 */
+	destroy() {
+		this.eventManager.release();
 
-    this.parent = null;
-    this.controls = null;
-    this.eventManager = null;
-    this.localization = null;
-    this.player = null;
-    this.video = null;
+		this.parent = null;
+		this.controls = null;
+		this.eventManager = null;
+		this.localization = null;
+		this.player = null;
+		this.video = null;
 
-    return Promise.resolve();
-  }
+		return Promise.resolve();
+	}
 };
