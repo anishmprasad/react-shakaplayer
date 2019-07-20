@@ -32,7 +32,7 @@ var shaka = window.shaka;
  * @template T
  * @export
  */
-shaka.util.AbortableOperation = class {
+class AbortableOperation {
 	/**
 	 * @param {!Promise.<T>} promise
 	 *   A Promise which represents the underlying operation.  It is resolved when
@@ -271,11 +271,13 @@ shaka.util.AbortableOperation = class {
 			return () => Promise.resolve();
 		}
 	}
-};
+}
 
 /**
  * @const {!Promise.<T>}
  * @exportInterface
  */
 // eslint-disable-next-line no-restricted-syntax
-shaka.util.AbortableOperation.prototype.promise;
+AbortableOperation.prototype.promise = {};
+
+export default AbortableOperation;

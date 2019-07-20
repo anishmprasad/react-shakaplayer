@@ -24,6 +24,7 @@
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import NetworkingEngine from '../net/networking_engine';
 var shaka = window.shaka;
 var goog = window.goog;
 

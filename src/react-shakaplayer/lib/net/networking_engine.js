@@ -29,6 +29,7 @@
 // goog.require('shaka.util.ObjectUtils');
 // goog.require('shaka.util.OperationManager');
 import FakeEventTarget from '../util/fake_event_target';
+import AbortableOperation from '../util/abortable_operation';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -92,10 +93,10 @@ class NetworkingEngine extends FakeEventTarget {
 	 */
 	static registerScheme(scheme, plugin, priority) {
 		goog.asserts.assert(priority == undefined || priority > 0, 'explicit priority must be > 0');
-		priority = priority || shaka.net.NetworkingEngine.PluginPriority.APPLICATION;
-		const existing = shaka.net.NetworkingEngine.schemes_[scheme];
+		priority = priority || NetworkingEngine.PluginPriority.APPLICATION;
+		const existing = NetworkingEngine.schemes_[scheme];
 		if (!existing || priority >= existing.priority) {
-			shaka.net.NetworkingEngine.schemes_[scheme] = {
+			NetworkingEngine.schemes_[scheme] = {
 				priority: priority,
 				plugin: plugin
 			};
@@ -109,7 +110,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 * @export
 	 */
 	static unregisterScheme(scheme) {
-		delete shaka.net.NetworkingEngine.schemes_[scheme];
+		delete NetworkingEngine.schemes_[scheme];
 	}
 
 	/**
@@ -224,7 +225,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 */
 	request(type, request) {
 		const ObjectUtils = shaka.util.ObjectUtils;
-		const numBytesRemainingObj = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
+		const numBytesRemainingObj = new NetworkingEngine.NumBytesRemainingClass();
 
 		// Reject all requests made after destroy is called.
 		if (this.destroyed_) {
@@ -238,7 +239,7 @@ class NetworkingEngine extends FakeEventTarget {
 			// Silence uncaught rejection errors, which may otherwise occur any place
 			// we don't explicitly handle aborted operations.
 			p.catch(() => {});
-			return new shaka.net.NetworkingEngine.PendingRequest(p, () => Promise.resolve(), numBytesRemainingObj);
+			return new NetworkingEngine.PendingRequest(p, () => Promise.resolve(), numBytesRemainingObj);
 		}
 
 		goog.asserts.assert(request.uris && request.uris.length, 'Request without URIs!');
@@ -253,7 +254,7 @@ class NetworkingEngine extends FakeEventTarget {
 		request.headers = request.headers || {};
 		request.retryParameters = request.retryParameters
 			? ObjectUtils.cloneObject(request.retryParameters)
-			: shaka.net.NetworkingEngine.defaultRetryParameters();
+			: NetworkingEngine.defaultRetryParameters();
 		request.uris = ObjectUtils.cloneObject(request.uris);
 
 		// Apply the registered filters to the request.
@@ -293,7 +294,7 @@ class NetworkingEngine extends FakeEventTarget {
 					!responseAndGotProgress.gotProgress &&
 					this.onProgressUpdated_ &&
 					!response.fromCache &&
-					type == shaka.net.NetworkingEngine.RequestType.SEGMENT
+					type == NetworkingEngine.RequestType.SEGMENT
 				) {
 					this.onProgressUpdated_(response.timeMs, response.data.byteLength);
 				}
@@ -327,7 +328,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 * @private
 	 */
 	filterRequest_(type, request) {
-		let filterOperation = shaka.util.AbortableOperation.completed(undefined);
+		let filterOperation = AbortableOperation.completed(undefined);
 
 		for (const requestFilter of this.requestFilters_) {
 			// Request filters are run sequentially.
@@ -387,7 +388,7 @@ class NetworkingEngine extends FakeEventTarget {
 		let gotProgress = false;
 		if (!scheme) {
 			// If there is no scheme, infer one from the location.
-			scheme = shaka.net.NetworkingEngine.getLocationProtocol_();
+			scheme = NetworkingEngine.getLocationProtocol_();
 			goog.asserts.assert(scheme[scheme.length - 1] == ':', 'location.protocol expected to end with a colon!');
 			// Drop the colon.
 			scheme = scheme.slice(0, -1);
@@ -397,10 +398,10 @@ class NetworkingEngine extends FakeEventTarget {
 			request.uris[index] = uri.toString();
 		}
 
-		const object = shaka.net.NetworkingEngine.schemes_[scheme];
+		const object = NetworkingEngine.schemes_[scheme];
 		const plugin = object ? object.plugin : null;
 		if (!plugin) {
-			return shaka.util.AbortableOperation.failed(
+			return AbortableOperation.failed(
 				new shaka.util.Error(
 					shaka.util.Error.Severity.CRITICAL,
 					shaka.util.Error.Category.NETWORK,
@@ -412,17 +413,17 @@ class NetworkingEngine extends FakeEventTarget {
 
 		// Every attempt must have an associated backoff.attempt() call so that the
 		// accounting is correct.
-		const backoffOperation = shaka.util.AbortableOperation.notAbortable(backoff.attempt());
+		const backoffOperation = AbortableOperation.notAbortable(backoff.attempt());
 
 		let startTimeMs;
 		const sendOperation = backoffOperation
 			.chain(() => {
 				if (this.destroyed_) {
-					return shaka.util.AbortableOperation.aborted();
+					return AbortableOperation.aborted();
 				}
 
 				startTimeMs = Date.now();
-				const segment = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+				const segment = NetworkingEngine.RequestType.SEGMENT;
 
 				return plugin(
 					request.uris[index],
@@ -452,7 +453,7 @@ class NetworkingEngine extends FakeEventTarget {
 				},
 				error => {
 					if (this.destroyed_) {
-						return shaka.util.AbortableOperation.aborted();
+						return AbortableOperation.aborted();
 					}
 
 					if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
@@ -493,7 +494,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 * @private
 	 */
 	filterResponse_(type, responseAndGotProgress) {
-		let filterOperation = shaka.util.AbortableOperation.completed(undefined);
+		let filterOperation = AbortableOperation.completed(undefined);
 		for (const responseFilter of this.responseFilters_) {
 			// Response filters are run sequentially.
 			filterOperation = filterOperation.chain(() => responseFilter(type, responseAndGotProgress.response));
@@ -538,7 +539,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 * @private
 	 */
 	static getLocationProtocol_() {
-		return location.protocol;
+		return window.location.protocol;
 	}
 }
 
