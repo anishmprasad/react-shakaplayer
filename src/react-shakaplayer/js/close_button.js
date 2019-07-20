@@ -21,6 +21,9 @@
  * at load-time when in uncompiled mode.
  * @implements {shaka.extern.IUIElement}
  */
+
+import shakaDemoMain from './main';
+
 class CloseButton {
 	/**
 	 * @param {!HTMLElement} parent

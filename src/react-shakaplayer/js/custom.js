@@ -16,12 +16,14 @@
  */
 
 /** @type {?ShakaDemoCustom} */
+import shakaDemoMain from './main';
+
 let shakaDemoCustom;
 
 /**
  * Shaka Player demo, custom asset page layout.
  */
-class ShakaDemoCustom {
+export default class ShakaDemoCustom {
 	/**
 	 * Register the page configuration.
 	 */

@@ -16,6 +16,10 @@
  */
 
 /** @type {?ShakaDemoSearch} */
+import shakaDemoMain from './main';
+import shakaAssets from './common/assets';
+import ShakaDemoInputContainer from './input_container';
+
 let shakaDemoSearch;
 
 /**

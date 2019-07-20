@@ -26,7 +26,7 @@
 
 import ShakaDemoTooltips from './tooltip';
 
-class ShakaDemoInputContainer {
+export default class ShakaDemoInputContainer {
 	/**
 	 * @param {!Element} parentDiv
 	 * @param {?string} headerText The text to be displayed by the header. If

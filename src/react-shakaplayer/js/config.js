@@ -16,11 +16,16 @@
  */
 
 /** @type {?ShakaDemoConfig} */
+
+import shakaDemoMain from './main';
+import ShakaDemoInputContainer from './input_container';
+
 let shakaDemoConfig;
 
 /**
  * Shaka Player demo, configuration page layout.
  */
+
 class ShakaDemoConfig {
 	/**
 	 * Register the page configuration.
@@ -340,6 +345,8 @@ class ShakaDemoConfig {
 					break;
 				case 'v':
 					setLevel(Level['V1']);
+					break;
+				default:
 					break;
 			}
 			shakaDemoMain.remakeHash();

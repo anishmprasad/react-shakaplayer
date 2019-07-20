@@ -16,6 +16,11 @@
  */
 
 /** @type {?ShakaDemoFront} */
+
+import shakaDemoMain from './main';
+import shakaAssets from './common/assets';
+import AssetCard from './asset_card';
+
 let shakaDemoFront;
 
 /**

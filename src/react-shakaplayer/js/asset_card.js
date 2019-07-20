@@ -22,6 +22,7 @@
 
 import ShakaDemoTooltips from './tooltip';
 import shakaAssets from './common/assets';
+import shakaDemoMain from './main';
 
 class AssetCard {
 	/**
