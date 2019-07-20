@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.abr.SimpleAbrManager');
+// goog.provide('shaka.abr.SimpleAbrManager');
 
 goog.require('goog.asserts');
-goog.require('shaka.abr.EwmaBandwidthEstimator');
-goog.require('shaka.log');
-goog.require('shaka.util.StreamUtils');
+// goog.require('shaka.abr.EwmaBandwidthEstimator');
+// goog.require('shaka.log');
+// goog.require('shaka.util.StreamUtils');
 
+var shaka = window.shaka;
 
 /**
  * @summary
@@ -44,244 +45,228 @@ goog.require('shaka.util.StreamUtils');
  * @implements {shaka.extern.AbrManager}
  * @export
  */
-shaka.abr.SimpleAbrManager = class {
-  constructor() {
-    /** @private {?shaka.extern.AbrManager.SwitchCallback} */
-    this.switch_ = null;
+window.shaka.abr.SimpleAbrManager = class {
+	constructor() {
+		/** @private {?shaka.extern.AbrManager.SwitchCallback} */
+		this.switch_ = null;
 
-    /** @private {boolean} */
-    this.enabled_ = false;
+		/** @private {boolean} */
+		this.enabled_ = false;
 
-    /** @private {shaka.abr.EwmaBandwidthEstimator} */
-    this.bandwidthEstimator_ = new shaka.abr.EwmaBandwidthEstimator();
-    // TODO: Consider using NetworkInformation's change event to throw out an
-    // old estimate based on changing network types, such as wifi => 3g.
+		/** @private {shaka.abr.EwmaBandwidthEstimator} */
+		this.bandwidthEstimator_ = new shaka.abr.EwmaBandwidthEstimator();
+		// TODO: Consider using NetworkInformation's change event to throw out an
+		// old estimate based on changing network types, such as wifi => 3g.
 
-    /**
-     * A filtered list of Variants to choose from.
-     * @private {!Array.<!shaka.extern.Variant>}
-     */
-    this.variants_ = [];
+		/**
+		 * A filtered list of Variants to choose from.
+		 * @private {!Array.<!shaka.extern.Variant>}
+		 */
+		this.variants_ = [];
 
-    /** @private {boolean} */
-    this.startupComplete_ = false;
+		/** @private {boolean} */
+		this.startupComplete_ = false;
 
-    /**
-     * The last wall-clock time, in milliseconds, when streams were chosen.
-     *
-     * @private {?number}
-     */
-    this.lastTimeChosenMs_ = null;
+		/**
+		 * The last wall-clock time, in milliseconds, when streams were chosen.
+		 *
+		 * @private {?number}
+		 */
+		this.lastTimeChosenMs_ = null;
 
-    /** @private {?shaka.extern.AbrConfiguration} */
-    this.config_ = null;
-  }
+		/** @private {?shaka.extern.AbrConfiguration} */
+		this.config_ = null;
+	}
 
+	/**
+	 * @override
+	 * @export
+	 */
+	stop() {
+		this.switch_ = null;
+		this.enabled_ = false;
+		this.variants_ = [];
+		this.lastTimeChosenMs_ = null;
 
-  /**
-   * @override
-   * @export
-   */
-  stop() {
-    this.switch_ = null;
-    this.enabled_ = false;
-    this.variants_ = [];
-    this.lastTimeChosenMs_ = null;
+		// Don't reset |startupComplete_|: if we've left the startup interval, we
+		// can start using bandwidth estimates right away after init() is called.
+	}
 
-    // Don't reset |startupComplete_|: if we've left the startup interval, we
-    // can start using bandwidth estimates right away after init() is called.
-  }
+	/**
+	 * @override
+	 * @export
+	 */
+	init(switchCallback) {
+		this.switch_ = switchCallback;
+	}
 
+	/**
+	 * @override
+	 * @export
+	 */
+	chooseVariant() {
+		const SimpleAbrManager = shaka.abr.SimpleAbrManager;
 
-  /**
-   * @override
-   * @export
-   */
-  init(switchCallback) {
-    this.switch_ = switchCallback;
-  }
+		// Get sorted Variants.
+		let sortedVariants = SimpleAbrManager.filterAndSortVariants_(this.config_.restrictions, this.variants_);
+		const currentBandwidth = this.bandwidthEstimator_.getBandwidthEstimate(this.config_.defaultBandwidthEstimate);
 
+		if (this.variants_.length && !sortedVariants.length) {
+			// If we couldn't meet the ABR restrictions, we should still play
+			// something.
+			// These restrictions are not "hard" restrictions in the way that
+			// top-level or DRM-based restrictions are.  Sort the variants without
+			// restrictions and keep just the first (lowest-bandwidth) one.
+			shaka.log.warning('No variants met the ABR restrictions. ' + 'Choosing a variant by lowest bandwidth.');
+			sortedVariants = SimpleAbrManager.filterAndSortVariants_(/* restrictions */ null, this.variants_);
+			sortedVariants = [sortedVariants[0]];
+		}
 
-  /**
-   * @override
-   * @export
-   */
-  chooseVariant() {
-    const SimpleAbrManager = shaka.abr.SimpleAbrManager;
+		// Start by assuming that we will use the first Stream.
+		let chosen = sortedVariants[0] || null;
 
-    // Get sorted Variants.
-    let sortedVariants = SimpleAbrManager.filterAndSortVariants_(
-        this.config_.restrictions, this.variants_);
-    const currentBandwidth = this.bandwidthEstimator_.getBandwidthEstimate(
-        this.config_.defaultBandwidthEstimate);
+		for (let i = 0; i < sortedVariants.length; ++i) {
+			const variant = sortedVariants[i];
+			const nextVariant = sortedVariants[i + 1] || { bandwidth: Infinity };
 
-    if (this.variants_.length && !sortedVariants.length) {
-      // If we couldn't meet the ABR restrictions, we should still play
-      // something.
-      // These restrictions are not "hard" restrictions in the way that
-      // top-level or DRM-based restrictions are.  Sort the variants without
-      // restrictions and keep just the first (lowest-bandwidth) one.
-      shaka.log.warning('No variants met the ABR restrictions. ' +
-                        'Choosing a variant by lowest bandwidth.');
-      sortedVariants = SimpleAbrManager.filterAndSortVariants_(
-          /* restrictions */ null, this.variants_);
-      sortedVariants = [sortedVariants[0]];
-    }
+			const minBandwidth = variant.bandwidth / this.config_.bandwidthDowngradeTarget;
+			const maxBandwidth = nextVariant.bandwidth / this.config_.bandwidthUpgradeTarget;
+			shaka.log.v2(
+				'Bandwidth ranges:',
+				(variant.bandwidth / 1e6).toFixed(3),
+				(minBandwidth / 1e6).toFixed(3),
+				(maxBandwidth / 1e6).toFixed(3)
+			);
 
-    // Start by assuming that we will use the first Stream.
-    let chosen = sortedVariants[0] || null;
+			if (currentBandwidth >= minBandwidth && currentBandwidth <= maxBandwidth) {
+				chosen = variant;
+			}
+		}
 
-    for (let i = 0; i < sortedVariants.length; ++i) {
-      const variant = sortedVariants[i];
-      const nextVariant = sortedVariants[i + 1] || {bandwidth: Infinity};
+		this.lastTimeChosenMs_ = Date.now();
+		return chosen;
+	}
 
-      const minBandwidth = variant.bandwidth /
-                         this.config_.bandwidthDowngradeTarget;
-      const maxBandwidth = nextVariant.bandwidth /
-                         this.config_.bandwidthUpgradeTarget;
-      shaka.log.v2('Bandwidth ranges:',
-          (variant.bandwidth / 1e6).toFixed(3),
-          (minBandwidth / 1e6).toFixed(3),
-          (maxBandwidth / 1e6).toFixed(3));
+	/**
+	 * @override
+	 * @export
+	 */
+	enable() {
+		this.enabled_ = true;
+	}
 
-      if (currentBandwidth >= minBandwidth &&
-          currentBandwidth <= maxBandwidth) {
-        chosen = variant;
-      }
-    }
+	/**
+	 * @override
+	 * @export
+	 */
+	disable() {
+		this.enabled_ = false;
+	}
 
-    this.lastTimeChosenMs_ = Date.now();
-    return chosen;
-  }
+	/**
+	 * @override
+	 * @export
+	 */
+	segmentDownloaded(deltaTimeMs, numBytes) {
+		shaka.log.v2(
+			'Segment downloaded:',
+			'deltaTimeMs=' + deltaTimeMs,
+			'numBytes=' + numBytes,
+			'lastTimeChosenMs=' + this.lastTimeChosenMs_,
+			'enabled=' + this.enabled_
+		);
+		goog.asserts.assert(deltaTimeMs >= 0, 'expected a non-negative duration');
+		this.bandwidthEstimator_.sample(deltaTimeMs, numBytes);
 
+		if (this.lastTimeChosenMs_ != null && this.enabled_) {
+			this.suggestStreams_();
+		}
+	}
 
-  /**
-   * @override
-   * @export
-   */
-  enable() {
-    this.enabled_ = true;
-  }
+	/**
+	 * @override
+	 * @export
+	 */
+	getBandwidthEstimate() {
+		return this.bandwidthEstimator_.getBandwidthEstimate(this.config_.defaultBandwidthEstimate);
+	}
 
+	/**
+	 * @override
+	 * @export
+	 */
+	setVariants(variants) {
+		this.variants_ = variants;
+	}
 
-  /**
-   * @override
-   * @export
-   */
-  disable() {
-    this.enabled_ = false;
-  }
+	/**
+	 * @override
+	 * @export
+	 */
+	configure(config) {
+		this.config_ = config;
+	}
 
+	/**
+	 * Calls switch_() with the variant chosen by chooseVariant().
+	 *
+	 * @private
+	 */
+	suggestStreams_() {
+		shaka.log.v2('Suggesting Streams...');
+		goog.asserts.assert(this.lastTimeChosenMs_ != null, 'lastTimeChosenMs_ should not be null');
 
-  /**
-   * @override
-   * @export
-   */
-  segmentDownloaded(deltaTimeMs, numBytes) {
-    shaka.log.v2('Segment downloaded:',
-        'deltaTimeMs=' + deltaTimeMs,
-        'numBytes=' + numBytes,
-        'lastTimeChosenMs=' + this.lastTimeChosenMs_,
-        'enabled=' + this.enabled_);
-    goog.asserts.assert(deltaTimeMs >= 0, 'expected a non-negative duration');
-    this.bandwidthEstimator_.sample(deltaTimeMs, numBytes);
+		if (!this.startupComplete_) {
+			// Check if we've got enough data yet.
+			if (!this.bandwidthEstimator_.hasGoodEstimate()) {
+				shaka.log.v2('Still waiting for a good estimate...');
+				return;
+			}
+			this.startupComplete_ = true;
+		} else {
+			// Check if we've left the switch interval.
+			const now = Date.now();
+			const delta = now - this.lastTimeChosenMs_;
+			if (delta < this.config_.switchInterval * 1000) {
+				shaka.log.v2('Still within switch interval...');
+				return;
+			}
+		}
 
-    if ((this.lastTimeChosenMs_ != null) && this.enabled_) {
-      this.suggestStreams_();
-    }
-  }
+		const chosenVariant = this.chooseVariant();
+		const bandwidthEstimate = this.bandwidthEstimator_.getBandwidthEstimate(this.config_.defaultBandwidthEstimate);
+		const currentBandwidthKbps = Math.round(bandwidthEstimate / 1000.0);
 
+		shaka.log.debug('Calling switch_(), bandwidth=' + currentBandwidthKbps + ' kbps');
+		// If any of these chosen streams are already chosen, Player will filter
+		// them out before passing the choices on to StreamingEngine.
+		this.switch_(chosenVariant);
+	}
 
-  /**
-   * @override
-   * @export
-   */
-  getBandwidthEstimate() {
-    return this.bandwidthEstimator_.getBandwidthEstimate(
-        this.config_.defaultBandwidthEstimate);
-  }
+	/**
+	 * @param {?shaka.extern.Restrictions} restrictions
+	 * @param {!Array.<shaka.extern.Variant>} variants
+	 * @return {!Array.<shaka.extern.Variant>} variants filtered according to
+	 *   |restrictions| and sorted in ascending order of bandwidth.
+	 * @private
+	 */
+	static filterAndSortVariants_(restrictions, variants) {
+		if (restrictions) {
+			variants = variants.filter(variant => {
+				// This was already checked in another scope, but the compiler doesn't
+				// seem to understand that.
+				goog.asserts.assert(restrictions, 'Restrictions should exist!');
 
+				return shaka.util.StreamUtils.meetsRestrictions(
+					variant,
+					restrictions,
+					/* maxHwRes */ { width: Infinity, height: Infinity }
+				);
+			});
+		}
 
-  /**
-   * @override
-   * @export
-   */
-  setVariants(variants) {
-    this.variants_ = variants;
-  }
-
-
-  /**
-   * @override
-   * @export
-   */
-  configure(config) {
-    this.config_ = config;
-  }
-
-
-  /**
-   * Calls switch_() with the variant chosen by chooseVariant().
-   *
-   * @private
-   */
-  suggestStreams_() {
-    shaka.log.v2('Suggesting Streams...');
-    goog.asserts.assert(this.lastTimeChosenMs_ != null,
-        'lastTimeChosenMs_ should not be null');
-
-    if (!this.startupComplete_) {
-      // Check if we've got enough data yet.
-      if (!this.bandwidthEstimator_.hasGoodEstimate()) {
-        shaka.log.v2('Still waiting for a good estimate...');
-        return;
-      }
-      this.startupComplete_ = true;
-    } else {
-      // Check if we've left the switch interval.
-      const now = Date.now();
-      const delta = now - this.lastTimeChosenMs_;
-      if (delta < this.config_.switchInterval * 1000) {
-        shaka.log.v2('Still within switch interval...');
-        return;
-      }
-    }
-
-    const chosenVariant = this.chooseVariant();
-    const bandwidthEstimate = this.bandwidthEstimator_.getBandwidthEstimate(
-        this.config_.defaultBandwidthEstimate);
-    const currentBandwidthKbps = Math.round(bandwidthEstimate / 1000.0);
-
-    shaka.log.debug(
-        'Calling switch_(), bandwidth=' + currentBandwidthKbps + ' kbps');
-    // If any of these chosen streams are already chosen, Player will filter
-    // them out before passing the choices on to StreamingEngine.
-    this.switch_(chosenVariant);
-  }
-
-
-  /**
-   * @param {?shaka.extern.Restrictions} restrictions
-   * @param {!Array.<shaka.extern.Variant>} variants
-   * @return {!Array.<shaka.extern.Variant>} variants filtered according to
-   *   |restrictions| and sorted in ascending order of bandwidth.
-   * @private
-   */
-  static filterAndSortVariants_(restrictions, variants) {
-    if (restrictions) {
-      variants = variants.filter((variant) => {
-        // This was already checked in another scope, but the compiler doesn't
-        // seem to understand that.
-        goog.asserts.assert(restrictions, 'Restrictions should exist!');
-
-        return shaka.util.StreamUtils.meetsRestrictions(
-            variant, restrictions,
-            /* maxHwRes */ {width: Infinity, height: Infinity});
-      });
-    }
-
-    return variants.sort((v1, v2) => {
-      return v1.bandwidth - v2.bandwidth;
-    });
-  }
+		return variants.sort((v1, v2) => {
+			return v1.bandwidth - v2.bandwidth;
+		});
+	}
 };

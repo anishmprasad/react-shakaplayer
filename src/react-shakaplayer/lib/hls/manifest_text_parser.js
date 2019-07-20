@@ -15,17 +15,21 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.hls.ManifestTextParser');
+// goog.provide('shaka.hls.ManifestTextParser');
 
-goog.require('shaka.hls.Attribute');
-goog.require('shaka.hls.Playlist');
-goog.require('shaka.hls.PlaylistType');
-goog.require('shaka.hls.Segment');
-goog.require('shaka.hls.Tag');
-goog.require('shaka.hls.Utils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.TextParser');
+// goog.require('shaka.hls.Attribute');
+// goog.require('shaka.hls.Playlist');
+// goog.require('shaka.hls.PlaylistType');
+// goog.require('shaka.hls.Segment');
+// goog.require('shaka.hls.Tag');
+// goog.require('shaka.hls.Utils');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.StringUtils');
+// goog.require('shaka.util.TextParser');
+
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

@@ -15,23 +15,26 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.media.MediaSourceEngine');
+// goog.provide('shaka.media.MediaSourceEngine');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.media.IClosedCaptionParser');
-goog.require('shaka.media.TimeRangesUtils');
-goog.require('shaka.media.Transmuxer');
-goog.require('shaka.text.TextEngine');
-goog.require('shaka.util.Destroyer');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.MimeUtils');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.PublicPromise');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.media.IClosedCaptionParser');
+// goog.require('shaka.media.TimeRangesUtils');
+// goog.require('shaka.media.Transmuxer');
+// goog.require('shaka.text.TextEngine');
+// goog.require('shaka.util.Destroyer');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.Functional');
+// goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.MimeUtils');
+// goog.require('shaka.util.Platform');
+// goog.require('shaka.util.PublicPromise');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

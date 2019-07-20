@@ -15,82 +15,81 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.ManifestParserUtils');
+// goog.provide('shaka.util.ManifestParserUtils');
 
-goog.require('goog.Uri');
-goog.require('shaka.util.Functional');
+// goog.require('goog.Uri');
+// goog.require('shaka.util.Functional');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * @summary Utility functions for manifest parsing.
  */
 shaka.util.ManifestParserUtils = class {
-  /**
-   * Resolves an array of relative URIs to the given base URIs. This will result
-   * in M*N number of URIs.
-   *
-   * @param {!Array.<string>} baseUris
-   * @param {!Array.<string>} relativeUris
-   * @return {!Array.<string>}
-   */
-  static resolveUris(baseUris, relativeUris) {
-    const Functional = shaka.util.Functional;
-    if (relativeUris.length == 0) {
-      return baseUris;
-    }
+	/**
+	 * Resolves an array of relative URIs to the given base URIs. This will result
+	 * in M*N number of URIs.
+	 *
+	 * @param {!Array.<string>} baseUris
+	 * @param {!Array.<string>} relativeUris
+	 * @return {!Array.<string>}
+	 */
+	static resolveUris(baseUris, relativeUris) {
+		const Functional = shaka.util.Functional;
+		if (relativeUris.length == 0) {
+			return baseUris;
+		}
 
-    const relativeAsGoog = relativeUris.map((uri) => new goog.Uri(uri));
-    // Resolve each URI relative to each base URI, creating an Array of Arrays.
-    // Then flatten the Arrays into a single Array.
-    return baseUris.map((uri) => new goog.Uri(uri))
-        .map((base) => relativeAsGoog.map((i) => base.resolve(i)))
-        .reduce(Functional.collapseArrays, [])
-        .map((uri) => uri.toString());
-  }
+		const relativeAsGoog = relativeUris.map(uri => new goog.Uri(uri));
+		// Resolve each URI relative to each base URI, creating an Array of Arrays.
+		// Then flatten the Arrays into a single Array.
+		return baseUris
+			.map(uri => new goog.Uri(uri))
+			.map(base => relativeAsGoog.map(i => base.resolve(i)))
+			.reduce(Functional.collapseArrays, [])
+			.map(uri => uri.toString());
+	}
 
-
-  /**
-   * Creates a DrmInfo object from the given info.
-   *
-   * @param {string} keySystem
-   * @param {Array.<shaka.extern.InitDataOverride>} initData
-   * @return {shaka.extern.DrmInfo}
-   */
-  static createDrmInfo(keySystem, initData) {
-    return {
-      keySystem: keySystem,
-      licenseServerUri: '',
-      distinctiveIdentifierRequired: false,
-      persistentStateRequired: false,
-      audioRobustness: '',
-      videoRobustness: '',
-      serverCertificate: null,
-      initData: initData || [],
-      keyIds: [],
-    };
-  }
+	/**
+	 * Creates a DrmInfo object from the given info.
+	 *
+	 * @param {string} keySystem
+	 * @param {Array.<shaka.extern.InitDataOverride>} initData
+	 * @return {shaka.extern.DrmInfo}
+	 */
+	static createDrmInfo(keySystem, initData) {
+		return {
+			keySystem: keySystem,
+			licenseServerUri: '',
+			distinctiveIdentifierRequired: false,
+			persistentStateRequired: false,
+			audioRobustness: '',
+			videoRobustness: '',
+			serverCertificate: null,
+			initData: initData || [],
+			keyIds: []
+		};
+	}
 };
-
 
 /**
  * @enum {string}
  */
 shaka.util.ManifestParserUtils.ContentType = {
-  VIDEO: 'video',
-  AUDIO: 'audio',
-  TEXT: 'text',
-  APPLICATION: 'application',
+	VIDEO: 'video',
+	AUDIO: 'audio',
+	TEXT: 'text',
+	APPLICATION: 'application'
 };
-
 
 /**
  * @enum {string}
  */
 shaka.util.ManifestParserUtils.TextStreamKind = {
-  SUBTITLE: 'subtitle',
-  CLOSED_CAPTION: 'caption',
+	SUBTITLE: 'subtitle',
+	CLOSED_CAPTION: 'caption'
 };
-
 
 /**
  * Specifies how tolerant the player is of inaccurate segment start times and

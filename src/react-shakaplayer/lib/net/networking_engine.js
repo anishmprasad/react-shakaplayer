@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.net.NetworkingEngine');
-goog.provide('shaka.net.NetworkingEngine.PendingRequest');
+// goog.provide('shaka.net.NetworkingEngine');
+// goog.provide('shaka.net.NetworkingEngine.PendingRequest');
 
-goog.require('goog.Uri');
-goog.require('goog.asserts');
-goog.require('shaka.net.Backoff');
-goog.require('shaka.util.AbortableOperation');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.ObjectUtils');
-goog.require('shaka.util.OperationManager');
+// goog.require('goog.Uri');
+// goog.require('goog.asserts');
+// goog.require('shaka.net.Backoff');
+// goog.require('shaka.util.AbortableOperation');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.FakeEventTarget');
+// goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.util.ObjectUtils');
+// goog.require('shaka.util.OperationManager');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * @event shaka.net.NetworkingEngine.RetryEvent
@@ -42,7 +44,6 @@ goog.require('shaka.util.OperationManager');
  * @exportDoc
  */
 
-
 /**
  * NetworkingEngine wraps all networking operations.  This accepts plugins that
  * handle the actual request.  A plugin is registered using registerScheme.
@@ -52,478 +53,496 @@ goog.require('shaka.util.OperationManager');
  * @export
  */
 shaka.net.NetworkingEngine = class extends shaka.util.FakeEventTarget {
-  /**
-   * @param {function(number, number)=} onProgressUpdated Called when a progress
-   *   event is triggered. Passed the duration, in milliseconds, that the
-   *   request took, and the number of bytes transferred.
-   */
-  constructor(onProgressUpdated) {
-    super();
+	/**
+	 * @param {function(number, number)=} onProgressUpdated Called when a progress
+	 *   event is triggered. Passed the duration, in milliseconds, that the
+	 *   request took, and the number of bytes transferred.
+	 */
+	constructor(onProgressUpdated) {
+		super();
 
-    /** @private {boolean} */
-    this.destroyed_ = false;
+		/** @private {boolean} */
+		this.destroyed_ = false;
 
-    /** @private {!shaka.util.OperationManager} */
-    this.operationManager_ = new shaka.util.OperationManager();
+		/** @private {!shaka.util.OperationManager} */
+		this.operationManager_ = new shaka.util.OperationManager();
 
-    /** @private {!Set.<shaka.extern.RequestFilter>} */
-    this.requestFilters_ = new Set();
+		/** @private {!Set.<shaka.extern.RequestFilter>} */
+		this.requestFilters_ = new Set();
 
-    /** @private {!Set.<shaka.extern.ResponseFilter>} */
-    this.responseFilters_ = new Set();
+		/** @private {!Set.<shaka.extern.ResponseFilter>} */
+		this.responseFilters_ = new Set();
 
-    /** @private {?function(number, number)} */
-    this.onProgressUpdated_ = onProgressUpdated || null;
-  }
+		/** @private {?function(number, number)} */
+		this.onProgressUpdated_ = onProgressUpdated || null;
+	}
 
-  /**
-   * Registers a scheme plugin.  This plugin will handle all requests with the
-   * given scheme.  If a plugin with the same scheme already exists, it is
-   * replaced, unless the existing plugin is of higher priority.
-   * If no priority is provided, this defaults to the highest priority of
-   * APPLICATION.
-   *
-   * @param {string} scheme
-   * @param {shaka.extern.SchemePlugin} plugin
-   * @param {number=} priority
-   * @export
-   */
-  static registerScheme(scheme, plugin, priority) {
-    goog.asserts.assert(
-        priority == undefined || priority > 0, 'explicit priority must be > 0');
-    priority =
-    priority || shaka.net.NetworkingEngine.PluginPriority.APPLICATION;
-    const existing = shaka.net.NetworkingEngine.schemes_[scheme];
-    if (!existing || priority >= existing.priority) {
-      shaka.net.NetworkingEngine.schemes_[scheme] = {
-        priority: priority,
-        plugin: plugin,
-      };
-    }
-  }
+	/**
+	 * Registers a scheme plugin.  This plugin will handle all requests with the
+	 * given scheme.  If a plugin with the same scheme already exists, it is
+	 * replaced, unless the existing plugin is of higher priority.
+	 * If no priority is provided, this defaults to the highest priority of
+	 * APPLICATION.
+	 *
+	 * @param {string} scheme
+	 * @param {shaka.extern.SchemePlugin} plugin
+	 * @param {number=} priority
+	 * @export
+	 */
+	static registerScheme(scheme, plugin, priority) {
+		goog.asserts.assert(priority == undefined || priority > 0, 'explicit priority must be > 0');
+		priority = priority || shaka.net.NetworkingEngine.PluginPriority.APPLICATION;
+		const existing = shaka.net.NetworkingEngine.schemes_[scheme];
+		if (!existing || priority >= existing.priority) {
+			shaka.net.NetworkingEngine.schemes_[scheme] = {
+				priority: priority,
+				plugin: plugin
+			};
+		}
+	}
 
-  /**
-   * Removes a scheme plugin.
-   *
-   * @param {string} scheme
-   * @export
-   */
-  static unregisterScheme(scheme) {
-    delete shaka.net.NetworkingEngine.schemes_[scheme];
-  }
+	/**
+	 * Removes a scheme plugin.
+	 *
+	 * @param {string} scheme
+	 * @export
+	 */
+	static unregisterScheme(scheme) {
+		delete shaka.net.NetworkingEngine.schemes_[scheme];
+	}
 
-  /**
-   * Registers a new request filter.  All filters are applied in the order they
-   * are registered.
-   *
-   * @param {shaka.extern.RequestFilter} filter
-   * @export
-   */
-  registerRequestFilter(filter) {
-    this.requestFilters_.add(filter);
-  }
+	/**
+	 * Registers a new request filter.  All filters are applied in the order they
+	 * are registered.
+	 *
+	 * @param {shaka.extern.RequestFilter} filter
+	 * @export
+	 */
+	registerRequestFilter(filter) {
+		this.requestFilters_.add(filter);
+	}
 
-  /**
-   * Removes a request filter.
-   *
-   * @param {shaka.extern.RequestFilter} filter
-   * @export
-   */
-  unregisterRequestFilter(filter) {
-    this.requestFilters_.delete(filter);
-  }
+	/**
+	 * Removes a request filter.
+	 *
+	 * @param {shaka.extern.RequestFilter} filter
+	 * @export
+	 */
+	unregisterRequestFilter(filter) {
+		this.requestFilters_.delete(filter);
+	}
 
-  /**
-   * Clears all request filters.
-   *
-   * @export
-   */
-  clearAllRequestFilters() {
-    this.requestFilters_.clear();
-  }
+	/**
+	 * Clears all request filters.
+	 *
+	 * @export
+	 */
+	clearAllRequestFilters() {
+		this.requestFilters_.clear();
+	}
 
-  /**
-   * Registers a new response filter.  All filters are applied in the order they
-   * are registered.
-   *
-   * @param {shaka.extern.ResponseFilter} filter
-   * @export
-   */
-  registerResponseFilter(filter) {
-    this.responseFilters_.add(filter);
-  }
+	/**
+	 * Registers a new response filter.  All filters are applied in the order they
+	 * are registered.
+	 *
+	 * @param {shaka.extern.ResponseFilter} filter
+	 * @export
+	 */
+	registerResponseFilter(filter) {
+		this.responseFilters_.add(filter);
+	}
 
-  /**
-   * Removes a response filter.
-   *
-   * @param {shaka.extern.ResponseFilter} filter
-   * @export
-   */
-  unregisterResponseFilter(filter) {
-    this.responseFilters_.delete(filter);
-  }
+	/**
+	 * Removes a response filter.
+	 *
+	 * @param {shaka.extern.ResponseFilter} filter
+	 * @export
+	 */
+	unregisterResponseFilter(filter) {
+		this.responseFilters_.delete(filter);
+	}
 
-  /**
-   * Clears all response filters.
-   *
-   * @export
-   */
-  clearAllResponseFilters() {
-    this.responseFilters_.clear();
-  }
+	/**
+	 * Clears all response filters.
+	 *
+	 * @export
+	 */
+	clearAllResponseFilters() {
+		this.responseFilters_.clear();
+	}
 
-  /**
-   * Gets a copy of the default retry parameters.
-   *
-   * @return {shaka.extern.RetryParameters}
-   *
-   * NOTE: The implementation moved to shaka.net.Backoff to avoid a circular
-   * dependency between the two classes.
-   */
-  static defaultRetryParameters() {
-    return shaka.net.Backoff.defaultRetryParameters();
-  }
+	/**
+	 * Gets a copy of the default retry parameters.
+	 *
+	 * @return {shaka.extern.RetryParameters}
+	 *
+	 * NOTE: The implementation moved to shaka.net.Backoff to avoid a circular
+	 * dependency between the two classes.
+	 */
+	static defaultRetryParameters() {
+		return shaka.net.Backoff.defaultRetryParameters();
+	}
 
-  /**
-   * Makes a simple network request for the given URIs.
-   *
-   * @param {!Array.<string>} uris
-   * @param {shaka.extern.RetryParameters} retryParams
-   * @return {shaka.extern.Request}
-   */
-  static makeRequest(uris, retryParams) {
-    return {
-      uris: uris,
-      method: 'GET',
-      body: null,
-      headers: {},
-      allowCrossSiteCredentials: false,
-      retryParameters: retryParams,
-      licenseRequestType: null,
-    };
-  }
+	/**
+	 * Makes a simple network request for the given URIs.
+	 *
+	 * @param {!Array.<string>} uris
+	 * @param {shaka.extern.RetryParameters} retryParams
+	 * @return {shaka.extern.Request}
+	 */
+	static makeRequest(uris, retryParams) {
+		return {
+			uris: uris,
+			method: 'GET',
+			body: null,
+			headers: {},
+			allowCrossSiteCredentials: false,
+			retryParameters: retryParams,
+			licenseRequestType: null
+		};
+	}
 
-  /**
-   * @override
-   * @export
-   */
-  destroy() {
-    this.destroyed_ = true;
-    this.requestFilters_.clear();
-    this.responseFilters_.clear();
-    return this.operationManager_.destroy();
-  }
+	/**
+	 * @override
+	 * @export
+	 */
+	destroy() {
+		this.destroyed_ = true;
+		this.requestFilters_.clear();
+		this.responseFilters_.clear();
+		return this.operationManager_.destroy();
+	}
 
-  /**
-   * Makes a network request and returns the resulting data.
-   *
-   * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.extern.Request} request
-   * @return {!shaka.net.NetworkingEngine.PendingRequest}
-   * @export
-   */
-  request(type, request) {
-    const ObjectUtils = shaka.util.ObjectUtils;
-    const numBytesRemainingObj =
-        new shaka.net.NetworkingEngine.NumBytesRemainingClass();
+	/**
+	 * Makes a network request and returns the resulting data.
+	 *
+	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {shaka.extern.Request} request
+	 * @return {!shaka.net.NetworkingEngine.PendingRequest}
+	 * @export
+	 */
+	request(type, request) {
+		const ObjectUtils = shaka.util.ObjectUtils;
+		const numBytesRemainingObj = new shaka.net.NetworkingEngine.NumBytesRemainingClass();
 
-    // Reject all requests made after destroy is called.
-    if (this.destroyed_) {
-      const p = Promise.reject(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.PLAYER,
-          shaka.util.Error.Code.OPERATION_ABORTED));
-      // Silence uncaught rejection errors, which may otherwise occur any place
-      // we don't explicitly handle aborted operations.
-      p.catch(() => {});
-      return new shaka.net.NetworkingEngine.PendingRequest(
-          p, () => Promise.resolve(), numBytesRemainingObj);
-    }
+		// Reject all requests made after destroy is called.
+		if (this.destroyed_) {
+			const p = Promise.reject(
+				new shaka.util.Error(
+					shaka.util.Error.Severity.CRITICAL,
+					shaka.util.Error.Category.PLAYER,
+					shaka.util.Error.Code.OPERATION_ABORTED
+				)
+			);
+			// Silence uncaught rejection errors, which may otherwise occur any place
+			// we don't explicitly handle aborted operations.
+			p.catch(() => {});
+			return new shaka.net.NetworkingEngine.PendingRequest(p, () => Promise.resolve(), numBytesRemainingObj);
+		}
 
-    goog.asserts.assert(
-        request.uris && request.uris.length, 'Request without URIs!');
+		goog.asserts.assert(request.uris && request.uris.length, 'Request without URIs!');
 
-    // If a request comes from outside the library, some parameters may be left
-    // undefined.  To make it easier for application developers, we will fill
-    // them in with defaults if necessary.
-    //
-    // We clone retryParameters and uris so that if a filter modifies the
-    // request, it doesn't contaminate future requests.
-    request.method = request.method || 'GET';
-    request.headers = request.headers || {};
-    request.retryParameters = request.retryParameters ?
-        ObjectUtils.cloneObject(request.retryParameters) :
-        shaka.net.NetworkingEngine.defaultRetryParameters();
-    request.uris = ObjectUtils.cloneObject(request.uris);
+		// If a request comes from outside the library, some parameters may be left
+		// undefined.  To make it easier for application developers, we will fill
+		// them in with defaults if necessary.
+		//
+		// We clone retryParameters and uris so that if a filter modifies the
+		// request, it doesn't contaminate future requests.
+		request.method = request.method || 'GET';
+		request.headers = request.headers || {};
+		request.retryParameters = request.retryParameters
+			? ObjectUtils.cloneObject(request.retryParameters)
+			: shaka.net.NetworkingEngine.defaultRetryParameters();
+		request.uris = ObjectUtils.cloneObject(request.uris);
 
-    // Apply the registered filters to the request.
-    const requestFilterOperation = this.filterRequest_(type, request);
-    const requestOperation = requestFilterOperation.chain(
-        () => this.makeRequestWithRetry_(type, request, numBytesRemainingObj));
-    const responseFilterOperation = requestOperation.chain(
-        (responseAndGotProgress) =>
-          this.filterResponse_(type, responseAndGotProgress));
+		// Apply the registered filters to the request.
+		const requestFilterOperation = this.filterRequest_(type, request);
+		const requestOperation = requestFilterOperation.chain(() =>
+			this.makeRequestWithRetry_(type, request, numBytesRemainingObj)
+		);
+		const responseFilterOperation = requestOperation.chain(responseAndGotProgress =>
+			this.filterResponse_(type, responseAndGotProgress)
+		);
 
-    // Keep track of time spent in filters.
-    const requestFilterStartTime = Date.now();
-    let requestFilterMs = 0;
-    requestFilterOperation.promise.then(() => {
-      requestFilterMs = Date.now() - requestFilterStartTime;
-    }, () => {});  // Silence errors in this fork of the Promise chain.
+		// Keep track of time spent in filters.
+		const requestFilterStartTime = Date.now();
+		let requestFilterMs = 0;
+		requestFilterOperation.promise.then(
+			() => {
+				requestFilterMs = Date.now() - requestFilterStartTime;
+			},
+			() => {}
+		); // Silence errors in this fork of the Promise chain.
 
-    let responseFilterStartTime = 0;
-    requestOperation.promise.then(() => {
-      responseFilterStartTime = Date.now();
-    }, () => {});  // Silence errors in this fork of the Promise chain.
+		let responseFilterStartTime = 0;
+		requestOperation.promise.then(
+			() => {
+				responseFilterStartTime = Date.now();
+			},
+			() => {}
+		); // Silence errors in this fork of the Promise chain.
 
-    const op = responseFilterOperation.chain((responseAndGotProgress) => {
-      const responseFilterMs = Date.now() - responseFilterStartTime;
-      const response = responseAndGotProgress.response;
-      response.timeMs += requestFilterMs;
-      response.timeMs += responseFilterMs;
-      if (!responseAndGotProgress.gotProgress &&
-          this.onProgressUpdated_ &&
-          !response.fromCache &&
-          type == shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-        this.onProgressUpdated_(response.timeMs, response.data.byteLength);
-      }
-      return response;
-    }, (e) => {
-      // Any error thrown from elsewhere should be recategorized as CRITICAL
-      // here.  This is because by the time it gets here, we've exhausted
-      // retries.
-      if (e) {
-        goog.asserts.assert(e instanceof shaka.util.Error, 'Wrong error type');
-        e.severity = shaka.util.Error.Severity.CRITICAL;
-      }
+		const op = responseFilterOperation.chain(
+			responseAndGotProgress => {
+				const responseFilterMs = Date.now() - responseFilterStartTime;
+				const response = responseAndGotProgress.response;
+				response.timeMs += requestFilterMs;
+				response.timeMs += responseFilterMs;
+				if (
+					!responseAndGotProgress.gotProgress &&
+					this.onProgressUpdated_ &&
+					!response.fromCache &&
+					type == shaka.net.NetworkingEngine.RequestType.SEGMENT
+				) {
+					this.onProgressUpdated_(response.timeMs, response.data.byteLength);
+				}
+				return response;
+			},
+			e => {
+				// Any error thrown from elsewhere should be recategorized as CRITICAL
+				// here.  This is because by the time it gets here, we've exhausted
+				// retries.
+				if (e) {
+					goog.asserts.assert(e instanceof shaka.util.Error, 'Wrong error type');
+					e.severity = shaka.util.Error.Severity.CRITICAL;
+				}
 
-      throw e;
-    });
+				throw e;
+			}
+		);
 
-    // Return the pending request, which carries the response operation, and the
-    // number of bytes remaining to be downloaded, updated by the progress
-    // events.  Add the operation to the manager for later cleanup.
-    const pendingRequest =
-        new shaka.net.NetworkingEngine.PendingRequest(
-            op.promise, op.onAbort_, numBytesRemainingObj);
-    this.operationManager_.manage(pendingRequest);
-    return pendingRequest;
-  }
+		// Return the pending request, which carries the response operation, and the
+		// number of bytes remaining to be downloaded, updated by the progress
+		// events.  Add the operation to the manager for later cleanup.
+		const pendingRequest = new shaka.net.NetworkingEngine.PendingRequest(
+			op.promise,
+			op.onAbort_,
+			numBytesRemainingObj
+		);
+		this.operationManager_.manage(pendingRequest);
+		return pendingRequest;
+	}
 
-  /**
-   * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.extern.Request} request
-   * @return {!shaka.extern.IAbortableOperation.<undefined>}
-   * @private
-   */
-  filterRequest_(type, request) {
-    let filterOperation = shaka.util.AbortableOperation.completed(undefined);
+	/**
+	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {shaka.extern.Request} request
+	 * @return {!shaka.extern.IAbortableOperation.<undefined>}
+	 * @private
+	 */
+	filterRequest_(type, request) {
+		let filterOperation = shaka.util.AbortableOperation.completed(undefined);
 
-    for (const requestFilter of this.requestFilters_) {
-      // Request filters are run sequentially.
-      filterOperation =
-          filterOperation.chain(() => requestFilter(type, request));
-    }
+		for (const requestFilter of this.requestFilters_) {
+			// Request filters are run sequentially.
+			filterOperation = filterOperation.chain(() => requestFilter(type, request));
+		}
 
-    // Catch any errors thrown by request filters, and substitute
-    // them with a Shaka-native error.
-    return filterOperation.chain(undefined, (e) => {
-      if (e && e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
-        // Don't change anything if the operation was aborted.
-        throw e;
-      }
+		// Catch any errors thrown by request filters, and substitute
+		// them with a Shaka-native error.
+		return filterOperation.chain(undefined, e => {
+			if (e && e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+				// Don't change anything if the operation was aborted.
+				throw e;
+			}
 
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.NETWORK,
-          shaka.util.Error.Code.REQUEST_FILTER_ERROR, e);
-    });
-  }
+			throw new shaka.util.Error(
+				shaka.util.Error.Severity.CRITICAL,
+				shaka.util.Error.Category.NETWORK,
+				shaka.util.Error.Code.REQUEST_FILTER_ERROR,
+				e
+			);
+		});
+	}
 
-  /**
-   * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.extern.Request} request
-   * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
-   *            numBytesRemainingObj
-   * @return {!shaka.extern.IAbortableOperation.<
-   *            shaka.net.NetworkingEngine.ResponseAndGotProgress>}
-   * @private
-   */
-  makeRequestWithRetry_(type, request, numBytesRemainingObj) {
-    const backoff = new shaka.net.Backoff(
-        request.retryParameters, /* autoReset */ false);
-    const index = 0;
-    return this.send_(
-        type, request, backoff, index, /* lastError */ null,
-        numBytesRemainingObj);
-  }
+	/**
+	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {shaka.extern.Request} request
+	 * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
+	 *            numBytesRemainingObj
+	 * @return {!shaka.extern.IAbortableOperation.<
+	 *            shaka.net.NetworkingEngine.ResponseAndGotProgress>}
+	 * @private
+	 */
+	makeRequestWithRetry_(type, request, numBytesRemainingObj) {
+		const backoff = new shaka.net.Backoff(request.retryParameters, /* autoReset */ false);
+		const index = 0;
+		return this.send_(type, request, backoff, index, /* lastError */ null, numBytesRemainingObj);
+	}
 
-  /**
-   * Sends the given request to the correct plugin and retry using Backoff.
-   *
-   * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.extern.Request} request
-   * @param {!shaka.net.Backoff} backoff
-   * @param {number} index
-   * @param {?shaka.util.Error} lastError
-   * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
-   *     numBytesRemainingObj
-   * @return {!shaka.extern.IAbortableOperation.<
-   *               shaka.net.NetworkingEngine.ResponseAndGotProgress>}
-   * @private
-   */
-  send_(type, request, backoff, index, lastError, numBytesRemainingObj) {
-    const uri = new goog.Uri(request.uris[index]);
-    let scheme = uri.getScheme();
-    // Whether it got a progress event.
-    let gotProgress = false;
-    if (!scheme) {
-      // If there is no scheme, infer one from the location.
-      scheme = shaka.net.NetworkingEngine.getLocationProtocol_();
-      goog.asserts.assert(
-          scheme[scheme.length - 1] == ':',
-          'location.protocol expected to end with a colon!');
-      // Drop the colon.
-      scheme = scheme.slice(0, -1);
+	/**
+	 * Sends the given request to the correct plugin and retry using Backoff.
+	 *
+	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {shaka.extern.Request} request
+	 * @param {!shaka.net.Backoff} backoff
+	 * @param {number} index
+	 * @param {?shaka.util.Error} lastError
+	 * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
+	 *     numBytesRemainingObj
+	 * @return {!shaka.extern.IAbortableOperation.<
+	 *               shaka.net.NetworkingEngine.ResponseAndGotProgress>}
+	 * @private
+	 */
+	send_(type, request, backoff, index, lastError, numBytesRemainingObj) {
+		const uri = new goog.Uri(request.uris[index]);
+		let scheme = uri.getScheme();
+		// Whether it got a progress event.
+		let gotProgress = false;
+		if (!scheme) {
+			// If there is no scheme, infer one from the location.
+			scheme = shaka.net.NetworkingEngine.getLocationProtocol_();
+			goog.asserts.assert(scheme[scheme.length - 1] == ':', 'location.protocol expected to end with a colon!');
+			// Drop the colon.
+			scheme = scheme.slice(0, -1);
 
-      // Override the original URI to make the scheme explicit.
-      uri.setScheme(scheme);
-      request.uris[index] = uri.toString();
-    }
+			// Override the original URI to make the scheme explicit.
+			uri.setScheme(scheme);
+			request.uris[index] = uri.toString();
+		}
 
-    const object = shaka.net.NetworkingEngine.schemes_[scheme];
-    const plugin = object ? object.plugin : null;
-    if (!plugin) {
-      return shaka.util.AbortableOperation.failed(
-          new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.NETWORK,
-              shaka.util.Error.Code.UNSUPPORTED_SCHEME,
-              uri));
-    }
+		const object = shaka.net.NetworkingEngine.schemes_[scheme];
+		const plugin = object ? object.plugin : null;
+		if (!plugin) {
+			return shaka.util.AbortableOperation.failed(
+				new shaka.util.Error(
+					shaka.util.Error.Severity.CRITICAL,
+					shaka.util.Error.Category.NETWORK,
+					shaka.util.Error.Code.UNSUPPORTED_SCHEME,
+					uri
+				)
+			);
+		}
 
+		// Every attempt must have an associated backoff.attempt() call so that the
+		// accounting is correct.
+		const backoffOperation = shaka.util.AbortableOperation.notAbortable(backoff.attempt());
 
-    // Every attempt must have an associated backoff.attempt() call so that the
-    // accounting is correct.
-    const backoffOperation =
-        shaka.util.AbortableOperation.notAbortable(backoff.attempt());
+		let startTimeMs;
+		const sendOperation = backoffOperation
+			.chain(() => {
+				if (this.destroyed_) {
+					return shaka.util.AbortableOperation.aborted();
+				}
 
-    let startTimeMs;
-    const sendOperation = backoffOperation.chain(() => {
-      if (this.destroyed_) {
-        return shaka.util.AbortableOperation.aborted();
-      }
+				startTimeMs = Date.now();
+				const segment = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
-      startTimeMs = Date.now();
-      const segment = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+				return plugin(
+					request.uris[index],
+					request,
+					type,
+					// The following function is passed to plugin.
+					(time, bytes, numBytesRemaining) => {
+						if (this.onProgressUpdated_ && type == segment) {
+							this.onProgressUpdated_(time, bytes);
+							gotProgress = true;
+							numBytesRemainingObj.setBytes(numBytesRemaining);
+						}
+					}
+				);
+			})
+			.chain(
+				response => {
+					if (response.timeMs == undefined) {
+						response.timeMs = Date.now() - startTimeMs;
+					}
+					const responseAndGotProgress = {
+						response: response,
+						gotProgress: gotProgress
+					};
 
-      return plugin(request.uris[index],
-          request,
-          type,
-          // The following function is passed to plugin.
-          (time, bytes, numBytesRemaining) => {
-            if (this.onProgressUpdated_ && type == segment) {
-              this.onProgressUpdated_(time, bytes);
-              gotProgress = true;
-              numBytesRemainingObj.setBytes(numBytesRemaining);
-            }
-          });
-    }).chain((response) => {
-      if (response.timeMs == undefined) {
-        response.timeMs = Date.now() - startTimeMs;
-      }
-      const responseAndGotProgress = {
-        response: response,
-        gotProgress: gotProgress,
-      };
+					return responseAndGotProgress;
+				},
+				error => {
+					if (this.destroyed_) {
+						return shaka.util.AbortableOperation.aborted();
+					}
 
-      return responseAndGotProgress;
-    }, (error) => {
-      if (this.destroyed_) {
-        return shaka.util.AbortableOperation.aborted();
-      }
+					if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+						// Don't change anything if the operation was aborted.
+						throw error;
+					} else if (error.code == shaka.util.Error.Code.ATTEMPTS_EXHAUSTED) {
+						goog.asserts.assert(lastError, 'Should have last error');
+						throw lastError;
+					}
 
-      if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
-        // Don't change anything if the operation was aborted.
-        throw error;
-      } else if (error.code == shaka.util.Error.Code.ATTEMPTS_EXHAUSTED) {
-        goog.asserts.assert(lastError, 'Should have last error');
-        throw lastError;
-      }
+					if (error.severity == shaka.util.Error.Severity.RECOVERABLE) {
+						// Don't pass in a non-shaka error, even if one is somehow thrown;
+						// instead, call the listener with a null error.
+						const errorOrNull = error instanceof shaka.util.Error ? error : null;
+						const event = new shaka.util.FakeEvent('retry', { error: errorOrNull });
+						this.dispatchEvent(event);
 
-      if (error.severity == shaka.util.Error.Severity.RECOVERABLE) {
-        // Don't pass in a non-shaka error, even if one is somehow thrown;
-        // instead, call the listener with a null error.
-        const errorOrNull = error instanceof shaka.util.Error ? error : null;
-        const event = new shaka.util.FakeEvent('retry', {'error': errorOrNull});
-        this.dispatchEvent(event);
+						// Move to the next URI.
+						index = (index + 1) % request.uris.length;
+						const shakaError = /** @type {shaka.util.Error} */ (error);
+						return this.send_(type, request, backoff, index, shakaError, numBytesRemainingObj);
+					}
 
-        // Move to the next URI.
-        index = (index + 1) % request.uris.length;
-        const shakaError = /** @type {shaka.util.Error} */(error);
-        return this.send_(
-            type, request, backoff, index, shakaError, numBytesRemainingObj);
-      }
+					// The error was not recoverable, so do not try again.
+					throw error;
+				}
+			);
 
-      // The error was not recoverable, so do not try again.
-      throw error;
-    });
+		return sendOperation;
+	}
 
-    return sendOperation;
-  }
+	/**
+	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {shaka.net.NetworkingEngine.ResponseAndGotProgress}
+	 *        responseAndGotProgress
+	 * @return {!shaka.extern.IAbortableOperation.<
+	 *               shaka.net.NetworkingEngine.ResponseAndGotProgress>}
+	 * @private
+	 */
+	filterResponse_(type, responseAndGotProgress) {
+		let filterOperation = shaka.util.AbortableOperation.completed(undefined);
+		for (const responseFilter of this.responseFilters_) {
+			// Response filters are run sequentially.
+			filterOperation = filterOperation.chain(() => responseFilter(type, responseAndGotProgress.response));
+		}
+		// If successful, return the filtered response with whether it got
+		// progress.
+		return filterOperation.chain(
+			() => {
+				return responseAndGotProgress;
+			},
+			e => {
+				// Catch any errors thrown by request filters, and substitute
+				// them with a Shaka-native error.
 
-  /**
-   * @param {shaka.net.NetworkingEngine.RequestType} type
-   * @param {shaka.net.NetworkingEngine.ResponseAndGotProgress}
-   *        responseAndGotProgress
-   * @return {!shaka.extern.IAbortableOperation.<
-   *               shaka.net.NetworkingEngine.ResponseAndGotProgress>}
-   * @private
-   */
-  filterResponse_(type, responseAndGotProgress) {
-    let filterOperation = shaka.util.AbortableOperation.completed(undefined);
-    for (const responseFilter of this.responseFilters_) {
-      // Response filters are run sequentially.
-      filterOperation = filterOperation.chain(
-          () => responseFilter(type, responseAndGotProgress.response));
-    }
-    // If successful, return the filtered response with whether it got
-    // progress.
-    return filterOperation.chain(() => {
-      return responseAndGotProgress;
-    }, (e) => {
-      // Catch any errors thrown by request filters, and substitute
-      // them with a Shaka-native error.
+				if (e && e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+					// Don't change anything if the operation was aborted.
+					throw e;
+				}
 
-      if (e && e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
-        // Don't change anything if the operation was aborted.
-        throw e;
-      }
+				// The error is assumed to be critical if the original wasn't a Shaka
+				// error.
+				let severity = shaka.util.Error.Severity.CRITICAL;
+				if (e instanceof shaka.util.Error) {
+					severity = e.severity;
+				}
 
-      // The error is assumed to be critical if the original wasn't a Shaka
-      // error.
-      let severity = shaka.util.Error.Severity.CRITICAL;
-      if (e instanceof shaka.util.Error) {
-        severity = e.severity;
-      }
+				throw new shaka.util.Error(
+					severity,
+					shaka.util.Error.Category.NETWORK,
+					shaka.util.Error.Code.RESPONSE_FILTER_ERROR,
+					e
+				);
+			}
+		);
+	}
 
-      throw new shaka.util.Error(
-          severity,
-          shaka.util.Error.Category.NETWORK,
-          shaka.util.Error.Code.RESPONSE_FILTER_ERROR, e);
-    });
-  }
-
-  /**
-   * This is here only for testability.  We can't mock location in our tests on
-   * all browsers, so instead we mock this.
-   *
-   * @return {string} The value of location.protocol.
-   * @private
-   */
-  static getLocationProtocol_() {
-    return location.protocol;
-  }
+	/**
+	 * This is here only for testability.  We can't mock location in our tests on
+	 * all browsers, so instead we mock this.
+	 *
+	 * @return {string} The value of location.protocol.
+	 * @private
+	 */
+	static getLocationProtocol_() {
+		return location.protocol;
+	}
 };
 
 /**
@@ -536,27 +555,27 @@ shaka.net.NetworkingEngine = class extends shaka.util.FakeEventTarget {
  * @export
  */
 shaka.net.NetworkingEngine.NumBytesRemainingClass = class {
-  /**
-   * Constructor
-   */
-  constructor() {
-    /** @private {number} */
-    this.bytesToLoad_ = 0;
-  }
+	/**
+	 * Constructor
+	 */
+	constructor() {
+		/** @private {number} */
+		this.bytesToLoad_ = 0;
+	}
 
-  /**
-   * @param {number} bytesToLoad
-   */
-  setBytes(bytesToLoad) {
-    this.bytesToLoad_ = bytesToLoad;
-  }
+	/**
+	 * @param {number} bytesToLoad
+	 */
+	setBytes(bytesToLoad) {
+		this.bytesToLoad_ = bytesToLoad;
+	}
 
-  /**
-   * @return {number}
-   */
-  getBytes() {
-    return this.bytesToLoad_;
-  }
+	/**
+	 * @return {number}
+	 */
+	getBytes() {
+		return this.bytesToLoad_;
+	}
 };
 
 /**
@@ -567,37 +586,36 @@ shaka.net.NetworkingEngine.NumBytesRemainingClass = class {
  * @extends {shaka.util.AbortableOperation}
  * @export
  */
-shaka.net.NetworkingEngine.PendingRequest =
-    class extends shaka.util.AbortableOperation {
-      /**
-       * @param {!Promise} promise
-       *   A Promise which represents the underlying operation.  It is resolved
-       *   when the operation is complete, and rejected if the operation fails
-       *   or is aborted.  Aborted operations should be rejected with a
-       *   shaka.util.Error object using the error code OPERATION_ABORTED.
-       * @param {function():!Promise} onAbort
-       *   Will be called by this object to abort the underlying operation.
-       *   This is not cancelation, and will not necessarily result in any work
-       *   being undone.  abort() should return a Promise which is resolved when
-       *   the underlying operation has been aborted.  The returned Promise
-       *   should never be rejected.
-       * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
-       *   numBytesRemainingObj
-       */
-      constructor(promise, onAbort, numBytesRemainingObj) {
-        super(promise, onAbort);
+shaka.net.NetworkingEngine.PendingRequest = class extends shaka.util.AbortableOperation {
+	/**
+	 * @param {!Promise} promise
+	 *   A Promise which represents the underlying operation.  It is resolved
+	 *   when the operation is complete, and rejected if the operation fails
+	 *   or is aborted.  Aborted operations should be rejected with a
+	 *   shaka.util.Error object using the error code OPERATION_ABORTED.
+	 * @param {function():!Promise} onAbort
+	 *   Will be called by this object to abort the underlying operation.
+	 *   This is not cancelation, and will not necessarily result in any work
+	 *   being undone.  abort() should return a Promise which is resolved when
+	 *   the underlying operation has been aborted.  The returned Promise
+	 *   should never be rejected.
+	 * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
+	 *   numBytesRemainingObj
+	 */
+	constructor(promise, onAbort, numBytesRemainingObj) {
+		super(promise, onAbort);
 
-        /** @private {shaka.net.NetworkingEngine.NumBytesRemainingClass} */
-        this.bytesRemaining_ = numBytesRemainingObj;
-      }
+		/** @private {shaka.net.NetworkingEngine.NumBytesRemainingClass} */
+		this.bytesRemaining_ = numBytesRemainingObj;
+	}
 
-      /**
-       * @return {number}
-       */
-      getBytesRemaining() {
-        return this.bytesRemaining_.getBytes();
-      }
-    };
+	/**
+	 * @return {number}
+	 */
+	getBytesRemaining() {
+		return this.bytesRemaining_.getBytes();
+	}
+};
 
 /**
  * Request types.  Allows a filter to decide which requests to read/alter.
@@ -606,13 +624,12 @@ shaka.net.NetworkingEngine.PendingRequest =
  * @export
  */
 shaka.net.NetworkingEngine.RequestType = {
-  'MANIFEST': 0,
-  'SEGMENT': 1,
-  'LICENSE': 2,
-  'APP': 3,
-  'TIMING': 4,
+	MANIFEST: 0,
+	SEGMENT: 1,
+	LICENSE: 2,
+	APP: 3,
+	TIMING: 4
 };
-
 
 /**
  * Priority level for network scheme plugins.
@@ -623,11 +640,10 @@ shaka.net.NetworkingEngine.RequestType = {
  * @export
  */
 shaka.net.NetworkingEngine.PluginPriority = {
-  'FALLBACK': 1,
-  'PREFERRED': 2,
-  'APPLICATION': 3,
+	FALLBACK: 1,
+	PREFERRED: 2,
+	APPLICATION: 3
 };
-
 
 /**
  * @typedef {{
@@ -640,7 +656,6 @@ shaka.net.NetworkingEngine.PluginPriority = {
  *   The plugin's priority.
  */
 shaka.net.NetworkingEngine.SchemeObject;
-
 
 /**
  * Contains the scheme plugins.

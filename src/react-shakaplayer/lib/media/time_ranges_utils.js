@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.media.TimeRangesUtils');
+// goog.provide('shaka.media.TimeRangesUtils');
 
-goog.require('shaka.util.Platform');
+// goog.require('shaka.util.Platform');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * @summary A set of utility functions for dealing with TimeRanges objects.

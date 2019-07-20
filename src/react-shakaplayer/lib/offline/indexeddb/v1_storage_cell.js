@@ -15,14 +15,17 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.offline.indexeddb.V1StorageCell');
+// goog.provide('shaka.offline.indexeddb.V1StorageCell');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.offline.indexeddb.DBConnection');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.PublicPromise');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.offline.indexeddb.DBConnection');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.PublicPromise');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

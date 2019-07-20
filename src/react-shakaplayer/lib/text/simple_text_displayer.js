@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.text.SimpleTextDisplayer');
+// goog.provide('shaka.text.SimpleTextDisplayer');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.text.Cue');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.text.Cue');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

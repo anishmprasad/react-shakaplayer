@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.polyfill');
+// goog.provide('shaka.polyfill');
 
+var shaka = window.shaka;
+// var goog = window.goog;
 
 /**
  * @summary A one-stop installer for all polyfills.
@@ -24,37 +26,36 @@ goog.provide('shaka.polyfill');
  * @exportDoc
  */
 shaka.polyfill = class {
-  /**
-   * Install all polyfills.
-   * @export
-   */
-  static installAll() {
-    for (const polyfill of shaka.polyfill.polyfills_) {
-      polyfill.callback();
-    }
-  }
+	/**
+	 * Install all polyfills.
+	 * @export
+	 */
+	static installAll() {
+		for (const polyfill of shaka.polyfill.polyfills_) {
+			polyfill.callback();
+		}
+	}
 
-  /**
-   * Registers a new polyfill to be installed.
-   *
-   * @param {function()} polyfill
-   * @param {number=} priority An optional number priority.  Higher priorities
-   *   will be executed before lower priority ones.  Default is 0.
-   * @export
-   */
-  static register(polyfill, priority) {
-    priority = priority || 0;
-    const item = {priority: priority, callback: polyfill};
-    for (let i = 0; i < shaka.polyfill.polyfills_.length; i++) {
-      if (shaka.polyfill.polyfills_[i].priority < priority) {
-        shaka.polyfill.polyfills_.splice(i, 0, item);
-        return;
-      }
-    }
-    shaka.polyfill.polyfills_.push(item);
-  }
+	/**
+	 * Registers a new polyfill to be installed.
+	 *
+	 * @param {function()} polyfill
+	 * @param {number=} priority An optional number priority.  Higher priorities
+	 *   will be executed before lower priority ones.  Default is 0.
+	 * @export
+	 */
+	static register(polyfill, priority) {
+		priority = priority || 0;
+		const item = { priority: priority, callback: polyfill };
+		for (let i = 0; i < shaka.polyfill.polyfills_.length; i++) {
+			if (shaka.polyfill.polyfills_[i].priority < priority) {
+				shaka.polyfill.polyfills_.splice(i, 0, item);
+				return;
+			}
+		}
+		shaka.polyfill.polyfills_.push(item);
+	}
 };
-
 
 /**
  * Contains the polyfills that will be installed.

@@ -15,367 +15,362 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.polyfill.MediaSource');
+// goog.provide('shaka.polyfill.MediaSource');
 
-goog.require('shaka.log');
-goog.require('shaka.polyfill');
-goog.require('shaka.util.MimeUtils');
-goog.require('shaka.util.Platform');
+// goog.require('shaka.log');
+// goog.require('shaka.polyfill');
+// goog.require('shaka.util.MimeUtils');
+// goog.require('shaka.util.Platform');
+
+var shaka = window.shaka;
+// var goog = window.goog;
 
 /**
  * @summary A polyfill to patch MSE bugs.
  */
 shaka.polyfill.MediaSource = class {
-  /**
-   * Install the polyfill if needed.
-   */
-  static install() {
-    shaka.log.debug('MediaSource.install');
+	/**
+	 * Install the polyfill if needed.
+	 */
+	static install() {
+		shaka.log.debug('MediaSource.install');
 
-    // MediaSource bugs are difficult to detect without checking for the
-    // affected platform.  SourceBuffer is not always exposed on window, for
-    // example, and instances are only accessible after setting up MediaSource
-    // on a video element.  Because of this, we use UA detection and other
-    // platform detection tricks to decide which patches to install.
+		// MediaSource bugs are difficult to detect without checking for the
+		// affected platform.  SourceBuffer is not always exposed on window, for
+		// example, and instances are only accessible after setting up MediaSource
+		// on a video element.  Because of this, we use UA detection and other
+		// platform detection tricks to decide which patches to install.
 
-    if (!window.MediaSource) {
-      shaka.log.info('No MSE implementation available.');
-    } else if (window.cast && cast.__platform__ &&
-               cast.__platform__.canDisplayType) {
-      shaka.log.info('Patching Chromecast MSE bugs.');
-      // Chromecast cannot make accurate determinations via isTypeSupported.
-      shaka.polyfill.MediaSource.patchCastIsTypeSupported_();
-    } else if (shaka.util.Platform.isApple()) {
-      const version = navigator.appVersion;
+		if (!window.MediaSource) {
+			shaka.log.info('No MSE implementation available.');
+		} else if (window.cast && cast.__platform__ && cast.__platform__.canDisplayType) {
+			shaka.log.info('Patching Chromecast MSE bugs.');
+			// Chromecast cannot make accurate determinations via isTypeSupported.
+			shaka.polyfill.MediaSource.patchCastIsTypeSupported_();
+		} else if (shaka.util.Platform.isApple()) {
+			const version = navigator.appVersion;
 
-      // TS content is broken on Safari in general.
-      // See https://github.com/google/shaka-player/issues/743
-      // and https://bugs.webkit.org/show_bug.cgi?id=165342
-      shaka.polyfill.MediaSource.rejectTsContent_();
+			// TS content is broken on Safari in general.
+			// See https://github.com/google/shaka-player/issues/743
+			// and https://bugs.webkit.org/show_bug.cgi?id=165342
+			shaka.polyfill.MediaSource.rejectTsContent_();
 
-      if (version.includes('Version/8')) {
-        // Safari 8 does not implement appendWindowEnd.  If we ignore the
-        // incomplete MSE implementation, some content (especially multi-period)
-        // will fail to play correctly.  The best we can do is blacklist Safari
-        // 8.
-        shaka.log.info('Blacklisting Safari 8 MSE.');
-        shaka.polyfill.MediaSource.blacklist_();
-      } else if (version.includes('Version/9')) {
-        shaka.log.info('Patching Safari 9 MSE bugs.');
-        // Safari 9 does not correctly implement abort() on SourceBuffer.
-        // Calling abort() causes a decoder failure, rather than resetting the
-        // decode timestamp as called for by the spec.
-        // Bug filed: https://bugs.webkit.org/show_bug.cgi?id=160316
-        shaka.polyfill.MediaSource.stubAbort_();
-      } else if (version.includes('Version/10')) {
-        shaka.log.info('Patching Safari 10 MSE bugs.');
-        // Safari 10 does not correctly implement abort() on SourceBuffer.
-        // Calling abort() before appending a segment causes that segment to be
-        // incomplete in buffer.
-        // Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165342
-        shaka.polyfill.MediaSource.stubAbort_();
-        // Safari 10 fires spurious 'updateend' events after endOfStream().
-        // Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165336
-        shaka.polyfill.MediaSource.patchEndOfStreamEvents_();
-      } else if (version.includes('Version/11') ||
-                 version.includes('Version/12')) {
-        shaka.log.info('Patching Safari 11/12 MSE bugs.');
-        // Safari 11 does not correctly implement abort() on SourceBuffer.
-        // Calling abort() before appending a segment causes that segment to be
-        // incomplete in the buffer.
-        // Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165342
-        shaka.polyfill.MediaSource.stubAbort_();
-        // If you remove up to a keyframe, Safari 11 incorrectly will also
-        // remove that keyframe and the content up to the next.
-        // Offsetting the end of the removal range seems to help.
-        // Bug filed: https://bugs.webkit.org/show_bug.cgi?id=177884
-        shaka.polyfill.MediaSource.patchRemovalRange_();
-      }
-    } else if (shaka.util.Platform.isTizen()) {
-      // Tizen's implementation of MSE does not work well with opus. To prevent
-      // the player from trying to play opus on Tizen, we will override media
-      // source to always reject opus content.
+			if (version.includes('Version/8')) {
+				// Safari 8 does not implement appendWindowEnd.  If we ignore the
+				// incomplete MSE implementation, some content (especially multi-period)
+				// will fail to play correctly.  The best we can do is blacklist Safari
+				// 8.
+				shaka.log.info('Blacklisting Safari 8 MSE.');
+				shaka.polyfill.MediaSource.blacklist_();
+			} else if (version.includes('Version/9')) {
+				shaka.log.info('Patching Safari 9 MSE bugs.');
+				// Safari 9 does not correctly implement abort() on SourceBuffer.
+				// Calling abort() causes a decoder failure, rather than resetting the
+				// decode timestamp as called for by the spec.
+				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=160316
+				shaka.polyfill.MediaSource.stubAbort_();
+			} else if (version.includes('Version/10')) {
+				shaka.log.info('Patching Safari 10 MSE bugs.');
+				// Safari 10 does not correctly implement abort() on SourceBuffer.
+				// Calling abort() before appending a segment causes that segment to be
+				// incomplete in buffer.
+				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165342
+				shaka.polyfill.MediaSource.stubAbort_();
+				// Safari 10 fires spurious 'updateend' events after endOfStream().
+				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165336
+				shaka.polyfill.MediaSource.patchEndOfStreamEvents_();
+			} else if (version.includes('Version/11') || version.includes('Version/12')) {
+				shaka.log.info('Patching Safari 11/12 MSE bugs.');
+				// Safari 11 does not correctly implement abort() on SourceBuffer.
+				// Calling abort() before appending a segment causes that segment to be
+				// incomplete in the buffer.
+				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165342
+				shaka.polyfill.MediaSource.stubAbort_();
+				// If you remove up to a keyframe, Safari 11 incorrectly will also
+				// remove that keyframe and the content up to the next.
+				// Offsetting the end of the removal range seems to help.
+				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=177884
+				shaka.polyfill.MediaSource.patchRemovalRange_();
+			}
+		} else if (shaka.util.Platform.isTizen()) {
+			// Tizen's implementation of MSE does not work well with opus. To prevent
+			// the player from trying to play opus on Tizen, we will override media
+			// source to always reject opus content.
 
-      shaka.polyfill.MediaSource.rejectCodec_('opus');
-    } else {
-      shaka.log.info('Using native MSE as-is.');
-    }
-  }
+			shaka.polyfill.MediaSource.rejectCodec_('opus');
+		} else {
+			shaka.log.info('Using native MSE as-is.');
+		}
+	}
 
-  /**
-   * Blacklist the current browser by removing media source. A side-effect of
-   * this will be to make |shaka.util.Platform.supportsMediaSource| return
-   * |false|.
-   *
-   * @private
-   */
-  static blacklist_() {
-    window['MediaSource'] = null;
-  }
+	/**
+	 * Blacklist the current browser by removing media source. A side-effect of
+	 * this will be to make |shaka.util.Platform.supportsMediaSource| return
+	 * |false|.
+	 *
+	 * @private
+	 */
+	static blacklist_() {
+		window['MediaSource'] = null;
+	}
 
-  /**
-   * Stub out abort().  On some buggy MSE implementations, calling abort()
-   * causes various problems.
-   *
-   * @private
-   */
-  static stubAbort_() {
-    /* eslint-disable no-restricted-syntax */
-    const addSourceBuffer = MediaSource.prototype.addSourceBuffer;
-    MediaSource.prototype.addSourceBuffer = function(...varArgs) {
-      const sourceBuffer = addSourceBuffer.apply(this, varArgs);
-      sourceBuffer.abort = function() {}; // Stub out for buggy implementations.
-      return sourceBuffer;
-    };
-    /* eslint-enable no-restricted-syntax */
-  }
+	/**
+	 * Stub out abort().  On some buggy MSE implementations, calling abort()
+	 * causes various problems.
+	 *
+	 * @private
+	 */
+	static stubAbort_() {
+		/* eslint-disable no-restricted-syntax */
+		const addSourceBuffer = MediaSource.prototype.addSourceBuffer;
+		MediaSource.prototype.addSourceBuffer = function(...varArgs) {
+			const sourceBuffer = addSourceBuffer.apply(this, varArgs);
+			sourceBuffer.abort = function() {}; // Stub out for buggy implementations.
+			return sourceBuffer;
+		};
+		/* eslint-enable no-restricted-syntax */
+	}
 
-  /**
-   * Patch remove().  On Safari 11, if you call remove() to remove the content
-   * up to a keyframe, Safari will also remove the keyframe and all of the data
-   * up to the next one. For example, if the keyframes are at 0s, 5s, and 10s,
-   * and you tried to remove 0s-5s, it would instead remove 0s-10s.
-   *
-   * Offsetting the end of the range seems to be a usable workaround.
-   *
-   * @private
-   */
-  static patchRemovalRange_() {
-    // eslint-disable-next-line no-restricted-syntax
-    const originalRemove = SourceBuffer.prototype.remove;
+	/**
+	 * Patch remove().  On Safari 11, if you call remove() to remove the content
+	 * up to a keyframe, Safari will also remove the keyframe and all of the data
+	 * up to the next one. For example, if the keyframes are at 0s, 5s, and 10s,
+	 * and you tried to remove 0s-5s, it would instead remove 0s-10s.
+	 *
+	 * Offsetting the end of the range seems to be a usable workaround.
+	 *
+	 * @private
+	 */
+	static patchRemovalRange_() {
+		// eslint-disable-next-line no-restricted-syntax
+		const originalRemove = SourceBuffer.prototype.remove;
 
-    // eslint-disable-next-line no-restricted-syntax
-    SourceBuffer.prototype.remove = function(startTime, endTime) {
-      // eslint-disable-next-line no-restricted-syntax
-      return originalRemove.call(this, startTime, endTime - 0.001);
-    };
-  }
+		// eslint-disable-next-line no-restricted-syntax
+		SourceBuffer.prototype.remove = function(startTime, endTime) {
+			// eslint-disable-next-line no-restricted-syntax
+			return originalRemove.call(this, startTime, endTime - 0.001);
+		};
+	}
 
-  /**
-   * Patch endOfStream() to get rid of 'updateend' events that should not fire.
-   * These extra events confuse MediaSourceEngine, which relies on correct
-   * events to manage SourceBuffer state.
-   *
-   * @private
-   */
-  static patchEndOfStreamEvents_() {
-    // eslint-disable-next-line no-restricted-syntax
-    const endOfStream = MediaSource.prototype.endOfStream;
-    // eslint-disable-next-line no-restricted-syntax
-    MediaSource.prototype.endOfStream = function(...varArgs) {
-      // This bug manifests only when endOfStream() results in the truncation
-      // of the MediaSource's duration.  So first we must calculate what the
-      // new duration will be.
-      let newDuration = 0;
-      for (const buffer of this.sourceBuffers || []) {
-        const bufferEnd = buffer.buffered.end(buffer.buffered.length - 1);
-        newDuration = Math.max(newDuration, bufferEnd);
-      }
+	/**
+	 * Patch endOfStream() to get rid of 'updateend' events that should not fire.
+	 * These extra events confuse MediaSourceEngine, which relies on correct
+	 * events to manage SourceBuffer state.
+	 *
+	 * @private
+	 */
+	static patchEndOfStreamEvents_() {
+		// eslint-disable-next-line no-restricted-syntax
+		const endOfStream = MediaSource.prototype.endOfStream;
+		// eslint-disable-next-line no-restricted-syntax
+		MediaSource.prototype.endOfStream = function(...varArgs) {
+			// This bug manifests only when endOfStream() results in the truncation
+			// of the MediaSource's duration.  So first we must calculate what the
+			// new duration will be.
+			let newDuration = 0;
+			for (const buffer of this.sourceBuffers || []) {
+				const bufferEnd = buffer.buffered.end(buffer.buffered.length - 1);
+				newDuration = Math.max(newDuration, bufferEnd);
+			}
 
-      // If the duration is going to be reduced, suppress the next 'updateend'
-      // event on each SourceBuffer.
-      if (!isNaN(this.duration) &&
-          newDuration < this.duration) {
-        this.ignoreUpdateEnd_ = true;
-        for (const buffer of this.sourceBuffers || []) {
-          buffer.eventSuppressed_ = false;
-        }
-      }
+			// If the duration is going to be reduced, suppress the next 'updateend'
+			// event on each SourceBuffer.
+			if (!isNaN(this.duration) && newDuration < this.duration) {
+				this.ignoreUpdateEnd_ = true;
+				for (const buffer of this.sourceBuffers || []) {
+					buffer.eventSuppressed_ = false;
+				}
+			}
 
-      // eslint-disable-next-line no-restricted-syntax
-      return endOfStream.apply(this, varArgs);
-    };
+			// eslint-disable-next-line no-restricted-syntax
+			return endOfStream.apply(this, varArgs);
+		};
 
-    let cleanUpHandlerInstalled = false;
-    // eslint-disable-next-line no-restricted-syntax
-    const addSourceBuffer = MediaSource.prototype.addSourceBuffer;
-    // eslint-disable-next-line no-restricted-syntax
-    MediaSource.prototype.addSourceBuffer = function(...varArgs) {
-      // After adding a new source buffer, add an event listener to allow us to
-      // suppress events.
-      // eslint-disable-next-line no-restricted-syntax
-      const sourceBuffer = addSourceBuffer.apply(this, varArgs);
-      sourceBuffer['mediaSource_'] = this;
-      sourceBuffer.addEventListener('updateend',
-          shaka.polyfill.MediaSource.ignoreUpdateEnd_, false);
+		let cleanUpHandlerInstalled = false;
+		// eslint-disable-next-line no-restricted-syntax
+		const addSourceBuffer = MediaSource.prototype.addSourceBuffer;
+		// eslint-disable-next-line no-restricted-syntax
+		MediaSource.prototype.addSourceBuffer = function(...varArgs) {
+			// After adding a new source buffer, add an event listener to allow us to
+			// suppress events.
+			// eslint-disable-next-line no-restricted-syntax
+			const sourceBuffer = addSourceBuffer.apply(this, varArgs);
+			sourceBuffer['mediaSource_'] = this;
+			sourceBuffer.addEventListener('updateend', shaka.polyfill.MediaSource.ignoreUpdateEnd_, false);
 
-      if (!cleanUpHandlerInstalled) {
-        // If we haven't already, install an event listener to allow us to clean
-        // up listeners when MediaSource is torn down.
-        this.addEventListener('sourceclose',
-            shaka.polyfill.MediaSource.cleanUpListeners_, false);
-        cleanUpHandlerInstalled = true;
-      }
-      return sourceBuffer;
-    };
-  }
+			if (!cleanUpHandlerInstalled) {
+				// If we haven't already, install an event listener to allow us to clean
+				// up listeners when MediaSource is torn down.
+				this.addEventListener('sourceclose', shaka.polyfill.MediaSource.cleanUpListeners_, false);
+				cleanUpHandlerInstalled = true;
+			}
+			return sourceBuffer;
+		};
+	}
 
-  /**
-   * An event listener for 'updateend' which selectively suppresses the events.
-   *
-   * @see shaka.polyfill.MediaSource.patchEndOfStreamEvents_
-   *
-   * @param {Event} event
-   * @private
-   */
-  static ignoreUpdateEnd_(event) {
-    const sourceBuffer = event.target;
-    const mediaSource = sourceBuffer['mediaSource_'];
+	/**
+	 * An event listener for 'updateend' which selectively suppresses the events.
+	 *
+	 * @see shaka.polyfill.MediaSource.patchEndOfStreamEvents_
+	 *
+	 * @param {Event} event
+	 * @private
+	 */
+	static ignoreUpdateEnd_(event) {
+		const sourceBuffer = event.target;
+		const mediaSource = sourceBuffer['mediaSource_'];
 
-    if (mediaSource.ignoreUpdateEnd_) {
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      sourceBuffer.eventSuppressed_ = true;
+		if (mediaSource.ignoreUpdateEnd_) {
+			event.preventDefault();
+			event.stopPropagation();
+			event.stopImmediatePropagation();
+			sourceBuffer.eventSuppressed_ = true;
 
-      for (const buffer of mediaSource.sourceBuffers) {
-        if (buffer.eventSuppressed_ == false) {
-          // More events need to be suppressed.
-          return;
-        }
-      }
+			for (const buffer of mediaSource.sourceBuffers) {
+				if (buffer.eventSuppressed_ == false) {
+					// More events need to be suppressed.
+					return;
+				}
+			}
 
-      // All events have been suppressed, all buffers are out of 'updating'
-      // mode.  Stop suppressing events.
-      mediaSource.ignoreUpdateEnd_ = false;
-    }
-  }
+			// All events have been suppressed, all buffers are out of 'updating'
+			// mode.  Stop suppressing events.
+			mediaSource.ignoreUpdateEnd_ = false;
+		}
+	}
 
-  /**
-   * An event listener for 'sourceclose' which cleans up listeners for
-   * 'updateend' to avoid memory leaks.
-   *
-   * @see shaka.polyfill.MediaSource.patchEndOfStreamEvents_
-   * @see shaka.polyfill.MediaSource.ignoreUpdateEnd_
-   *
-   * @param {Event} event
-   * @private
-   */
-  static cleanUpListeners_(event) {
-    const mediaSource = /** @type {!MediaSource} */ (event.target);
-    for (const buffer of mediaSource.sourceBuffers || []) {
-      buffer.removeEventListener('updateend',
-          shaka.polyfill.MediaSource.ignoreUpdateEnd_, false);
-    }
-    mediaSource.removeEventListener('sourceclose',
-        shaka.polyfill.MediaSource.cleanUpListeners_, false);
-  }
+	/**
+	 * An event listener for 'sourceclose' which cleans up listeners for
+	 * 'updateend' to avoid memory leaks.
+	 *
+	 * @see shaka.polyfill.MediaSource.patchEndOfStreamEvents_
+	 * @see shaka.polyfill.MediaSource.ignoreUpdateEnd_
+	 *
+	 * @param {Event} event
+	 * @private
+	 */
+	static cleanUpListeners_(event) {
+		const mediaSource = /** @type {!MediaSource} */ (event.target);
+		for (const buffer of mediaSource.sourceBuffers || []) {
+			buffer.removeEventListener('updateend', shaka.polyfill.MediaSource.ignoreUpdateEnd_, false);
+		}
+		mediaSource.removeEventListener('sourceclose', shaka.polyfill.MediaSource.cleanUpListeners_, false);
+	}
 
-  /**
-   * Patch isTypeSupported() to reject TS content.  Used to avoid TS-related MSE
-   * bugs on Safari.
-   *
-   * @private
-   */
-  static rejectTsContent_() {
-    const originalIsTypeSupported = MediaSource.isTypeSupported;
+	/**
+	 * Patch isTypeSupported() to reject TS content.  Used to avoid TS-related MSE
+	 * bugs on Safari.
+	 *
+	 * @private
+	 */
+	static rejectTsContent_() {
+		const originalIsTypeSupported = MediaSource.isTypeSupported;
 
-    MediaSource.isTypeSupported = (mimeType) => {
-      // Parse the basic MIME type from its parameters.
-      const pieces = mimeType.split(/ *; */);
-      const basicMimeType = pieces[0];
-      const container = basicMimeType.split('/')[1];
+		MediaSource.isTypeSupported = mimeType => {
+			// Parse the basic MIME type from its parameters.
+			const pieces = mimeType.split(/ *; */);
+			const basicMimeType = pieces[0];
+			const container = basicMimeType.split('/')[1];
 
-      if (container == 'mp2t') {
-        return false;
-      }
+			if (container == 'mp2t') {
+				return false;
+			}
 
-      return originalIsTypeSupported(mimeType);
-    };
-  }
+			return originalIsTypeSupported(mimeType);
+		};
+	}
 
-  /**
-   * Patch |MediaSource.isTypeSupported| to always reject |codec|. This is used
-   * when we know that we are on a platform that does not work well with a given
-   * codec.
-   *
-   * @param {string} codec
-   * @private
-   */
-  static rejectCodec_(codec) {
-    const isTypeSupported = MediaSource.isTypeSupported;
+	/**
+	 * Patch |MediaSource.isTypeSupported| to always reject |codec|. This is used
+	 * when we know that we are on a platform that does not work well with a given
+	 * codec.
+	 *
+	 * @param {string} codec
+	 * @private
+	 */
+	static rejectCodec_(codec) {
+		const isTypeSupported = MediaSource.isTypeSupported;
 
-    MediaSource.isTypeSupported = (mimeType) => {
-      const actualCodec = shaka.util.MimeUtils.getCodecBase(mimeType);
-      return actualCodec != codec && isTypeSupported(mimeType);
-    };
-  }
+		MediaSource.isTypeSupported = mimeType => {
+			const actualCodec = shaka.util.MimeUtils.getCodecBase(mimeType);
+			return actualCodec != codec && isTypeSupported(mimeType);
+		};
+	}
 
-  /**
-   * Patch isTypeSupported() to parse for HDR-related clues and chain to a
-   * private API on the Chromecast which can query for support.
-   *
-   * @private
-   */
-  static patchCastIsTypeSupported_() {
-    const originalIsTypeSupported = MediaSource.isTypeSupported;
+	/**
+	 * Patch isTypeSupported() to parse for HDR-related clues and chain to a
+	 * private API on the Chromecast which can query for support.
+	 *
+	 * @private
+	 */
+	static patchCastIsTypeSupported_() {
+		const originalIsTypeSupported = MediaSource.isTypeSupported;
 
-    // Docs from Dolby detailing profile names: https://bit.ly/2T2wKbu
-    const dolbyVisionRegex = /^dv(?:h[e1]|a[v1])\./;
+		// Docs from Dolby detailing profile names: https://bit.ly/2T2wKbu
+		const dolbyVisionRegex = /^dv(?:h[e1]|a[v1])\./;
 
-    MediaSource.isTypeSupported = (mimeType) => {
-      // Parse the basic MIME type from its parameters.
-      const pieces = mimeType.split(/ *; */);
-      const basicMimeType = pieces[0];
+		MediaSource.isTypeSupported = mimeType => {
+			// Parse the basic MIME type from its parameters.
+			const pieces = mimeType.split(/ *; */);
+			const basicMimeType = pieces[0];
 
-      // Parse the parameters into key-value pairs.
-      /** @type {Object.<string, string>} */
-      const parameters = {};
-      for (let i = 1; i < pieces.length; ++i) {
-        const kv = pieces[i].split('=');
-        const k = kv[0];
-        const v = kv[1].replace(/"(.*)"/, '$1');
-        parameters[k] = v;
-      }
+			// Parse the parameters into key-value pairs.
+			/** @type {Object.<string, string>} */
+			const parameters = {};
+			for (let i = 1; i < pieces.length; ++i) {
+				const kv = pieces[i].split('=');
+				const k = kv[0];
+				const v = kv[1].replace(/"(.*)"/, '$1');
+				parameters[k] = v;
+			}
 
-      const codecs = parameters['codecs'];
-      if (!codecs) {
-        return originalIsTypeSupported(mimeType);
-      }
+			const codecs = parameters['codecs'];
+			if (!codecs) {
+				return originalIsTypeSupported(mimeType);
+			}
 
-      let isHDR = false;
-      let isDolbyVision = false;
+			let isHDR = false;
+			let isDolbyVision = false;
 
-      const codecList = codecs.split(',').filter((codec) => {
-        if (dolbyVisionRegex.test(codec)) {
-          isDolbyVision = true;
-        }
+			const codecList = codecs.split(',').filter(codec => {
+				if (dolbyVisionRegex.test(codec)) {
+					isDolbyVision = true;
+				}
 
-        // We take this string as a signal for HDR, but don't remove it.
-        // This regex matches the strings "hev1.2" and "hvc1.2".
-        if (/^(hev|hvc)1\.2/.test(codec)) {
-          isHDR = true;
-        }
+				// We take this string as a signal for HDR, but don't remove it.
+				// This regex matches the strings "hev1.2" and "hvc1.2".
+				if (/^(hev|hvc)1\.2/.test(codec)) {
+					isHDR = true;
+				}
 
-        // Keep all other strings in the list.
-        return true;
-      });
+				// Keep all other strings in the list.
+				return true;
+			});
 
-      // If the content uses Dolby Vision, we take this as a sign that the
-      // content is not HDR after all.
-      if (isDolbyVision) {
-        isHDR = false;
-      }
+			// If the content uses Dolby Vision, we take this as a sign that the
+			// content is not HDR after all.
+			if (isDolbyVision) {
+				isHDR = false;
+			}
 
-      // Reconstruct the "codecs" parameter from the results of the filter.
-      parameters['codecs'] = codecList.join(',');
+			// Reconstruct the "codecs" parameter from the results of the filter.
+			parameters['codecs'] = codecList.join(',');
 
-      // If the content is HDR, we add this additional parameter so that the
-      // Cast platform will check for HDR support.
-      if (isHDR) {
-        parameters['eotf'] = 'smpte2084';
-      }
+			// If the content is HDR, we add this additional parameter so that the
+			// Cast platform will check for HDR support.
+			if (isHDR) {
+				parameters['eotf'] = 'smpte2084';
+			}
 
-      // Reconstruct the MIME type, possibly with additional parameters.
-      let extendedMimeType = basicMimeType;
-      for (const k in parameters) {
-        const v = parameters[k];
-        extendedMimeType += '; ' + k + '="' + v + '"';
-      }
-      return cast.__platform__.canDisplayType(extendedMimeType);
-    };
-  }
+			// Reconstruct the MIME type, possibly with additional parameters.
+			let extendedMimeType = basicMimeType;
+			for (const k in parameters) {
+				const v = parameters[k];
+				extendedMimeType += '; ' + k + '="' + v + '"';
+			}
+			return cast.__platform__.canDisplayType(extendedMimeType);
+		};
+	}
 };
-
 
 shaka.polyfill.register(shaka.polyfill.MediaSource.install);

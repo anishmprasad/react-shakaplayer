@@ -15,96 +15,90 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.Pssh');
+// goog.provide('shaka.util.Pssh');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.util.Mp4Parser');
-goog.require('shaka.util.Uint8ArrayUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.util.Mp4Parser');
+// goog.require('shaka.util.Uint8ArrayUtils');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * @summary
  * Parse a PSSH box and extract the system IDs.
  */
 shaka.util.Pssh = class {
-  /**
-   * @param {!Uint8Array} psshBox
-   * @throws {shaka.util.Error} if a PSSH box is truncated or contains a size
-   *   field over 53 bits.
-   */
-  constructor(psshBox) {
-    /**
-     * In hex.
-     * @type {!Array.<string>}
-     */
-    this.systemIds = [];
+	/**
+	 * @param {!Uint8Array} psshBox
+	 * @throws {shaka.util.Error} if a PSSH box is truncated or contains a size
+	 *   field over 53 bits.
+	 */
+	constructor(psshBox) {
+		/**
+		 * In hex.
+		 * @type {!Array.<string>}
+		 */
+		this.systemIds = [];
 
-    /**
-     * In hex.
-     * @type {!Array.<string>}
-     */
-    this.cencKeyIds = [];
+		/**
+		 * In hex.
+		 * @type {!Array.<string>}
+		 */
+		this.cencKeyIds = [];
 
-    /*
-    * Array of tuples that define the startIndex + size for each
-    * discrete pssh within |psshBox|
-    * */
-    this.dataBoundaries = [];
+		/*
+		 * Array of tuples that define the startIndex + size for each
+		 * discrete pssh within |psshBox|
+		 * */
+		this.dataBoundaries = [];
 
-    new shaka.util.Mp4Parser()
-        .fullBox('pssh', (box) => this.parseBox_(box))
-        .parse(psshBox.buffer);
+		new shaka.util.Mp4Parser().fullBox('pssh', box => this.parseBox_(box)).parse(psshBox.buffer);
 
-    if (this.dataBoundaries.length == 0) {
-      shaka.log.warning('No pssh box found!');
-    }
-  }
+		if (this.dataBoundaries.length == 0) {
+			shaka.log.warning('No pssh box found!');
+		}
+	}
 
+	/**
+	 * @param {!shaka.extern.ParsedBox} box
+	 * @private
+	 */
+	parseBox_(box) {
+		goog.asserts.assert(box.version != null, 'PSSH boxes are full boxes and must have a valid version');
 
-  /**
-   * @param {!shaka.extern.ParsedBox} box
-   * @private
-   */
-  parseBox_(box) {
-    goog.asserts.assert(
-        box.version != null,
-        'PSSH boxes are full boxes and must have a valid version');
+		goog.asserts.assert(box.flags != null, 'PSSH boxes are full boxes and must have a valid flag');
 
-    goog.asserts.assert(
-        box.flags != null,
-        'PSSH boxes are full boxes and must have a valid flag');
+		if (box.version > 1) {
+			shaka.log.warning('Unrecognized PSSH version found!');
+			return;
+		}
 
-    if (box.version > 1) {
-      shaka.log.warning('Unrecognized PSSH version found!');
-      return;
-    }
+		const systemId = shaka.util.Uint8ArrayUtils.toHex(box.reader.readBytes(16));
+		const keyIds = [];
+		if (box.version > 0) {
+			const numKeyIds = box.reader.readUint32();
+			for (let i = 0; i < numKeyIds; ++i) {
+				const keyId = shaka.util.Uint8ArrayUtils.toHex(box.reader.readBytes(16));
+				keyIds.push(keyId);
+			}
+		}
 
-    const systemId = shaka.util.Uint8ArrayUtils.toHex(box.reader.readBytes(16));
-    const keyIds = [];
-    if (box.version > 0) {
-      const numKeyIds = box.reader.readUint32();
-      for (let i = 0; i < numKeyIds; ++i) {
-        const keyId =
-            shaka.util.Uint8ArrayUtils.toHex(box.reader.readBytes(16));
-        keyIds.push(keyId);
-      }
-    }
+		const dataSize = box.reader.readUint32();
+		box.reader.skip(dataSize); // Ignore the data section.
 
-    const dataSize = box.reader.readUint32();
-    box.reader.skip(dataSize);  // Ignore the data section.
+		// Now that everything has been succesfully parsed from this box,
+		// update member variables.
+		this.cencKeyIds.push(...keyIds);
+		this.systemIds.push(systemId);
+		this.dataBoundaries.push({
+			start: box.start,
+			end: box.start + box.size - 1
+		});
 
-    // Now that everything has been succesfully parsed from this box,
-    // update member variables.
-    this.cencKeyIds.push(...keyIds);
-    this.systemIds.push(systemId);
-    this.dataBoundaries.push({
-      start: box.start,
-      end: box.start + box.size - 1,
-    });
-
-    if (box.reader.getPosition() != box.reader.getLength()) {
-      shaka.log.warning('Mismatch between box size and data size!');
-    }
-  }
+		if (box.reader.getPosition() != box.reader.getLength()) {
+			shaka.log.warning('Mismatch between box size and data size!');
+		}
+	}
 };

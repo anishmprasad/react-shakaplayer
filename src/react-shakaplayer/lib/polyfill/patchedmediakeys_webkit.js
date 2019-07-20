@@ -15,18 +15,21 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.polyfill.PatchedMediaKeysWebkit');
+// goog.provide('shaka.polyfill.PatchedMediaKeysWebkit');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.polyfill');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.PublicPromise');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.Timer');
-goog.require('shaka.util.Uint8ArrayUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.polyfill');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.FakeEventTarget');
+// goog.require('shaka.util.PublicPromise');
+// goog.require('shaka.util.StringUtils');
+// goog.require('shaka.util.Timer');
+// goog.require('shaka.util.Uint8ArrayUtils');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

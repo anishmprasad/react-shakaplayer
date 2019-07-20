@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.deprecate.Enforcer');
+// goog.provide('shaka.deprecate.Enforcer');
 
-goog.require('shaka.deprecate.Version');
+// goog.require('shaka.deprecate.Version');
 
+var shaka = window.shaka;
+// var goog = window.goog;
 
 /**
  * The enforcer's job is to call the correct callback when a feature will need
@@ -31,40 +33,40 @@ goog.require('shaka.deprecate.Version');
  * @final
  */
 shaka.deprecate.Enforcer = class {
-  /**
-   * @param {!shaka.deprecate.Version} libraryVersion
-   * @param {shaka.deprecate.Listener} onPending
-   * @param {shaka.deprecate.Listener} onExpired
-   */
-  constructor(libraryVersion, onPending, onExpired) {
-    /** @private {!shaka.deprecate.Version} */
-    this.libraryVersion_ = libraryVersion;
+	/**
+	 * @param {!shaka.deprecate.Version} libraryVersion
+	 * @param {shaka.deprecate.Listener} onPending
+	 * @param {shaka.deprecate.Listener} onExpired
+	 */
+	constructor(libraryVersion, onPending, onExpired) {
+		/** @private {!shaka.deprecate.Version} */
+		this.libraryVersion_ = libraryVersion;
 
-    /** @private {shaka.deprecate.Listener} */
-    this.onPending_ = onPending;
-    /** @private {shaka.deprecate.Listener} */
-    this.onExpired_ = onExpired;
-  }
+		/** @private {shaka.deprecate.Listener} */
+		this.onPending_ = onPending;
+		/** @private {shaka.deprecate.Listener} */
+		this.onExpired_ = onExpired;
+	}
 
-  /**
-   * Tell the enforcer that a feature will expire on |expiredOn| and that it
-   * should notify the listeners if it is pending or expired.
-   *
-   * @param {!shaka.deprecate.Version} expiresOn
-   * @param {string} name
-   * @param {string} description
-   */
-  enforce(expiresOn, name, description) {
-    // If the expiration version is larger than the library version
-    // (compareTo > 0), it means the expiration is in the future, and is still
-    // pending.
-    const isPending = expiresOn.compareTo(this.libraryVersion_) > 0;
+	/**
+	 * Tell the enforcer that a feature will expire on |expiredOn| and that it
+	 * should notify the listeners if it is pending or expired.
+	 *
+	 * @param {!shaka.deprecate.Version} expiresOn
+	 * @param {string} name
+	 * @param {string} description
+	 */
+	enforce(expiresOn, name, description) {
+		// If the expiration version is larger than the library version
+		// (compareTo > 0), it means the expiration is in the future, and is still
+		// pending.
+		const isPending = expiresOn.compareTo(this.libraryVersion_) > 0;
 
-    // Find the right callback (pending or expired) for this enforcement request
-    // call it to handle this features pending/expired removal.
-    const callback = isPending ? this.onPending_ : this.onExpired_;
-    callback(this.libraryVersion_, expiresOn, name, description);
-  }
+		// Find the right callback (pending or expired) for this enforcement request
+		// call it to handle this features pending/expired removal.
+		const callback = isPending ? this.onPending_ : this.onExpired_;
+		callback(this.libraryVersion_, expiresOn, name, description);
+	}
 };
 
 /**

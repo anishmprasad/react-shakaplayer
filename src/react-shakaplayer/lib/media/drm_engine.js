@@ -15,24 +15,27 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.media.DrmEngine');
+// goog.provide('shaka.media.DrmEngine');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.util.Destroyer');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.Iterables');
-goog.require('shaka.util.MapUtils');
-goog.require('shaka.util.MimeUtils');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.PublicPromise');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.Timer');
-goog.require('shaka.util.Uint8ArrayUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.net.NetworkingEngine');
+// goog.require('shaka.util.Destroyer');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.util.Iterables');
+// goog.require('shaka.util.MapUtils');
+// goog.require('shaka.util.MimeUtils');
+// goog.require('shaka.util.Platform');
+// goog.require('shaka.util.PublicPromise');
+// goog.require('shaka.util.StringUtils');
+// goog.require('shaka.util.Timer');
+// goog.require('shaka.util.Uint8ArrayUtils');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /** @implements {shaka.util.IDestroyable} */

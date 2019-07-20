@@ -15,18 +15,21 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.cast.CastProxy');
+// goog.provide('shaka.cast.CastProxy');
 
 goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
-goog.require('shaka.cast.CastSender');
-goog.require('shaka.cast.CastUtils');
-goog.require('shaka.log');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.Deprecate');
+// goog.require('shaka.cast.CastSender');
+// goog.require('shaka.cast.CastUtils');
+// goog.require('shaka.log');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.FakeEventTarget');
+// goog.require('shaka.util.IDestroyable');
+
+const shaka = window.shaka
+
 
 
 /**
@@ -46,7 +49,7 @@ goog.require('shaka.util.IDestroyable');
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-shaka.cast.CastProxy = class extends shaka.util.FakeEventTarget {
+window.shaka.cast.CastProxy = class extends shaka.util.FakeEventTarget {
   /**
    * @param {!HTMLMediaElement} video The local video element associated with
    *   the local Player instance.

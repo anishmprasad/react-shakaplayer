@@ -15,17 +15,21 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.text.TtmlTextParser');
+// goog.provide('shaka.text.TtmlTextParser');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.text.Cue');
-goog.require('shaka.text.CueRegion');
-goog.require('shaka.text.TextEngine');
-goog.require('shaka.util.ArrayUtils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.XmlUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.text.Cue');
+// goog.require('shaka.text.CueRegion');
+// goog.require('shaka.text.TextEngine');
+// goog.require('shaka.util.ArrayUtils');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.StringUtils');
+// goog.require('shaka.util.XmlUtils');
+
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

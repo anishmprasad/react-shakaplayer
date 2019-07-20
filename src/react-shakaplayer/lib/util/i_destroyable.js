@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.IDestroyable');
+// goog.provide('shaka.util.IDestroyable');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * An interface to standardize how objects are destroyed.
@@ -25,13 +27,13 @@ goog.provide('shaka.util.IDestroyable');
  * @exportInterface
  */
 shaka.util.IDestroyable = class {
-  /**
-   * Request that this object be destroyed, releasing all resources and shutting
-   * down all operations. Returns a Promise which is resolved when destruction
-   * is complete. This Promise should never be rejected.
-   *
-   * @return {!Promise}
-   * @exportInterface
-   */
-  destroy() {}
+	/**
+	 * Request that this object be destroyed, releasing all resources and shutting
+	 * down all operations. Returns a Promise which is resolved when destruction
+	 * is complete. This Promise should never be rejected.
+	 *
+	 * @return {!Promise}
+	 * @exportInterface
+	 */
+	destroy() {}
 };

@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.Platform');
+// goog.provide('shaka.util.Platform');
 
-goog.require('shaka.util.Timer');
+// goog.require('shaka.util.Timer');
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

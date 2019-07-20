@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-goog.provide('goog.asserts');
+// goog.provide('goog.asserts');
 
+var goog = window.goog;
 
 /**
  * @summary An assertion framework which is compiled out for deployment.
@@ -25,24 +26,21 @@ goog.provide('goog.asserts');
  *   checking.
  */
 goog.asserts = class {
-  /**
-   * @param {*} val
-   * @param {string} message
-   */
-  static assert(val, message) {}
+	/**
+	 * @param {*} val
+	 * @param {string} message
+	 */
+	static assert(val, message) {}
 };
-
 
 /**
  * @define {boolean} true to enable asserts, false otherwise.
  */
 goog.define('goog.asserts.ENABLE_ASSERTS', goog.DEBUG);
 
-
 // Install assert functions.
 if (goog.asserts.ENABLE_ASSERTS) {
-  if (console.assert) {
-    goog.asserts.assert =
-        (/** * */ val, /** string */ message) => console.assert(val, message);
-  }
+	if (console.assert) {
+		goog.asserts.assert = (/** * */ val, /** string */ message) => console.assert(val, message);
+	}
 }

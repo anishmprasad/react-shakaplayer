@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.offline.OfflineUri');
+// goog.provide('shaka.offline.OfflineUri');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * The OfflineUri class contains all the components that make up the offline
@@ -29,111 +31,121 @@ goog.provide('shaka.offline.OfflineUri');
  *    KEY: The key that the data is stored under in the cell.
  */
 shaka.offline.OfflineUri = class {
-  /**
-   * @param {string} type
-   * @param {string} mechanism
-   * @param {string} cell
-   * @param {number} key
-   */
-  constructor(type, mechanism, cell, key) {
-    /**
-     * @private {string}
-     * @const
-     */
-    this.type_ = type;
-    /**
-     * @private {string}
-     * @const
-     */
-    this.mechanism_ = mechanism;
-    /**
-     * @private {string}
-     * @const
-     */
-    this.cell_ = cell;
-    /**
-     * @private {number}
-     * @const
-     */
-    this.key_ = key;
+	/**
+	 * @param {string} type
+	 * @param {string} mechanism
+	 * @param {string} cell
+	 * @param {number} key
+	 */
+	constructor(type, mechanism, cell, key) {
+		/**
+		 * @private {string}
+		 * @const
+		 */
+		this.type_ = type;
+		/**
+		 * @private {string}
+		 * @const
+		 */
+		this.mechanism_ = mechanism;
+		/**
+		 * @private {string}
+		 * @const
+		 */
+		this.cell_ = cell;
+		/**
+		 * @private {number}
+		 * @const
+		 */
+		this.key_ = key;
 
-    /**
-     * @private {string}
-     * @const
-     */
-    this.asString_ = [
-      'offline:', type, '/', mechanism, '/', cell, '/', key,
-    ].join('');
-  }
+		/**
+		 * @private {string}
+		 * @const
+		 */
+		this.asString_ = ['offline:', type, '/', mechanism, '/', cell, '/', key].join('');
+	}
 
-  /** @return {boolean} */
-  isManifest() { return this.type_ == 'manifest'; }
+	/** @return {boolean} */
+	isManifest() {
+		return this.type_ == 'manifest';
+	}
 
-  /** @return {boolean} */
-  isSegment() { return this.type_ == 'segment'; }
+	/** @return {boolean} */
+	isSegment() {
+		return this.type_ == 'segment';
+	}
 
-  /** @return {string} */
-  mechanism() { return this.mechanism_; }
+	/** @return {string} */
+	mechanism() {
+		return this.mechanism_;
+	}
 
-  /** @return {string} */
-  cell() { return this.cell_; }
+	/** @return {string} */
+	cell() {
+		return this.cell_;
+	}
 
-  /** @return {number} */
-  key() { return this.key_; }
+	/** @return {number} */
+	key() {
+		return this.key_;
+	}
 
-  /** @override */
-  toString() { return this.asString_; }
+	/** @override */
+	toString() {
+		return this.asString_;
+	}
 
-  /**
-   * @param {string} uri
-   * @return {?shaka.offline.OfflineUri}
-   */
-  static parse(uri) {
-    const parts = /^offline:([a-z]+)\/([^/]+)\/([^/]+)\/([0-9]+)$/.exec(uri);
-    if (parts == null) {
-      return null;
-    }
+	/**
+	 * @param {string} uri
+	 * @return {?shaka.offline.OfflineUri}
+	 */
+	static parse(uri) {
+		const parts = /^offline:([a-z]+)\/([^/]+)\/([^/]+)\/([0-9]+)$/.exec(uri);
+		if (parts == null) {
+			return null;
+		}
 
-    const type = parts[1];
-    if (type != 'manifest' && type != 'segment') {
-      return null;
-    }
+		const type = parts[1];
+		if (type != 'manifest' && type != 'segment') {
+			return null;
+		}
 
-    const mechanism = parts[2];
-    if (!mechanism) {
-      return null;
-    }
+		const mechanism = parts[2];
+		if (!mechanism) {
+			return null;
+		}
 
-    const cell = parts[3];
-    if (!cell) {
-      return null;
-    }
+		const cell = parts[3];
+		if (!cell) {
+			return null;
+		}
 
-    const key = Number(parts[4]);
-    if (type == null) {
-      return null;
-    }
+		const key = Number(parts[4]);
+		if (type == null) {
+			return null;
+		}
 
-    return new shaka.offline.OfflineUri(type, mechanism, cell, key);
-  }
+		return new shaka.offline.OfflineUri(type, mechanism, cell, key);
+	}
 
-  /**
-   * @param {string} mechanism
-   * @param {string} cell
-   * @param {number} key
-   * @return {!shaka.offline.OfflineUri}
-   */
-  static manifest(mechanism, cell, key) {
-    return new shaka.offline.OfflineUri('manifest', mechanism, cell, key);
-  }
+	/**
+	 * @param {string} mechanism
+	 * @param {string} cell
+	 * @param {number} key
+	 * @return {!shaka.offline.OfflineUri}
+	 */
+	static manifest(mechanism, cell, key) {
+		return new shaka.offline.OfflineUri('manifest', mechanism, cell, key);
+	}
 
-  /**
-   * @param {string} mechanism
-   * @param {string} cell
-   * @param {number} key
-   * @return {!shaka.offline.OfflineUri}
-   */
-  static segment(mechanism, cell, key) {
-    return new shaka.offline.OfflineUri('segment', mechanism, cell, key);
-  }
+	/**
+	 * @param {string} mechanism
+	 * @param {string} cell
+	 * @param {number} key
+	 * @return {!shaka.offline.OfflineUri}
+	 */
+	static segment(mechanism, cell, key) {
+		return new shaka.offline.OfflineUri('segment', mechanism, cell, key);
+	}
 };

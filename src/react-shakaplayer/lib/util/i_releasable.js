@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.IReleasable');
-
+// goog.provide('shaka.util.IReleasable');
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * An interface to standardize how objects release internal references
@@ -26,10 +27,10 @@ goog.provide('shaka.util.IReleasable');
  * @interface
  */
 shaka.util.IReleasable = class {
-  /**
-   * Request that this object release all internal references.
-   *
-   * @exportInterface
-   */
-  release() {}
+	/**
+	 * Request that this object release all internal references.
+	 *
+	 * @exportInterface
+	 */
+	release() {}
 };

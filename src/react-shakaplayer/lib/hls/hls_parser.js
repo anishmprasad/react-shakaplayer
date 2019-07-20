@@ -16,37 +16,40 @@
  */
 
 
-goog.provide('shaka.hls.HlsParser');
+// goog.provide('shaka.hls.HlsParser');
 
-goog.require('goog.Uri');
-goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
-goog.require('shaka.hls.ManifestTextParser');
-goog.require('shaka.hls.Playlist');
-goog.require('shaka.hls.PlaylistType');
-goog.require('shaka.hls.Tag');
-goog.require('shaka.hls.Utils');
-goog.require('shaka.log');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.InitSegmentReference');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.media.PresentationTimeline');
-goog.require('shaka.media.SegmentIndex');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.net.DataUriPlugin');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.text.TextEngine');
-goog.require('shaka.util.ArrayUtils');
-goog.require('shaka.util.DataViewReader');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.LanguageUtils');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.MimeUtils');
-goog.require('shaka.util.Mp4Parser');
-goog.require('shaka.util.Networking');
-goog.require('shaka.util.OperationManager');
-goog.require('shaka.util.Timer');
+// goog.require('goog.Uri');
+// goog.require('goog.asserts');
+// goog.require('shaka.Deprecate');
+// goog.require('shaka.hls.ManifestTextParser');
+// goog.require('shaka.hls.Playlist');
+// goog.require('shaka.hls.PlaylistType');
+// goog.require('shaka.hls.Tag');
+// goog.require('shaka.hls.Utils');
+// goog.require('shaka.log');
+// goog.require('shaka.media.DrmEngine');
+// goog.require('shaka.media.InitSegmentReference');
+// goog.require('shaka.media.ManifestParser');
+// goog.require('shaka.media.PresentationTimeline');
+// goog.require('shaka.media.SegmentIndex');
+// goog.require('shaka.media.SegmentReference');
+// goog.require('shaka.net.DataUriPlugin');
+// goog.require('shaka.net.NetworkingEngine');
+// goog.require('shaka.text.TextEngine');
+// goog.require('shaka.util.ArrayUtils');
+// goog.require('shaka.util.DataViewReader');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.Functional');
+// goog.require('shaka.util.LanguageUtils');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.MimeUtils');
+// goog.require('shaka.util.Mp4Parser');
+// goog.require('shaka.util.Networking');
+// goog.require('shaka.util.OperationManager');
+// goog.require('shaka.util.Timer');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

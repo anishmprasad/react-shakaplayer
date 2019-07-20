@@ -15,39 +15,39 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.MapUtils');
-
+// goog.provide('shaka.util.MapUtils');
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * @summary A set of map/object utility functions.
  */
 shaka.util.MapUtils = class {
-  /**
-   * @param {!Object.<KEY, VALUE>} object
-   * @return {!Map.<KEY, VALUE>}
-   * @template KEY,VALUE
-   */
-  static asMap(object) {
-    const map = new Map();
-    for (const key of Object.keys(object)) {
-      map.set(key, object[key]);
-    }
+	/**
+	 * @param {!Object.<KEY, VALUE>} object
+	 * @return {!Map.<KEY, VALUE>}
+	 * @template KEY,VALUE
+	 */
+	static asMap(object) {
+		const map = new Map();
+		for (const key of Object.keys(object)) {
+			map.set(key, object[key]);
+		}
 
-    return map;
-  }
+		return map;
+	}
 
+	/**
+	 * @param {!Map.<KEY, VALUE>} map
+	 * @return {!Object.<KEY, VALUE>}
+	 * @template KEY,VALUE
+	 */
+	static asObject(map) {
+		const obj = {};
+		map.forEach((value, key) => {
+			obj[key] = value;
+		});
 
-  /**
-   * @param {!Map.<KEY, VALUE>} map
-   * @return {!Object.<KEY, VALUE>}
-   * @template KEY,VALUE
-   */
-  static asObject(map) {
-    const obj = {};
-    map.forEach((value, key) => {
-      obj[key] = value;
-    });
-
-    return obj;
-  }
+		return obj;
+	}
 };

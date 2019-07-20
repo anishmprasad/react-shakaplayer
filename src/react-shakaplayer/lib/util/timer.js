@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.Timer');
+// goog.provide('shaka.util.Timer');
 
-goog.require('shaka.util.DelayedTick');
+// goog.require('shaka.util.DelayedTick');
 
+var shaka = window.shaka;
+var goog = window.goog;
 
 /**
  * A timer allows a single function to be executed at a later time or at
@@ -28,87 +30,87 @@ goog.require('shaka.util.DelayedTick');
  * @export
  */
 shaka.util.Timer = class {
-  /**
-   * Create a new timer. A timer is committed to a single callback function.
-   * While there is no technical reason to do this, it is far easier to
-   * understand and use timers when they are connected to one functional idea.
-   *
-   * @param {function()} onTick
-   */
-  constructor(onTick) {
-    /**
-     * Each time our timer "does work", we call that a "tick". The name comes
-     * from old analog clocks.
-     *
-     * @private {function()}
-     */
-    this.onTick_ = onTick;
+	/**
+	 * Create a new timer. A timer is committed to a single callback function.
+	 * While there is no technical reason to do this, it is far easier to
+	 * understand and use timers when they are connected to one functional idea.
+	 *
+	 * @param {function()} onTick
+	 */
+	constructor(onTick) {
+		/**
+		 * Each time our timer "does work", we call that a "tick". The name comes
+		 * from old analog clocks.
+		 *
+		 * @private {function()}
+		 */
+		this.onTick_ = onTick;
 
-    /** @private {shaka.util.DelayedTick} */
-    this.ticker_ = null;
-  }
+		/** @private {shaka.util.DelayedTick} */
+		this.ticker_ = null;
+	}
 
-  /**
-   * Have the timer call |onTick| now.
-   *
-   * @return {!shaka.util.Timer}
-   * @export
-   */
-  tickNow() {
-    this.stop();
-    this.onTick_();
+	/**
+	 * Have the timer call |onTick| now.
+	 *
+	 * @return {!shaka.util.Timer}
+	 * @export
+	 */
+	tickNow() {
+		this.stop();
+		this.onTick_();
 
-    return this;
-  }
+		return this;
+	}
 
-  /**
-   * Have the timer call |onTick| after |seconds| has elapsed unless |stop| is
-   * called first.
-   *
-   * @param {number} seconds
-   * @return {!shaka.util.Timer}
-   * @export
-   */
-  tickAfter(seconds) {
-    this.stop();
+	/**
+	 * Have the timer call |onTick| after |seconds| has elapsed unless |stop| is
+	 * called first.
+	 *
+	 * @param {number} seconds
+	 * @return {!shaka.util.Timer}
+	 * @export
+	 */
+	tickAfter(seconds) {
+		this.stop();
 
-    this.ticker_ = new shaka.util.DelayedTick(() => {
-      this.onTick_();
-    }).tickAfter(seconds);
+		this.ticker_ = new shaka.util.DelayedTick(() => {
+			this.onTick_();
+		}).tickAfter(seconds);
 
-    return this;
-  }
+		return this;
+	}
 
-  /**
-   * Have the timer call |onTick| every |seconds| until |stop| is called.
-   *
-   * @param {number} seconds
-   * @return {!shaka.util.Timer}
-   * @export
-   */
-  tickEvery(seconds) {
-    this.stop();
+	/**
+	 * Have the timer call |onTick| every |seconds| until |stop| is called.
+	 *
+	 * @param {number} seconds
+	 * @return {!shaka.util.Timer}
+	 * @export
+	 */
+	tickEvery(seconds) {
+		this.stop();
 
-    this.ticker_ = new shaka.util.DelayedTick(() => {
-      // Schedule the timer again first. |onTick_| could cancel the timer and
-      // rescheduling first simplifies the implementation.
-      this.ticker_.tickAfter(seconds);
-      this.onTick_();
-    }).tickAfter(seconds);
+		this.ticker_ = new shaka.util.DelayedTick(() => {
+			// Schedule the timer again first. |onTick_| could cancel the timer and
+			// rescheduling first simplifies the implementation.
+			this.ticker_.tickAfter(seconds);
+			this.onTick_();
+		}).tickAfter(seconds);
 
-    return this;
-  }
+		return this;
+	}
 
-  /**
-   * Stop the timer and clear the previous behaviour. The timer is still usable
-   * after calling |stop|.
-   *
-   * @export
-   */
-  stop() {
-    if (this.ticker_) {
-      this.ticker_.stop();
-      this.ticker_ = null;
-    }
-  }
+	/**
+	 * Stop the timer and clear the previous behaviour. The timer is still usable
+	 * after calling |stop|.
+	 *
+	 * @export
+	 */
+	stop() {
+		if (this.ticker_) {
+			this.ticker_.stop();
+			this.ticker_ = null;
+		}
+	}
 };

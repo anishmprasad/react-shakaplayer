@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.cast.CastReceiver');
+// goog.provide('shaka.cast.CastReceiver');
 
-goog.require('goog.asserts');
-goog.require('shaka.cast.CastUtils');
-goog.require('shaka.log');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.Timer');
+// goog.require('goog.asserts');
+// goog.require('shaka.cast.CastUtils');
+// goog.require('shaka.log');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.FakeEventTarget');
+// goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.util.Platform');
+// goog.require('shaka.util.Timer');
 
+const shaka  = window.shaka
 
 /**
  * A receiver to communicate between the Chromecast-hosted player and the
@@ -36,7 +37,7 @@ goog.require('shaka.util.Timer');
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-shaka.cast.CastReceiver = class extends shaka.util.FakeEventTarget {
+window.shaka.cast.CastReceiver = class extends shaka.util.FakeEventTarget {
   /**
    * @param {!HTMLMediaElement} video The local video element associated with
    *   the local Player instance.

@@ -15,31 +15,31 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.polyfill.IndexedDB');
+// goog.provide('shaka.polyfill.IndexedDB');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.polyfill');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.polyfill');
 
+var shaka = window.shaka;
+// var goog = window.goog;
 
 /**
  * @summary A polyfill to patch IndexedDB bugs.
  */
 shaka.polyfill.IndexedDB = class {
-  /**
-   * Install the polyfill if needed.
-   */
-  static install() {
-    shaka.log.debug('IndexedDB.install');
+	/**
+	 * Install the polyfill if needed.
+	 */
+	static install() {
+		shaka.log.debug('IndexedDB.install');
 
-    if (shaka.util.Platform.isChromecast()) {
-      shaka.log.debug('Removing IndexedDB from ChromeCast');
-      delete window.indexedDB;
-      goog.asserts.assert(
-          !window.indexedDB, 'Failed to override window.indexedDB');
-    }
-  }
+		if (shaka.util.Platform.isChromecast()) {
+			shaka.log.debug('Removing IndexedDB from ChromeCast');
+			delete window.indexedDB;
+			goog.asserts.assert(!window.indexedDB, 'Failed to override window.indexedDB');
+		}
+	}
 };
-
 
 shaka.polyfill.register(shaka.polyfill.IndexedDB.install);

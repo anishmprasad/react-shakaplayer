@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.polyfill.VideoPlaybackQuality');
+// goog.provide('shaka.polyfill.VideoPlaybackQuality');
 
-goog.require('shaka.polyfill');
+// goog.require('shaka.polyfill');
 
+var shaka = window.shaka;
+// var goog = window.goog;
 
 /**
  * @summary A polyfill to provide MSE VideoPlaybackQuality metrics.
@@ -26,44 +28,42 @@ goog.require('shaka.polyfill');
  * similar data through individual prefixed attributes on HTMLVideoElement.
  */
 shaka.polyfill.VideoPlaybackQuality = class {
-  /**
-   * Install the polyfill if needed.
-   */
-  static install() {
-    if (!window.HTMLVideoElement) {
-      // Avoid errors on very old browsers.
-      return;
-    }
+	/**
+	 * Install the polyfill if needed.
+	 */
+	static install() {
+		if (!window.HTMLVideoElement) {
+			// Avoid errors on very old browsers.
+			return;
+		}
 
-    // eslint-disable-next-line no-restricted-syntax
-    const proto = HTMLVideoElement.prototype;
-    if (proto.getVideoPlaybackQuality) {
-      // No polyfill needed.
-      return;
-    }
+		// eslint-disable-next-line no-restricted-syntax
+		const proto = HTMLVideoElement.prototype;
+		if (proto.getVideoPlaybackQuality) {
+			// No polyfill needed.
+			return;
+		}
 
-    if ('webkitDroppedFrameCount' in proto) {
-      proto.getVideoPlaybackQuality =
-          shaka.polyfill.VideoPlaybackQuality.webkit_;
-    }
-  }
+		if ('webkitDroppedFrameCount' in proto) {
+			proto.getVideoPlaybackQuality = shaka.polyfill.VideoPlaybackQuality.webkit_;
+		}
+	}
 
-  /**
-   * @this {HTMLVideoElement}
-   * @return {!VideoPlaybackQuality}
-   * @private
-   */
-  static webkit_() {
-    return {
-      'droppedVideoFrames': this.webkitDroppedFrameCount,
-      'totalVideoFrames': this.webkitDecodedFrameCount,
-      // Not provided by this polyfill:
-      'corruptedVideoFrames': 0,
-      'creationTime': NaN,
-      'totalFrameDelay': 0,
-    };
-  }
+	/**
+	 * @this {HTMLVideoElement}
+	 * @return {!VideoPlaybackQuality}
+	 * @private
+	 */
+	static webkit_() {
+		return {
+			droppedVideoFrames: this.webkitDroppedFrameCount,
+			totalVideoFrames: this.webkitDecodedFrameCount,
+			// Not provided by this polyfill:
+			corruptedVideoFrames: 0,
+			creationTime: NaN,
+			totalFrameDelay: 0
+		};
+	}
 };
-
 
 shaka.polyfill.register(shaka.polyfill.VideoPlaybackQuality.install);

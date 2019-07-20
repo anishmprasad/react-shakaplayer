@@ -15,31 +15,33 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.dash.DashParser');
+// goog.provide('shaka.dash.DashParser');
 
 goog.require('goog.asserts');
-goog.require('shaka.abr.Ewma');
-goog.require('shaka.dash.ContentProtection');
-goog.require('shaka.dash.MpdUtils');
-goog.require('shaka.dash.SegmentBase');
-goog.require('shaka.dash.SegmentList');
-goog.require('shaka.dash.SegmentTemplate');
-goog.require('shaka.log');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.media.PresentationTimeline');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.text.TextEngine');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.LanguageUtils');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.MimeUtils');
-goog.require('shaka.util.Networking');
-goog.require('shaka.util.OperationManager');
-goog.require('shaka.util.StringUtils');
-goog.require('shaka.util.XmlUtils');
+// goog.require('shaka.abr.Ewma');
+// goog.require('shaka.dash.ContentProtection');
+// goog.require('shaka.dash.MpdUtils');
+// goog.require('shaka.dash.SegmentBase');
+// goog.require('shaka.dash.SegmentList');
+// goog.require('shaka.dash.SegmentTemplate');
+// goog.require('shaka.log');
+// goog.require('shaka.media.DrmEngine');
+// goog.require('shaka.media.ManifestParser');
+// goog.require('shaka.media.PresentationTimeline');
+// goog.require('shaka.media.SegmentReference');
+// goog.require('shaka.net.NetworkingEngine');
+// goog.require('shaka.text.TextEngine');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.Functional');
+// goog.require('shaka.util.LanguageUtils');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.MimeUtils');
+// goog.require('shaka.util.Networking');
+// goog.require('shaka.util.OperationManager');
+// goog.require('shaka.util.StringUtils');
+// goog.require('shaka.util.XmlUtils');
+
+const shaka  = window.shaka
 
 
 /**
@@ -48,7 +50,7 @@ goog.require('shaka.util.XmlUtils');
  * @implements {shaka.extern.ManifestParser}
  * @export
  */
-shaka.dash.DashParser = class {
+window.shaka.dash.DashParser = class {
   /** Creates a new DASH parser. */
   constructor() {
     /** @private {?shaka.extern.ManifestConfiguration} */

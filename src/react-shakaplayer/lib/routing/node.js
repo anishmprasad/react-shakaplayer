@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.routing.Node');
+// goog.provide('shaka.routing.Node');
 
+var shaka = window.shaka;
+// var goog = window.goog;
 
 /**
  * @typedef {{

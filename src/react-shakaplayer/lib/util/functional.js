@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.Functional');
+// goog.provide('shaka.util.Functional');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

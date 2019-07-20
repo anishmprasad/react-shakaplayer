@@ -15,17 +15,18 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.dash.MpdUtils');
+// goog.provide('shaka.dash.MpdUtils');
 
 goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.util.AbortableOperation');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.XmlUtils');
+// goog.require('shaka.log');
+// goog.require('shaka.net.NetworkingEngine');
+// goog.require('shaka.util.AbortableOperation');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.Functional');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.XmlUtils');
 
+const shaka  = window.shaka
 
 /**
  * @summary MPD processing utility functions.

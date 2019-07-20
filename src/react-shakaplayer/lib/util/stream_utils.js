@@ -15,17 +15,20 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.util.StreamUtils');
+// goog.provide('shaka.util.StreamUtils');
 
-goog.require('goog.asserts');
-goog.require('shaka.log');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.text.TextEngine');
-goog.require('shaka.util.Functional');
-goog.require('shaka.util.LanguageUtils');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.MimeUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.log');
+// goog.require('shaka.media.DrmEngine');
+// goog.require('shaka.media.MediaSourceEngine');
+// goog.require('shaka.text.TextEngine');
+// goog.require('shaka.util.Functional');
+// goog.require('shaka.util.LanguageUtils');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.MimeUtils');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

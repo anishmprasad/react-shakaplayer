@@ -15,46 +15,49 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.Player');
+// goog.provide('shaka.Player');
 
-goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
-goog.require('shaka.log');
-goog.require('shaka.media.ActiveStreamMap');
-goog.require('shaka.media.AdaptationSetCriteria');
-goog.require('shaka.media.BufferingObserver');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.media.MediaSourceEngine');
-goog.require('shaka.media.MuxJSClosedCaptionParser');
-goog.require('shaka.media.NoopCaptionParser');
-goog.require('shaka.media.PeriodObserver');
-goog.require('shaka.media.PlayRateController');
-goog.require('shaka.media.Playhead');
-goog.require('shaka.media.PlayheadObserverManager');
-goog.require('shaka.media.PreferenceBasedCriteria');
-goog.require('shaka.media.RegionObserver');
-goog.require('shaka.media.RegionTimeline');
-goog.require('shaka.media.SegmentReference');
-goog.require('shaka.media.StreamingEngine');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.routing.Walker');
-goog.require('shaka.text.SimpleTextDisplayer');
-goog.require('shaka.util.ArrayUtils');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.FakeEventTarget');
-goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.LanguageUtils');
-goog.require('shaka.util.ManifestParserUtils');
-goog.require('shaka.util.MimeUtils');
-goog.require('shaka.util.MultiMap');
-goog.require('shaka.util.Periods');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.Stats');
-goog.require('shaka.util.StreamUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.Deprecate');
+// goog.require('shaka.log');
+// goog.require('shaka.media.ActiveStreamMap');
+// goog.require('shaka.media.AdaptationSetCriteria');
+// goog.require('shaka.media.BufferingObserver');
+// goog.require('shaka.media.DrmEngine');
+// goog.require('shaka.media.ManifestParser');
+// goog.require('shaka.media.MediaSourceEngine');
+// goog.require('shaka.media.MuxJSClosedCaptionParser');
+// goog.require('shaka.media.NoopCaptionParser');
+// goog.require('shaka.media.PeriodObserver');
+// goog.require('shaka.media.PlayRateController');
+// goog.require('shaka.media.Playhead');
+// goog.require('shaka.media.PlayheadObserverManager');
+// goog.require('shaka.media.PreferenceBasedCriteria');
+// goog.require('shaka.media.RegionObserver');
+// goog.require('shaka.media.RegionTimeline');
+// goog.require('shaka.media.SegmentReference');
+// goog.require('shaka.media.StreamingEngine');
+// goog.require('shaka.net.NetworkingEngine');
+// goog.require('shaka.routing.Walker');
+// goog.require('shaka.text.SimpleTextDisplayer');
+// goog.require('shaka.util.ArrayUtils');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.FakeEventTarget');
+// goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.util.LanguageUtils');
+// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.MimeUtils');
+// goog.require('shaka.util.MultiMap');
+// goog.require('shaka.util.Periods');
+// goog.require('shaka.util.Platform');
+// goog.require('shaka.util.PlayerConfiguration');
+// goog.require('shaka.util.Stats');
+// goog.require('shaka.util.StreamUtils');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**

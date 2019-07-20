@@ -15,15 +15,18 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.media.GapJumpingController');
+// goog.provide('shaka.media.GapJumpingController');
 
-goog.require('shaka.log');
-goog.require('shaka.media.StallDetector');
-goog.require('shaka.media.TimeRangesUtils');
-goog.require('shaka.util.EventManager');
-goog.require('shaka.util.FakeEvent');
-goog.require('shaka.util.IReleasable');
-goog.require('shaka.util.Timer');
+// goog.require('shaka.log');
+// goog.require('shaka.media.StallDetector');
+// goog.require('shaka.media.TimeRangesUtils');
+// goog.require('shaka.util.EventManager');
+// goog.require('shaka.util.FakeEvent');
+// goog.require('shaka.util.IReleasable');
+// goog.require('shaka.util.Timer');
+
+var shaka = window.shaka;
+// var goog = window.goog;
 
 
 /**

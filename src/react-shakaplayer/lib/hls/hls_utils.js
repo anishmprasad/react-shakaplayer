@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.hls.Utils');
+// goog.provide('shaka.hls.Utils');
 
-goog.require('shaka.util.ManifestParserUtils');
+// goog.require('shaka.util.ManifestParserUtils');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 shaka.hls.Utils = class {

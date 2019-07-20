@@ -15,31 +15,34 @@
  * limitations under the License.
  */
 
-goog.provide('shaka.offline.Storage');
+// goog.provide('shaka.offline.Storage');
 
-goog.require('goog.asserts');
-goog.require('shaka.Deprecate');
-goog.require('shaka.Player');
-goog.require('shaka.log');
-goog.require('shaka.media.DrmEngine');
-goog.require('shaka.media.ManifestParser');
-goog.require('shaka.net.NetworkingEngine');
-goog.require('shaka.offline.DownloadManager');
-goog.require('shaka.offline.OfflineUri');
-goog.require('shaka.offline.SessionDeleter');
-goog.require('shaka.offline.StorageMuxer');
-goog.require('shaka.offline.StoredContentUtils');
-goog.require('shaka.offline.StreamBandwidthEstimator');
-goog.require('shaka.util.ArrayUtils');
-goog.require('shaka.util.Destroyer');
-goog.require('shaka.util.Error');
-goog.require('shaka.util.IDestroyable');
-goog.require('shaka.util.ManifestFilter');
-goog.require('shaka.util.Networking');
-goog.require('shaka.util.Periods');
-goog.require('shaka.util.Platform');
-goog.require('shaka.util.PlayerConfiguration');
-goog.require('shaka.util.StreamUtils');
+// goog.require('goog.asserts');
+// goog.require('shaka.Deprecate');
+// goog.require('shaka.Player');
+// goog.require('shaka.log');
+// goog.require('shaka.media.DrmEngine');
+// goog.require('shaka.media.ManifestParser');
+// goog.require('shaka.net.NetworkingEngine');
+// goog.require('shaka.offline.DownloadManager');
+// goog.require('shaka.offline.OfflineUri');
+// goog.require('shaka.offline.SessionDeleter');
+// goog.require('shaka.offline.StorageMuxer');
+// goog.require('shaka.offline.StoredContentUtils');
+// goog.require('shaka.offline.StreamBandwidthEstimator');
+// goog.require('shaka.util.ArrayUtils');
+// goog.require('shaka.util.Destroyer');
+// goog.require('shaka.util.Error');
+// goog.require('shaka.util.IDestroyable');
+// goog.require('shaka.util.ManifestFilter');
+// goog.require('shaka.util.Networking');
+// goog.require('shaka.util.Periods');
+// goog.require('shaka.util.Platform');
+// goog.require('shaka.util.PlayerConfiguration');
+// goog.require('shaka.util.StreamUtils');
+
+var shaka = window.shaka;
+var goog = window.goog;
 
 
 /**
