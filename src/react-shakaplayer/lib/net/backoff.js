@@ -20,6 +20,8 @@
 // goog.require('goog.asserts');
 // goog.require('shaka.util.Timer');
 
+import Timer from '../util/timer';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -29,7 +31,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.net.Backoff = class {
+export default class Backoff {
 	/**
 	 * @param {shaka.extern.RetryParameters} parameters
 	 * @param {boolean=} autoReset  If true, start at a "first retry" state and
@@ -40,7 +42,7 @@ shaka.net.Backoff = class {
 		// Set defaults as we unpack these, so that individual app-level requests in
 		// NetworkingEngine can be missing parameters.
 
-		const defaults = shaka.net.Backoff.defaultRetryParameters();
+		const defaults = Backoff.defaultRetryParameters();
 
 		/**
 		 * @const
@@ -102,11 +104,7 @@ shaka.net.Backoff = class {
 			if (this.autoReset_) {
 				this.reset_();
 			} else {
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.PLAYER,
-					shaka.util.Error.Code.ATTEMPTS_EXHAUSTED
-				);
+				throw new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.ATTEMPTS_EXHAUSTED);
 			}
 		}
 
@@ -122,10 +120,10 @@ shaka.net.Backoff = class {
 
 		// Fuzz the delay to avoid tons of clients hitting the server at once
 		// after it recovers from whatever is causing it to fail.
-		const fuzzedDelayMs = shaka.net.Backoff.fuzz_(this.nextUnfuzzedDelay_, this.fuzzFactor_);
+		const fuzzedDelayMs = Backoff.fuzz_(this.nextUnfuzzedDelay_, this.fuzzFactor_);
 
 		await new Promise(resolve => {
-			shaka.net.Backoff.defer(fuzzedDelayMs, resolve);
+			Backoff.defer(fuzzedDelayMs, resolve);
 		});
 
 		// Update delay_ for next time.
@@ -187,7 +185,7 @@ shaka.net.Backoff = class {
 	 * @param {function()} callback
 	 */
 	static defer(delayInMs, callback) {
-		const timer = new shaka.util.Timer(callback);
+		const timer = new Timer(callback);
 		timer.tickAfter(delayInMs / 1000);
 	}
-};
+}

@@ -36,7 +36,7 @@ var goog = window.goog;
  * @implements {shaka.extern.TextDisplayer}
  * @export
  */
-shaka.text.SimpleTextDisplayer = class {
+class SimpleTextDisplayer {
   /** @param {HTMLMediaElement} video */
   constructor(video) {
     /** @private {TextTrack} */
@@ -263,4 +263,6 @@ shaka.text.SimpleTextDisplayer = class {
  * @const {string}
  * @private
  */
-shaka.text.SimpleTextDisplayer.TextTrackLabel_ = 'Shaka Player TextTrack';
+SimpleTextDisplayer.TextTrackLabel_ = 'Shaka Player TextTrack';
+
+export default SimpleTextDisplayer
