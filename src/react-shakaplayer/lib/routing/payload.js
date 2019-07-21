@@ -58,4 +58,5 @@ var shaka = window.shaka;
  * @property  {?string} uri
  *   The address of the content that will be loaded.
  */
-shaka.routing.Payload;
+const Payload = {};
+export default Payload;

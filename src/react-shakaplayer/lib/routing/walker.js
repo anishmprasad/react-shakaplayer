@@ -26,6 +26,11 @@
 // goog.require('shaka.util.Destroyer');
 // goog.require('shaka.util.IDestroyable');
 
+import Node from '../routing/node';
+import Payload from '../routing/payload';
+import Destroyer from '../util/destroyer';
+import IDestroyable from '../util/i_destroyable';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -65,7 +70,7 @@ var goog = window.goog;
  * @implements {shaka.util.IDestroyable}
  * @final
  */
-shaka.routing.Walker = class {
+export default class Walker {
 	/**
 	 * Create a new walker that starts at |startingAt| and with |startingWith|.
 	 * The instance of |startingWith| will be the one that the walker holds and
@@ -117,7 +122,7 @@ shaka.routing.Walker = class {
 		this.mainLoopPromise_ = Promise.resolve().then(() => this.mainLoop_());
 
 		/** @private {!shaka.util.Destroyer} */
-		this.destroyer_ = new shaka.util.Destroyer(() => this.doDestroy_());
+		this.destroyer_ = new Destroyer(() => this.doDestroy_());
 	}
 
 	/** @override */
@@ -388,7 +393,7 @@ shaka.routing.Walker = class {
 			this.waitForWork_ = null;
 		}
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -445,7 +450,7 @@ shaka.routing.Walker = class {
  *   current node.  After |onIdle| has been called, the walker will block until
  *   a new request is made, or the walker is destroyed.
  */
-shaka.routing.Walker.Implementation;
+Walker.Implementation;
 
 /**
  * @typedef {{
@@ -492,7 +497,7 @@ shaka.routing.Walker.Implementation;
  *   The callback for when the walker enters a node. This will allow us to
  *   track the progress of the walker within a per-route scope.
  */
-shaka.routing.Walker.Listeners;
+Walker.Listeners;
 
 /**
  * @typedef {{
@@ -521,7 +526,7 @@ shaka.routing.Walker.Listeners;
  *   resolved. When |false|, the route will be allowed to finished before
  *   resolving the next request.
  */
-shaka.routing.Walker.Route;
+Walker.Route;
 
 /**
  * @typedef {{
@@ -558,7 +563,7 @@ shaka.routing.Walker.Route;
  *
  * @private
  */
-shaka.routing.Walker.ActiveRoute_;
+Walker.ActiveRoute_;
 
 /**
  * @typedef {{
@@ -583,4 +588,4 @@ shaka.routing.Walker.ActiveRoute_;
  *
  * @private
  */
-shaka.routing.Walker.Request_;
+Walker.Request_;

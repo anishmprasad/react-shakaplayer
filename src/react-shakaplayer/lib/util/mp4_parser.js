@@ -259,7 +259,7 @@ class Mp4Parser {
  * @typedef {function(!shaka.extern.ParsedBox)}
  * @exportInterface
  */
-shaka.util.Mp4Parser.CallbackType = {};
+Mp4Parser.CallbackType = {};
 
 /**
  * An enum used to track the type of box so that the correct values can be
@@ -268,7 +268,7 @@ shaka.util.Mp4Parser.CallbackType = {};
  * @enum {number}
  * @private
  */
-shaka.util.Mp4Parser.BoxType_ = {
+Mp4Parser.BoxType_ = {
 	BASIC_BOX: 0,
 	FULL_BOX: 1
 };

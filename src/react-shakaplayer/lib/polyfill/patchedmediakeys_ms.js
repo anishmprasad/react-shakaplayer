@@ -197,7 +197,7 @@ export default class PatchedMediaKeysMs {
  *
  * @implements {MediaKeySystemAccess}
  */
-shaka.polyfill.PatchedMediaKeysMs.MediaKeySystemAccess = class {
+PatchedMediaKeysMs.MediaKeySystemAccess = class {
 	/**
 	 * @param {string} keySystem
 	 * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations

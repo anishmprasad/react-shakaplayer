@@ -25,14 +25,14 @@ var shaka = window.shaka;
  * @implements {shaka.extern.Cue}
  * @export
  */
-shaka.text.Cue = class {
+export class Cue {
 	/**
 	 * @param {number} startTime
 	 * @param {number} endTime
 	 * @param {string} payload
 	 */
 	constructor(startTime, endTime, payload) {
-		const Cue = shaka.text.Cue;
+		// const Cue = shaka.text.Cue;
 
 		/**
 		 * @override
@@ -186,13 +186,13 @@ shaka.text.Cue = class {
 		 */
 		this.id = '';
 	}
-};
+}
 
 /**
  * @enum {string}
  * @export
  */
-shaka.text.Cue.positionAlign = {
+Cue.positionAlign = {
 	LEFT: 'line-left',
 	RIGHT: 'line-right',
 	CENTER: 'center',
@@ -203,7 +203,7 @@ shaka.text.Cue.positionAlign = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.textAlign = {
+Cue.textAlign = {
 	LEFT: 'left',
 	RIGHT: 'right',
 	CENTER: 'center',
@@ -218,7 +218,7 @@ shaka.text.Cue.textAlign = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.displayAlign = {
+Cue.displayAlign = {
 	BEFORE: 'before',
 	CENTER: 'center',
 	AFTER: 'after'
@@ -228,7 +228,7 @@ shaka.text.Cue.displayAlign = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.direction = {
+Cue.direction = {
 	HORIZONTAL_LEFT_TO_RIGHT: 'ltr',
 	HORIZONTAL_RIGHT_TO_LEFT: 'rtl'
 };
@@ -237,7 +237,7 @@ shaka.text.Cue.direction = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.writingMode = {
+Cue.writingMode = {
 	HORIZONTAL_TOP_TO_BOTTOM: 'horizontal-tb',
 	VERTICAL_LEFT_TO_RIGHT: 'vertical-lr',
 	VERTICAL_RIGHT_TO_LEFT: 'vertical-rl'
@@ -247,7 +247,7 @@ shaka.text.Cue.writingMode = {
  * @enum {number}
  * @export
  */
-shaka.text.Cue.lineInterpretation = {
+Cue.lineInterpretation = {
 	LINE_NUMBER: 0,
 	PERCENTAGE: 1
 };
@@ -256,7 +256,7 @@ shaka.text.Cue.lineInterpretation = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.lineAlign = {
+Cue.lineAlign = {
 	CENTER: 'center',
 	START: 'start',
 	END: 'end'
@@ -268,7 +268,7 @@ shaka.text.Cue.lineAlign = {
  * @enum {number}
  * @export
  */
-shaka.text.Cue.fontWeight = {
+Cue.fontWeight = {
 	NORMAL: 400,
 	BOLD: 700
 };
@@ -277,7 +277,7 @@ shaka.text.Cue.fontWeight = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.fontStyle = {
+Cue.fontStyle = {
 	NORMAL: 'normal',
 	ITALIC: 'italic',
 	OBLIQUE: 'oblique'
@@ -287,7 +287,7 @@ shaka.text.Cue.fontStyle = {
  * @enum {string}
  * @export
  */
-shaka.text.Cue.textDecoration = {
+Cue.textDecoration = {
 	UNDERLINE: 'underline',
 	LINE_THROUGH: 'lineThrough',
 	OVERLINE: 'overline'
@@ -298,9 +298,9 @@ shaka.text.Cue.textDecoration = {
  * @struct
  * @export
  */
-shaka.text.CueRegion = class {
+export class CueRegion {
 	constructor() {
-		const CueRegion = shaka.text.CueRegion;
+		// const CueRegion = shaka.text.CueRegion;
 
 		/**
 		 * @override
@@ -368,13 +368,13 @@ shaka.text.CueRegion = class {
 		 */
 		this.scroll = CueRegion.scrollMode.NONE;
 	}
-};
+}
 
 /**
  * @enum {number}
  * @export
  */
-shaka.text.CueRegion.units = {
+CueRegion.units = {
 	PX: 0,
 	PERCENTAGE: 1,
 	LINES: 2
@@ -384,7 +384,7 @@ shaka.text.CueRegion.units = {
  * @enum {string}
  * @export
  */
-shaka.text.CueRegion.scrollMode = {
+CueRegion.scrollMode = {
 	NONE: '',
 	UP: 'up'
 };

@@ -33,4 +33,6 @@ var shaka = window.shaka;
  *   A human-readable name for this node. While this should not be used in
  *   production, the name helps identify nodes when debugging.
  */
-shaka.routing.Node;
+
+const Node = {};
+export default Node;

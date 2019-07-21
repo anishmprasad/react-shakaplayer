@@ -19,6 +19,8 @@
 
 // goog.require('shaka.util.DelayedTick');
 
+import DelayedTick from '../util/delayed_tick';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -29,7 +31,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.util.Timer = class {
+export default class Timer {
 	/**
 	 * Create a new timer. A timer is committed to a single callback function.
 	 * While there is no technical reason to do this, it is far easier to
@@ -74,7 +76,7 @@ shaka.util.Timer = class {
 	tickAfter(seconds) {
 		this.stop();
 
-		this.ticker_ = new shaka.util.DelayedTick(() => {
+		this.ticker_ = new DelayedTick(() => {
 			this.onTick_();
 		}).tickAfter(seconds);
 
@@ -91,7 +93,7 @@ shaka.util.Timer = class {
 	tickEvery(seconds) {
 		this.stop();
 
-		this.ticker_ = new shaka.util.DelayedTick(() => {
+		this.ticker_ = new DelayedTick(() => {
 			// Schedule the timer again first. |onTick_| could cancel the timer and
 			// rescheduling first simplifies the implementation.
 			this.ticker_.tickAfter(seconds);
@@ -113,4 +115,4 @@ shaka.util.Timer = class {
 			this.ticker_ = null;
 		}
 	}
-};
+}

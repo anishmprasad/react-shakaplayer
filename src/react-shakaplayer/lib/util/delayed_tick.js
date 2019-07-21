@@ -26,7 +26,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.DelayedTick = class {
+export default class DelayedTick {
 	/**
 	 * @param {function()} onTick
 	 */
@@ -84,4 +84,4 @@ shaka.util.DelayedTick = class {
 			this.cancelPending_ = null;
 		}
 	}
-};
+}
