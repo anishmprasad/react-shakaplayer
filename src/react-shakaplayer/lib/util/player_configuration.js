@@ -20,6 +20,10 @@
 // goog.require('shaka.abr.SimpleAbrManager');
 // goog.require('shaka.util.ConfigUtils');
 
+import SimpleAbrManager from '../abr/simple_abr_manager';
+import ConfigUtils from '../util/config_utils';
+import NetworkingEngine from '../net/networking_engine';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -35,7 +39,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.util.PlayerConfiguration = class {
+class PlayerConfiguration {
 	/** @return {shaka.extern.PlayerConfiguration} */
 	static createDefault() {
 		// This is a relatively safe default in the absence of clues from the
@@ -78,7 +82,7 @@ shaka.util.PlayerConfiguration = class {
 		}
 
 		const drm = {
-			retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+			retryParameters: NetworkingEngine.defaultRetryParameters(),
 			// These will all be verified by special cases in mergeConfigObjects_():
 			servers: {}, // key is arbitrary key system ID, value must be string
 			clearKeys: {}, // key is arbitrary key system ID, value must be string
@@ -87,7 +91,7 @@ shaka.util.PlayerConfiguration = class {
 		};
 
 		const manifest = {
-			retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+			retryParameters: NetworkingEngine.defaultRetryParameters(),
 			availabilityWindowOverride: NaN,
 			dash: {
 				// Reference node to keep closure from removing it.
@@ -106,7 +110,7 @@ shaka.util.PlayerConfiguration = class {
 		};
 
 		const streaming = {
-			retryParameters: shaka.net.NetworkingEngine.defaultRetryParameters(),
+			retryParameters: NetworkingEngine.defaultRetryParameters(),
 			// Need some operation in the callback or else closure may remove calls
 			// to the function as it would be a no-op.
 			failureCallback: error => {
@@ -181,7 +185,7 @@ shaka.util.PlayerConfiguration = class {
 			manifest: manifest,
 			streaming: streaming,
 			offline: offline,
-			abrFactory: shaka.abr.SimpleAbrManager,
+			abrFactory: SimpleAbrManager,
 			abr: abr,
 			preferredAudioLanguage: '',
 			preferredTextLanguage: '',
@@ -236,7 +240,7 @@ shaka.util.PlayerConfiguration = class {
 				individualizationServer: ''
 			}
 		};
-		return shaka.util.ConfigUtils.mergeConfigObjects(
+		return ConfigUtils.mergeConfigObjects(
 			destination,
 			updates,
 			template || shaka.util.PlayerConfiguration.createDefault(),
@@ -345,4 +349,6 @@ shaka.util.PlayerConfiguration = class {
 
 		return selectedTracks;
 	}
-};
+}
+
+export default PlayerConfiguration;

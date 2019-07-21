@@ -19,6 +19,8 @@
 
 // goog.require('shaka.offline.indexeddb.DBConnection');
 
+import DBConnection from '../indexeddb/db_connection';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -27,14 +29,14 @@ var shaka = window.shaka;
  *
  * @implements {shaka.extern.EmeSessionStorageCell}
  */
-shaka.offline.indexeddb.EmeSessionStorageCell = class {
+export default class EmeSessionStorageCell {
 	/**
 	 * @param {IDBDatabase} connection
 	 * @param {string} store
 	 */
 	constructor(connection, store) {
 		/** @private {!shaka.offline.indexeddb.DBConnection} */
-		this.connection_ = new shaka.offline.indexeddb.DBConnection(connection);
+		this.connection_ = new DBConnection(connection);
 
 		/** @private {string} */
 		this.store_ = store;
@@ -85,4 +87,4 @@ shaka.offline.indexeddb.EmeSessionStorageCell = class {
 
 		await op.promise();
 	}
-};
+}

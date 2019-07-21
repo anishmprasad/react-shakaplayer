@@ -24,7 +24,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.Periods = class {
+export default class Periods {
 	/**
 	 * Get all the variants across all periods.
 	 *
@@ -67,4 +67,4 @@ shaka.util.Periods = class {
 
 		return bestGuess;
 	}
-};
+}

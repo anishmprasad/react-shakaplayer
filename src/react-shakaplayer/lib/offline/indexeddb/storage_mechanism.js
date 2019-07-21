@@ -26,6 +26,13 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.PublicPromise');
 
+import StorageMuxer from '../../offline/storage_muxer';
+import EmeSessionStorageCell from '../../offline/indexeddb/eme_session_storage_cell';
+import V1StorageCell from '../../offline/indexeddb/v1_storage_cell';
+import V2StorageCell from '../../offline/indexeddb/v2_storage_cell';
+import Error from '../../util/error';
+import PublicPromise from '../../util/public_promise';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -40,7 +47,7 @@ var goog = window.goog;
  *
  * @implements {shaka.extern.StorageMechanism}
  */
-shaka.offline.indexeddb.StorageMechanism = class {
+class StorageMechanism {
 	constructor() {
 		/** @private {IDBDatabase} */
 		this.db_ = null;
@@ -59,18 +66,18 @@ shaka.offline.indexeddb.StorageMechanism = class {
 	 * @override
 	 */
 	init() {
-		const name = shaka.offline.indexeddb.StorageMechanism.DB_NAME;
-		const version = shaka.offline.indexeddb.StorageMechanism.VERSION;
+		const name = StorageMechanism.DB_NAME;
+		const version = StorageMechanism.VERSION;
 
 		const p = new shaka.util.PublicPromise();
 		const open = window.indexedDB.open(name, version);
 		open.onsuccess = event => {
 			const db = event.target.result;
 			this.db_ = db;
-			this.v1_ = shaka.offline.indexeddb.StorageMechanism.createV1_(db);
-			this.v2_ = shaka.offline.indexeddb.StorageMechanism.createV2_(db);
-			this.v3_ = shaka.offline.indexeddb.StorageMechanism.createV3_(db);
-			this.sessions_ = shaka.offline.indexeddb.StorageMechanism.createEmeSession_(db);
+			this.v1_ = StorageMechanism.createV1_(db);
+			this.v2_ = StorageMechanism.createV2_(db);
+			this.v3_ = StorageMechanism.createV3_(db);
+			this.sessions_ = StorageMechanism.createEmeSession_(db);
 			p.resolve();
 		};
 		open.onupgradeneeded = event => {
@@ -79,7 +86,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 		};
 		open.onerror = event => {
 			p.reject(
-				new shaka.util.Error(
+				new Error(
 					shaka.util.Error.Severity.CRITICAL,
 					shaka.util.Error.Category.STORAGE,
 					shaka.util.Error.Code.INDEXED_DB_ERROR,
@@ -167,7 +174,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 			this.db_.close();
 		}
 
-		await shaka.offline.indexeddb.StorageMechanism.deleteAll_();
+		await StorageMechanism.deleteAll_();
 
 		// Reset before initializing.
 		this.db_ = null;
@@ -191,7 +198,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 		if (stores.contains(manifestStore) && stores.contains(segmentStore)) {
 			shaka.log.debug('Mounting v1 idb storage cell');
 
-			return new shaka.offline.indexeddb.V1StorageCell(db, segmentStore, manifestStore);
+			return new V1StorageCell(db, segmentStore, manifestStore);
 		}
 		return null;
 	}
@@ -209,7 +216,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 		if (stores.contains(manifestStore) && stores.contains(segmentStore)) {
 			shaka.log.debug('Mounting v2 idb storage cell');
 
-			return new shaka.offline.indexeddb.V2StorageCell(db, segmentStore, manifestStore, true); // Are keys locked? Yes, this means no new additions.
+			return new V2StorageCell(db, segmentStore, manifestStore, true); // Are keys locked? Yes, this means no new additions.
 		}
 		return null;
 	}
@@ -229,7 +236,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 
 			// Version 3 uses the same structure as version 2, so we can use the same
 			// cells but it can support new entries.
-			return new shaka.offline.indexeddb.V2StorageCell(db, segmentStore, manifestStore, false); // Are keys locked? No, this means we can add new entries.
+			return new V2StorageCell(db, segmentStore, manifestStore, false); // Are keys locked? No, this means we can add new entries.
 		}
 		return null;
 	}
@@ -244,7 +251,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 		const store = StorageMechanism.SESSION_ID_STORE;
 		if (db.objectStoreNames.contains(store)) {
 			shaka.log.debug('Mounting session ID idb storage cell');
-			return new shaka.offline.indexeddb.EmeSessionStorageCell(db, store);
+			return new EmeSessionStorageCell(db, store);
 		}
 		return null;
 	}
@@ -255,9 +262,9 @@ shaka.offline.indexeddb.StorageMechanism = class {
 	 */
 	createStores_(db) {
 		const storeNames = [
-			shaka.offline.indexeddb.StorageMechanism.V3_SEGMENT_STORE,
-			shaka.offline.indexeddb.StorageMechanism.V3_MANIFEST_STORE,
-			shaka.offline.indexeddb.StorageMechanism.SESSION_ID_STORE
+			StorageMechanism.V3_SEGMENT_STORE,
+			StorageMechanism.V3_MANIFEST_STORE,
+			StorageMechanism.SESSION_ID_STORE
 		];
 
 		for (const name of storeNames) {
@@ -275,7 +282,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 	 * @private
 	 */
 	static deleteAll_() {
-		const name = shaka.offline.indexeddb.StorageMechanism.DB_NAME;
+		const name = StorageMechanism.DB_NAME;
 
 		const p = new shaka.util.PublicPromise();
 
@@ -288,7 +295,7 @@ shaka.offline.indexeddb.StorageMechanism = class {
 		};
 		del.onerror = event => {
 			p.reject(
-				new shaka.util.Error(
+				new Error(
 					shaka.util.Error.Severity.CRITICAL,
 					shaka.util.Error.Category.STORAGE,
 					shaka.util.Error.Code.INDEXED_DB_ERROR,
@@ -302,26 +309,26 @@ shaka.offline.indexeddb.StorageMechanism = class {
 
 		return p;
 	}
-};
+}
 
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.DB_NAME = 'shaka_offline_db';
+StorageMechanism.DB_NAME = 'shaka_offline_db';
 /** @const {number} */
-shaka.offline.indexeddb.StorageMechanism.VERSION = 4;
+StorageMechanism.VERSION = 4;
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.V1_SEGMENT_STORE = 'segment';
+StorageMechanism.V1_SEGMENT_STORE = 'segment';
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.V2_SEGMENT_STORE = 'segment-v2';
+StorageMechanism.V2_SEGMENT_STORE = 'segment-v2';
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.V3_SEGMENT_STORE = 'segment-v3';
+StorageMechanism.V3_SEGMENT_STORE = 'segment-v3';
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.V1_MANIFEST_STORE = 'manifest';
+StorageMechanism.V1_MANIFEST_STORE = 'manifest';
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.V2_MANIFEST_STORE = 'manifest-v2';
+StorageMechanism.V2_MANIFEST_STORE = 'manifest-v2';
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.V3_MANIFEST_STORE = 'manifest-v3';
+StorageMechanism.V3_MANIFEST_STORE = 'manifest-v3';
 /** @const {string} */
-shaka.offline.indexeddb.StorageMechanism.SESSION_ID_STORE = 'session-ids';
+StorageMechanism.SESSION_ID_STORE = 'session-ids';
 
 // Since this may be called before the polyfills remove indexeddb support from
 // some platforms (looking at you Chromecast), we need to check for support
@@ -329,6 +336,8 @@ shaka.offline.indexeddb.StorageMechanism.SESSION_ID_STORE = 'session-ids';
 //
 // Thankfully the storage muxer api allows us to return a null mechanism
 // to indicate that the mechanism is not supported on this platform.
-shaka.offline.StorageMuxer.register('idb', () => {
-	return window.indexedDB ? new shaka.offline.indexeddb.StorageMechanism() : null;
+StorageMuxer.register('idb', () => {
+	return window.indexedDB ? new StorageMechanism() : null;
 });
+
+export default StorageMechanism;

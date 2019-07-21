@@ -18,6 +18,7 @@
 // goog.provide('shaka.offline.indexeddb.DBOperation');
 
 // goog.require('shaka.util.PublicPromise');
+import PublicPromise from '../../util/public_promise';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -25,7 +26,7 @@ var goog = window.goog;
 /**
  * A DBOperation wraps an IndexedDB transaction in a promise.
  */
-shaka.offline.indexeddb.DBOperation = class {
+export default class DBOperation {
 	/**
 	 * @param {IDBTransaction} transaction
 	 * @param {string} storeName
@@ -36,7 +37,7 @@ shaka.offline.indexeddb.DBOperation = class {
 		/** @private {IDBObjectStore} */
 		this.store_ = transaction.objectStore(storeName);
 		/** @private {!shaka.util.PublicPromise} */
-		this.promise_ = new shaka.util.PublicPromise();
+		this.promise_ = new PublicPromise();
 
 		// Connect the transaction and the promise together.
 		// |event.preventDefault()| is used on all non-successful callbacks to
@@ -123,4 +124,4 @@ shaka.offline.indexeddb.DBOperation = class {
 	promise() {
 		return this.promise_;
 	}
-};
+}

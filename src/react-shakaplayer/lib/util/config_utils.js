@@ -24,7 +24,7 @@ var shaka = window.shaka;
 var goog = window.goog;
 
 /** @export */
-shaka.util.ConfigUtils = class {
+export default class ConfigUtils {
 	/**
 	 * @param {!Object} destination
 	 * @param {!Object} source
@@ -138,4 +138,4 @@ shaka.util.ConfigUtils = class {
 		last[fieldName.substring(nameStart).replace(/\\\./g, '.')] = value;
 		return configObject;
 	}
-};
+}

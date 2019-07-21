@@ -19,6 +19,8 @@
 
 // goog.require('shaka.offline.indexeddb.DBOperation');
 // goog.require('shaka.util.ArrayUtils');
+import DBOperation from '../indexeddb/db_operation';
+import ArrayUtils from '../../util/array_utils';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -28,7 +30,7 @@ var goog = window.goog;
  * operations. If the connection is killed (via |destroy|) all pending
  * operations will be cancelled.
  */
-shaka.offline.indexeddb.DBConnection = class {
+export default class DBConnection {
 	/**
 	 * @param {IDBDatabase} connection A connection to an IndexedDB instance.
 	 */
@@ -79,7 +81,7 @@ shaka.offline.indexeddb.DBConnection = class {
 	 */
 	startOperation_(store, type) {
 		const transaction = this.connection_.transaction([store], type);
-		const operation = new shaka.offline.indexeddb.DBOperation(transaction, store);
+		const operation = new DBOperation(transaction, store);
 
 		this.pending_.push(operation);
 
@@ -94,6 +96,6 @@ shaka.offline.indexeddb.DBConnection = class {
 	 * @private
 	 */
 	stopTracking_(operation) {
-		shaka.util.ArrayUtils.remove(this.pending_, operation);
+		ArrayUtils.remove(this.pending_, operation);
 	}
-};
+}

@@ -20,6 +20,7 @@
 // goog.require('shaka.offline.indexeddb.DBConnection');
 // goog.require('shaka.util.Error');
 
+import DBConnection from '../../offline/indexeddb/db_connection';
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -30,7 +31,7 @@ var goog = window.goog;
  *
  * @implements {shaka.extern.StorageCell}
  */
-shaka.offline.indexeddb.V2StorageCell = class {
+export default class V2StorageCell {
 	/**
 	 * @param {IDBDatabase} connection
 	 * @param {string} segmentStore
@@ -39,7 +40,7 @@ shaka.offline.indexeddb.V2StorageCell = class {
 	 */
 	constructor(connection, segmentStore, manifestStore, isFixedKey) {
 		/** @private {!shaka.offline.indexeddb.DBConnection} */
-		this.connection_ = new shaka.offline.indexeddb.DBConnection(connection);
+		this.connection_ = new DBConnection(connection);
 
 		/** @private {string} */
 		this.segmentStore_ = segmentStore;
@@ -246,4 +247,4 @@ shaka.offline.indexeddb.V2StorageCell = class {
 
 		return keys.map(key => values[key]);
 	}
-};
+}
