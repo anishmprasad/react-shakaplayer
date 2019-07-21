@@ -16,6 +16,7 @@
  */
 
 // goog.provide('shaka.util.Networking');
+import NetworkingEngine from '../net/networking_engine';
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -26,7 +27,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.Networking = class {
+export default class Networking {
 	/**
 	 * Create a request message for a segment. Providing |start| and |end|
 	 * will set the byte range. A non-zero start must be provided for |end| to
@@ -39,7 +40,7 @@ shaka.util.Networking = class {
 	 * @return {shaka.extern.Request}
 	 */
 	static createSegmentRequest(uris, start, end, retryParameters) {
-		const request = shaka.net.NetworkingEngine.makeRequest(uris, retryParameters);
+		const request = NetworkingEngine.makeRequest(uris, retryParameters);
 
 		if (start == 0 && end == null) {
 			// This is a request for the entire segment.  The Range header is not
@@ -55,4 +56,4 @@ shaka.util.Networking = class {
 
 		return request;
 	}
-};
+}

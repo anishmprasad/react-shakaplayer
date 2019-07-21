@@ -25,7 +25,7 @@ var goog = window.goog;
  * @implements {shaka.extern.Error}
  * @extends {Error}
  */
-shaka.util.Error = class {
+class ErrorUtils {
 	/**
 	 * @param {shaka.util.Error.Severity} severity
 	 * @param {shaka.util.Error.Category} category
@@ -108,7 +108,7 @@ shaka.util.Error = class {
 	toString() {
 		return 'shaka.util.Error ' + JSON.stringify(this, null, '  ');
 	}
-};
+}
 
 if (goog.DEBUG) {
 	/**
@@ -126,7 +126,7 @@ if (goog.DEBUG) {
  * @enum {number}
  * @export
  */
-shaka.util.Error.Severity = {
+Error.Severity = {
 	/**
 	 * An error occurred, but the Player is attempting to recover from the error.
 	 *
@@ -148,7 +148,7 @@ shaka.util.Error.Severity = {
  * @enum {number}
  * @export
  */
-shaka.util.Error.Category = {
+ErrorUtils.Category = {
 	/** Errors from the network stack. */
 	NETWORK: 1,
 
@@ -181,7 +181,7 @@ shaka.util.Error.Category = {
  * @enum {number}
  * @export
  */
-shaka.util.Error.Code = {
+ErrorUtils.Code = {
 	/**
 	 * A network request was made using an unsupported URI scheme.
 	 * <br> error.data[0] is the URI.
@@ -884,3 +884,5 @@ shaka.util.Error.Code = {
 	 */
 	MISSING_STORAGE_CELL: 9013
 };
+
+export default ErrorUtils;

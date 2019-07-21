@@ -26,7 +26,7 @@ var goog = window.goog;
  * @interface
  * @exportInterface
  */
-shaka.util.IDestroyable = class {
+export default class IDestroyable {
 	/**
 	 * Request that this object be destroyed, releasing all resources and shutting
 	 * down all operations. Returns a Promise which is resolved when destruction
@@ -36,4 +36,4 @@ shaka.util.IDestroyable = class {
 	 * @exportInterface
 	 */
 	destroy() {}
-};
+}

@@ -26,7 +26,7 @@ var goog = window.goog;
  * This utility class contains all the functions used to filter manifests
  * before playback and before storage.
  */
-shaka.util.ManifestFilter = class {
+class ManifestFilter {
 	/**
 	 * Filter the variants in |manifest| to only include the variants that meet
 	 * the given restrictions.
@@ -91,11 +91,11 @@ shaka.util.ManifestFilter = class {
 	static filterByCommonCodecs(manifest) {
 		goog.asserts.assert(manifest.periods.length > 0, 'There should be at least be one period');
 
-		const ManifestFilter = shaka.util.ManifestFilter;
+		// const ManifestFilter = shaka.util.ManifestFilter;
 
 		// Create a set of summaries that occur in each period.
 		/** @type {!shaka.util.ManifestFilter.VariantCodecSummarySet} */
-		const common = new shaka.util.ManifestFilter.VariantCodecSummarySet();
+		const common = new ManifestFilter.VariantCodecSummarySet();
 
 		let first = true;
 		for (const period of manifest.periods) {
@@ -129,7 +129,7 @@ shaka.util.ManifestFilter = class {
 	 * @param {function(shaka.extern.Period)} filter
 	 */
 	static rollingFilter(manifest, filter) {
-		const ManifestFilter = shaka.util.ManifestFilter;
+		// const ManifestFilter = ManifestFilter;
 
 		// Store a reference to the variants so that the next period can easily
 		// reference them too.
@@ -155,7 +155,7 @@ shaka.util.ManifestFilter = class {
 			previous = ManifestFilter.VariantCodecSummarySet.fromVariants(period.variants);
 		}
 	}
-};
+}
 
 /**
  * The variant codec summary is a summary of the codec information for a given
@@ -164,7 +164,7 @@ shaka.util.ManifestFilter = class {
  *
  * @final
  */
-shaka.util.ManifestFilter.VariantCodecSummary = class {
+ManifestFilter.VariantCodecSummary = class {
 	/**
 	 * @param {shaka.extern.Variant} variant
 	 */
@@ -206,7 +206,7 @@ shaka.util.ManifestFilter.VariantCodecSummary = class {
 /**
  * @final
  */
-shaka.util.ManifestFilter.VariantCodecSummarySet = class {
+ManifestFilter.VariantCodecSummarySet = class {
 	constructor() {
 		/** @private {!Array.<!shaka.util.ManifestFilter.VariantCodecSummary>} */
 		this.all_ = [];
@@ -256,10 +256,11 @@ shaka.util.ManifestFilter.VariantCodecSummarySet = class {
 	 * @return {!shaka.util.ManifestFilter.VariantCodecSummarySet}
 	 */
 	static fromVariants(variants) {
-		const set = new shaka.util.ManifestFilter.VariantCodecSummarySet();
+		const set = new ManifestFilter.VariantCodecSummarySet();
 		for (const variant of variants) {
-			set.add(new shaka.util.ManifestFilter.VariantCodecSummary(variant));
+			set.add(new ManifestFilter.VariantCodecSummary(variant));
 		}
 		return set;
 	}
 };
+export default ManifestFilter;
