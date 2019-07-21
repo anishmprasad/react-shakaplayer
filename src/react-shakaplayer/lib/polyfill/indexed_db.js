@@ -23,13 +23,15 @@
 // goog.require('shaka.log');
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
 /**
  * @summary A polyfill to patch IndexedDB bugs.
  */
-shaka.polyfill.IndexedDB = class {
+export default class IndexedDB {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -42,6 +44,6 @@ shaka.polyfill.IndexedDB = class {
 			goog.asserts.assert(!window.indexedDB, 'Failed to override window.indexedDB');
 		}
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.IndexedDB.install);
+polyfill.register(IndexedDB.install);

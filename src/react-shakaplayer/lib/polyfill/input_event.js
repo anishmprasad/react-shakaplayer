@@ -20,13 +20,14 @@
 // goog.require('shaka.log');
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
 var shaka = window.shaka;
 // var goog = window.goog;
 
 /**
  * @summary A polyfill to patch 'input' event support in IE11.
  */
-shaka.polyfill.InputEvent = class {
+export default class InputEvent {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -84,12 +85,14 @@ shaka.polyfill.InputEvent = class {
 				case 'range':
 					type = 'change';
 					break;
+				default:
+					break;
 			}
 		}
 
 		// eslint-disable-next-line no-restricted-syntax
 		HTMLInputElement.prototype['originalAddEventListener'].call(this, type, listener, options);
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.InputEvent.install);
+polyfill.register(InputEvent.install);

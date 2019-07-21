@@ -25,13 +25,13 @@ var shaka = window.shaka;
  * @see http://enwp.org/polyfill
  * @exportDoc
  */
-shaka.polyfill = class {
+class polyfill {
 	/**
 	 * Install all polyfills.
 	 * @export
 	 */
 	static installAll() {
-		for (const polyfill of shaka.polyfill.polyfills_) {
+		for (const polyfill of this.polyfills_) {
 			polyfill.callback();
 		}
 	}
@@ -47,18 +47,23 @@ shaka.polyfill = class {
 	static register(polyfill, priority) {
 		priority = priority || 0;
 		const item = { priority: priority, callback: polyfill };
-		for (let i = 0; i < shaka.polyfill.polyfills_.length; i++) {
-			if (shaka.polyfill.polyfills_[i].priority < priority) {
-				shaka.polyfill.polyfills_.splice(i, 0, item);
+		for (let i = 0; i < this.polyfills_.length; i++) {
+			if (this.polyfills_[i].priority < priority) {
+				this.polyfills_.splice(i, 0, item);
 				return;
 			}
 		}
-		shaka.polyfill.polyfills_.push(item);
+		this.polyfills_.push(item);
 	}
-};
+	polyfills_ = [];
+}
 
 /**
  * Contains the polyfills that will be installed.
  * @private {!Array.<{priority: number, callback: function()}>}
  */
-shaka.polyfill.polyfills_ = [];
+polyfill.polyfills_ = [];
+
+console.log(polyfill);
+
+export default polyfill;

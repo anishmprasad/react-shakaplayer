@@ -19,6 +19,8 @@
 
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -28,7 +30,7 @@ var shaka = window.shaka;
  * See {@link https://mzl.la/2K0xcHo Using fullscreen mode} on MDN for more
  * information.
  */
-shaka.polyfill.Fullscreen = class {
+export default class Fullscreen {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -101,6 +103,6 @@ shaka.polyfill.Fullscreen = class {
 
 		event.target.dispatchEvent(newEvent);
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.Fullscreen.install);
+polyfill.register(Fullscreen.install);
