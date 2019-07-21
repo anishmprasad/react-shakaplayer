@@ -23,8 +23,7 @@ var goog = window.goog;
  * @namespace shaka.util.ArrayUtils
  * @summary Array utility functions.
  */
-
-shaka.util.ArrayUtils = class {
+export default class ArrayUtils {
 	/**
 	 * Returns whether the two values contain the same value.  This correctly
 	 * handles comparisons involving NaN.
@@ -102,4 +101,4 @@ shaka.util.ArrayUtils = class {
 
 		return copy.length == 0;
 	}
-};
+}

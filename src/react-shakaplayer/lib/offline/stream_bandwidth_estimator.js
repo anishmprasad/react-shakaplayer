@@ -28,7 +28,7 @@ var goog = window.goog;
  * creating non-zero bandwidth estimates for all streams so that each stream
  * will have some influence over the progress of the download.
  */
-shaka.offline.StreamBandwidthEstimator = class {
+class StreamBandwidthEstimator {
 	constructor() {
 		/** @private {!Object.<number, number>} */
 		this.estimateByStreamId_ = {};
@@ -148,7 +148,7 @@ shaka.offline.StreamBandwidthEstimator = class {
 
 		return bitRate;
 	}
-};
+}
 
 /**
  * Since audio bandwidth does not vary much, we are going to use a constant
@@ -161,7 +161,7 @@ shaka.offline.StreamBandwidthEstimator = class {
  * @const {number}
  * @private
  */
-shaka.offline.StreamBandwidthEstimator.DEFAULT_AUDIO_BITRATE_ = 393216;
+StreamBandwidthEstimator.DEFAULT_AUDIO_BITRATE_ = 393216;
 
 /**
  * Since we don't normally get the bitrate for text, we still want to create
@@ -174,4 +174,6 @@ shaka.offline.StreamBandwidthEstimator.DEFAULT_AUDIO_BITRATE_ = 393216;
  * @const {number}
  * @private
  */
-shaka.offline.StreamBandwidthEstimator.DEFAULT_TEXT_BITRATE_ = 52;
+StreamBandwidthEstimator.DEFAULT_TEXT_BITRATE_ = 52;
+
+export default StreamBandwidthEstimator;

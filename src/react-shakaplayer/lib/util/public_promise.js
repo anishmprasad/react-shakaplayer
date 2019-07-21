@@ -27,7 +27,7 @@ var goog = window.goog;
  * @extends {Promise.<T>}
  * @template T
  */
-shaka.util.PublicPromise = class {
+export default class PublicPromise {
 	/**
 	 * @return {Promise.<T>}
 	 */
@@ -63,4 +63,4 @@ shaka.util.PublicPromise = class {
 
 	/** @param {*=} reason */
 	reject(reason) {}
-};
+}

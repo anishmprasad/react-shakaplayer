@@ -39,7 +39,7 @@ var goog = window.goog;
 
 
 /** @implements {shaka.util.IDestroyable} */
-shaka.media.DrmEngine = class {
+class DrmEngine {
   /** @param {shaka.media.DrmEngine.PlayerInterface} playerInterface */
   constructor(playerInterface) {
     /** @private {?shaka.media.DrmEngine.PlayerInterface} */
@@ -1964,7 +1964,7 @@ shaka.media.DrmEngine = class {
  *   call.  This is used to track the 'license-release' message when calling
  *   remove().
  */
-shaka.media.DrmEngine.SessionMetaData;
+DrmEngine.SessionMetaData = {}
 
 
 /**
@@ -1990,7 +1990,7 @@ shaka.media.DrmEngine.SessionMetaData;
  * @property {function(!Event)} onEvent
  *   Called when an event occurs that should be sent to the app.
  */
-shaka.media.DrmEngine.PlayerInterface;
+DrmEngine.PlayerInterface = {}
 
 
 /**
@@ -1998,7 +1998,7 @@ shaka.media.DrmEngine.PlayerInterface;
  * This allows us to work around Chrome bug https://crbug.com/690583.
  * @private {number}
  */
-shaka.media.DrmEngine.CLOSE_TIMEOUT_ = 1;
+DrmEngine.CLOSE_TIMEOUT_ = 1;
 
 
 /**
@@ -2007,7 +2007,7 @@ shaka.media.DrmEngine.CLOSE_TIMEOUT_ = 1;
  * without key statuses.
  * @private {number}
  */
-shaka.media.DrmEngine.SESSION_LOAD_TIMEOUT_ = 5;
+DrmEngine.SESSION_LOAD_TIMEOUT_ = 5;
 
 
 /**
@@ -2015,4 +2015,6 @@ shaka.media.DrmEngine.SESSION_LOAD_TIMEOUT_ = 5;
  * This allows us to avoid multiple expiration events in most cases.
  * @type {number}
  */
-shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME = 0.5;
+DrmEngine.KEY_STATUS_BATCH_TIME = 0.5;
+
+export default DrmEngine

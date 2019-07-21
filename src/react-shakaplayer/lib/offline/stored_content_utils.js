@@ -23,6 +23,11 @@
 // goog.require('shaka.offline.OfflineUri');
 // goog.require('shaka.util.StreamUtils');
 
+import PresentationTimeline from '../media/presentation_timeline';
+import ManifestConverter from '../offline/manifest_converter';
+import OfflineUri from '../offline/offline_uri';
+import StreamUtil from '../util/stream_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -30,7 +35,7 @@ var goog = window.goog;
  * A utility class used to create |shaka.extern.StoredContent| from different
  * types of input.
  */
-shaka.offline.StoredContentUtils = class {
+export default class StoredContentUtils {
 	/**
 	 * @param {string} originalUri
 	 * @param {shaka.extern.Manifest} manifest
@@ -51,7 +56,7 @@ shaka.offline.StoredContentUtils = class {
 		const firstPeriod = manifest.periods[0];
 
 		/** @type {!Array.<shaka.extern.Track>} */
-		const tracks = shaka.offline.StoredContentUtils.getTracks_(firstPeriod);
+		const tracks = StoredContentUtils.getTracks_(firstPeriod);
 
 		/** @type {shaka.extern.StoredContent} */
 		const content = {
@@ -75,12 +80,12 @@ shaka.offline.StoredContentUtils = class {
 	static fromManifestDB(offlineUri, manifestDB) {
 		goog.asserts.assert(manifestDB.periods.length, 'Cannot create stored content from manifestDB with no periods.');
 
-		const converter = new shaka.offline.ManifestConverter(offlineUri.mechanism(), offlineUri.cell());
+		const converter = new ManifestConverter(offlineUri.mechanism(), offlineUri.cell());
 
 		/** @type {shaka.extern.PeriodDB} */
 		const firstPeriodDB = manifestDB.periods[0];
 		/** @type {!shaka.media.PresentationTimeline} */
-		const timeline = new shaka.media.PresentationTimeline(null, 0);
+		const timeline = new PresentationTimeline(null, 0);
 
 		/** @type {shaka.extern.Period} */
 		const firstPeriod = converter.fromPeriodDB(firstPeriodDB, timeline);
@@ -113,7 +118,7 @@ shaka.offline.StoredContentUtils = class {
 	 * @private
 	 */
 	static getTracks_(period) {
-		const StreamUtils = shaka.util.StreamUtils;
+		const StreamUtils = StreamUtil;
 
 		const tracks = [];
 
@@ -129,4 +134,4 @@ shaka.offline.StoredContentUtils = class {
 
 		return tracks;
 	}
-};
+}

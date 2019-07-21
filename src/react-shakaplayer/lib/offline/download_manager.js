@@ -24,6 +24,10 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.IDestroyable');
 
+import NetworkingEngine from '../net/networking_engine';
+import DownloadProgressEstimator from '../offline/download_progress_estimator';
+import Destroyer from '../util/destroyer';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -33,7 +37,7 @@ var goog = window.goog;
  * @implements {shaka.util.IDestroyable}
  * @final
  */
-shaka.offline.DownloadManager = class {
+class DownloadManager {
 	/**
 	 * Create a new download manager. It will use (but not own) |networkingEngine|
 	 * and call |onProgress| after each download.
@@ -55,7 +59,7 @@ shaka.offline.DownloadManager = class {
 		this.groups_ = new Map();
 
 		/** @private {!shaka.util.Destroyer} */
-		this.destroyer_ = new shaka.util.Destroyer(() => {
+		this.destroyer_ = new Destroyer(() => {
 			const promises = Array.from(this.groups_.values());
 			// Add a "catch" block to stop errors from being returned.
 			return Promise.all(promises.map(p => p.catch(() => {})));
@@ -72,7 +76,7 @@ shaka.offline.DownloadManager = class {
 		this.onProgress_ = onProgress;
 
 		/** @private {shaka.offline.DownloadProgressEstimator} */
-		this.estimator_ = new shaka.offline.DownloadProgressEstimator();
+		this.estimator_ = new DownloadProgressEstimator();
 	}
 
 	/** @override */
@@ -142,11 +146,13 @@ shaka.offline.DownloadManager = class {
 	 * @private
 	 */
 	async fetchSegment_(request) {
-		const type = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+		const type = NetworkingEngine.RequestType.SEGMENT;
 		const action = this.networkingEngine_.request(type, request);
 		const response = await action.promise;
 
 		goog.asserts.assert(response.data, 'Response data should be non-null!');
 		return response.data;
 	}
-};
+}
+
+export default DownloadManager;

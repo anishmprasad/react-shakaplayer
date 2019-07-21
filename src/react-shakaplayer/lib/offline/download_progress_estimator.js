@@ -26,7 +26,7 @@ var shaka = window.shaka;
  *
  * @final
  */
-shaka.offline.DownloadProgressEstimator = class {
+export default class DownloadProgressEstimator {
 	constructor() {
 		/**
 		 * This is the sum of all estimates passed to |open|. This is used as the
@@ -134,4 +134,4 @@ shaka.offline.DownloadProgressEstimator = class {
 	getTotalDownloaded() {
 		return this.actualDownloaded_;
 	}
-};
+}

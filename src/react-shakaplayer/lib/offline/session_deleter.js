@@ -26,7 +26,7 @@ var goog = window.goog;
 /**
  * Contains a utility method to delete persistent EME sessions.
  */
-shaka.offline.SessionDeleter = class {
+class SessionDeleter {
 	/**
 	 * Deletes the given sessions.  This never fails and instead logs the error.
 	 *
@@ -160,7 +160,7 @@ shaka.offline.SessionDeleter = class {
 			ArrayUtils.hasSameElements(a.videoCapabilities, b.videoCapabilities, comp)
 		);
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -168,4 +168,6 @@ shaka.offline.SessionDeleter = class {
  *   sessionIds: !Array.<string>
  * }}
  */
-shaka.offline.SessionDeleter.Bucket_;
+SessionDeleter.Bucket_ = {};
+
+export default SessionDeleter;

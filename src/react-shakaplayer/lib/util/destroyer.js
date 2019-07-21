@@ -19,6 +19,8 @@
 
 // goog.require('shaka.util.PublicPromise');
 
+import PublicPromise from '../util/public_promise';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -28,7 +30,8 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.Destroyer = class {
+
+export default class Destroyer {
 	/**
 	 * @param {function():!Promise} callback
 	 *    A callback to destroy an object. This callback will only be called once
@@ -39,7 +42,7 @@ shaka.util.Destroyer = class {
 		this.destroyed_ = false;
 
 		/** @private {!shaka.util.PublicPromise} */
-		this.waitOnDestroy_ = new shaka.util.PublicPromise();
+		this.waitOnDestroy_ = new PublicPromise();
 
 		/** @private {function():!Promise} */
 		this.onDestroy_ = callback;
@@ -109,4 +112,4 @@ shaka.util.Destroyer = class {
 			error
 		);
 	}
-};
+}

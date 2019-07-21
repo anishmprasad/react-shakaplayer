@@ -41,6 +41,29 @@
 // goog.require('shaka.util.PlayerConfiguration');
 // goog.require('shaka.util.StreamUtils');
 
+// import Player from '../player'
+// import Deprecate from '../deprecate/deprecate'
+import DrmEngine from '../media/drm_engine'
+import ManifestParser from '../media/manifest_parser'
+import NetworkingEngine from '../net/networking_engine'
+import DownloadManager from '../offline/download_manager'
+import OfflineUri from '../offline/offline_uri'
+import SessionDeleter from '../offline/session_deleter'
+import StorageMuxer from '../offline/storage_muxer'
+import StoredContentUtils from '../offline/stored_content_utils'
+import StreamBandwidthEstimator from '../offline/stream_bandwidth_estimator'
+import ArrayUtils from '../util/array_utils'
+import Destroyer from '../util/destroyer'
+import Error from '../util/error'
+import IDestroyable from '../util/i_destroyable'
+import ManifestFilter from '../util/manifest_filter'
+import Networking from '../util/networking'
+import Periods from '../util/periods'
+import Platform from '../util/platform'
+import PlayerConfiguration from '../util/player_configuration'
+import StreamUtil from '../util/stream_utils'
+
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -59,7 +82,7 @@ var goog = window.goog;
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-shaka.offline.Storage = class {
+class Storage {
   /**
    * @param {!shaka.Player=} player
    *    A player instance to share a networking engine and configuration with.
@@ -100,7 +123,7 @@ shaka.offline.Storage = class {
               '|destroy| called on it.');
     } else {
       this.config_ = shaka.util.PlayerConfiguration.createDefault();
-      this.networkingEngine_ = new shaka.net.NetworkingEngine();
+      this.networkingEngine_ = new NetworkingEngine();
     }
 
     /** @private {boolean} */
@@ -132,7 +155,7 @@ shaka.offline.Storage = class {
     const destroyNetworkingEngine = !player;
 
     /** @private {!shaka.util.Destroyer} */
-    this.destroyer_ = new shaka.util.Destroyer(async () => {
+    this.destroyer_ = new Destroyer(async () => {
       // Wait for all the open operations to end. Wrap each operations so that a
       // single rejected promise won't cause |Promise.all| to return early or to
       // return a rejected Promise.
@@ -164,11 +187,11 @@ shaka.offline.Storage = class {
     // Our Storage system is useless without MediaSource.  MediaSource allows us
     // to pull data from anywhere (including our Storage system) and feed it to
     // the video element.
-    if (!shaka.util.Platform.supportsMediaSource()) {
+    if (!Platform.supportsMediaSource()) {
       return false;
     }
 
-    return shaka.offline.StorageMuxer.support();
+    return StorageMuxer.support();
   }
 
   /**
@@ -222,9 +245,9 @@ shaka.offline.Storage = class {
   getConfiguration() {
     goog.asserts.assert(this.config_, 'Config must not be null!');
 
-    const ret = shaka.util.PlayerConfiguration.createDefault();
-    shaka.util.PlayerConfiguration.mergeConfigObjects(
-        ret, this.config_, shaka.util.PlayerConfiguration.createDefault());
+    const ret = PlayerConfiguration.createDefault();
+    PlayerConfiguration.mergeConfigObjects(
+        ret, this.config_, PlayerConfiguration.createDefault());
     return ret;
   }
 
@@ -281,7 +304,7 @@ shaka.offline.Storage = class {
       goog.asserts.assert(
           this.networkingEngine_, 'Should not call |store| after |destroy|');
 
-      const parser = await shaka.media.ManifestParser.create(
+      const parser = await ManifestParser.create(
           uri,
           this.networkingEngine_,
           this.config_.manifest.retryParameters,
@@ -394,10 +417,10 @@ shaka.offline.Storage = class {
       const ids = await activeHandle.cell.addManifests([manifestDB]);
       this.ensureNotDestroyed_();
 
-      const offlineUri = shaka.offline.OfflineUri.manifest(
+      const offlineUri = OfflineUri.manifest(
           activeHandle.path.mechanism, activeHandle.path.cell, ids[0]);
 
-      return shaka.offline.StoredContentUtils.fromManifestDB(
+      return StoredContentUtils.fromManifestDB(
           offlineUri, manifestDB);
     } catch (e) {
       // If we did start saving some data, we need to remove it all to avoid
@@ -434,26 +457,26 @@ shaka.offline.Storage = class {
     // Filter the manifest based on the restrictions given in the player
     // configuration.
     const maxHwRes = {width: Infinity, height: Infinity};
-    shaka.util.ManifestFilter.filterByRestrictions(
+    ManifestFilter.filterByRestrictions(
         manifest, this.config_.restrictions, maxHwRes);
 
     // Filter the manifest based on what we know media source will be able to
     // play later (no point storing something we can't play).
-    shaka.util.ManifestFilter.filterByMediaSourceSupport(manifest);
+    ManifestFilter.filterByMediaSourceSupport(manifest);
 
     // Filter the manifest based on what we know our drm system will support
     // playing later.
-    shaka.util.ManifestFilter.filterByDrmSupport(manifest, drmEngine);
+    ManifestFilter.filterByDrmSupport(manifest, drmEngine);
 
     // Filter the manifest so that it will only use codecs that are available in
     // all periods.
-    shaka.util.ManifestFilter.filterByCommonCodecs(manifest);
+    ManifestFilter.filterByCommonCodecs(manifest);
 
     // Filter each variant based on what the app says they want to store. The
     // app will only be given variants that are compatible with all previous
     // post-filtered periods.
-    shaka.util.ManifestFilter.rollingFilter(manifest, (period) => {
-      const StreamUtils = shaka.util.StreamUtils;
+    ManifestFilter.rollingFilter(manifest, (period) => {
+      const StreamUtils = StreamUtil;
       const allTracks = [];
 
       for (const variant of period.variants) {
@@ -493,7 +516,7 @@ shaka.offline.Storage = class {
 
     // Check the post-filtered manifest for characteristics that may indicate
     // issues with how the app selected tracks.
-    shaka.offline.Storage.validateManifest_(manifest);
+    Storage.validateManifest_(manifest);
   }
 
   /**
@@ -512,11 +535,11 @@ shaka.offline.Storage = class {
         this.networkingEngine_,
         'Cannot call |downloadManifest_| after calling |destroy|.');
 
-    const pendingContent = shaka.offline.StoredContentUtils.fromManifest(
+    const pendingContent = StoredContentUtils.fromManifest(
         uri, manifest, /* size */ 0, metadata);
 
     /** @type {!shaka.offline.DownloadManager} */
-    const downloader = new shaka.offline.DownloadManager(
+    const downloader = new DownloadManager(
         this.networkingEngine_,
         (progress, size) => {
           // Update the size of the stored content before issuing a progress
@@ -559,9 +582,9 @@ shaka.offline.Storage = class {
   async remove_(contentUri) {
     this.requireSupport_();
 
-    const nullableUri = shaka.offline.OfflineUri.parse(contentUri);
+    const nullableUri = OfflineUri.parse(contentUri);
     if (nullableUri == null || !nullableUri.isManifest()) {
-      throw new shaka.util.Error(
+      throw new Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
           shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
@@ -572,7 +595,7 @@ shaka.offline.Storage = class {
     const uri = nullableUri;
 
     /** @type {!shaka.offline.StorageMuxer} */
-    const muxer = new shaka.offline.StorageMuxer();
+    const muxer = new StorageMuxer();
 
     try {
       await muxer.init();
@@ -627,7 +650,7 @@ shaka.offline.Storage = class {
    */
   async removeFromDRM_(uri, manifestDb, muxer) {
     goog.asserts.assert(this.networkingEngine_, 'Cannot be destroyed');
-    await shaka.offline.Storage.deleteLicenseFor_(
+    await Storage.deleteLicenseFor_(
         this.networkingEngine_, this.config_.drm, muxer, manifestDb);
   }
 
@@ -640,13 +663,13 @@ shaka.offline.Storage = class {
    */
   removeFromStorage_( storage, uri, manifest) {
     /** @type {!Array.<number>} */
-    const segmentIds = shaka.offline.Storage.getAllSegmentIds_(manifest);
+    const segmentIds = Storage.getAllSegmentIds_(manifest);
 
     // Count(segments) + Count(manifests)
     const toRemove = segmentIds.length + 1;
     let removed = 0;
 
-    const pendingContent = shaka.offline.StoredContentUtils.fromManifestDB(
+    const pendingContent = StoredContentUtils.fromManifestDB(
         uri, manifest);
 
     const onRemove = (key) => {
@@ -683,9 +706,9 @@ shaka.offline.Storage = class {
     const config = this.config_.drm;
 
     /** @type {!shaka.offline.StorageMuxer} */
-    const muxer = new shaka.offline.StorageMuxer();
+    const muxer = new StorageMuxer();
     /** @type {!shaka.offline.SessionDeleter} */
-    const deleter = new shaka.offline.SessionDeleter();
+    const deleter = new SessionDeleter();
 
     let hasRemaining = false;
 
@@ -744,7 +767,7 @@ shaka.offline.Storage = class {
     const result = [];
 
     /** @type {!shaka.offline.StorageMuxer} */
-    const muxer = new shaka.offline.StorageMuxer();
+    const muxer = new StorageMuxer();
     try {
       await muxer.init();
 
@@ -754,12 +777,12 @@ shaka.offline.Storage = class {
           const manifests = await cell.getAllManifests();
 
           manifests.forEach((manifest, key) => {
-            const uri = shaka.offline.OfflineUri.manifest(
+            const uri = OfflineUri.manifest(
                 path.mechanism,
                 path.cell,
                 key);
 
-            const content = shaka.offline.StoredContentUtils.fromManifestDB(
+            const content = StoredContentUtils.fromManifestDB(
                 uri,
                 manifest);
 
@@ -824,7 +847,7 @@ shaka.offline.Storage = class {
       this.ensureNotDestroyed_();
 
       // Get all the streams that are used in the manifest.
-      const streams = shaka.offline.Storage.getStreamSet_(manifest);
+      const streams = Storage.getStreamSet_(manifest);
 
       // Wait for each stream to create their segment indexes.
       await Promise.all(Array.from(streams).map((stream) => {
@@ -859,7 +882,7 @@ shaka.offline.Storage = class {
         'Cannot call |createDrmEngine| after |destroy|');
 
     /** @type {!shaka.media.DrmEngine} */
-    const drmEngine = new shaka.media.DrmEngine({
+    const drmEngine = new DrmEngine({
       netEngine: this.networkingEngine_,
       onError: onError,
       onKeyStatus: () => {},
@@ -867,7 +890,7 @@ shaka.offline.Storage = class {
       onEvent: () => {},
     });
 
-    const variants = shaka.util.Periods.getAllVariantsFrom(manifest.periods);
+    const variants = Periods.getAllVariantsFrom(manifest.periods);
 
     const config = this.config_;
     drmEngine.configure(config.drm);
@@ -895,7 +918,7 @@ shaka.offline.Storage = class {
    */
   createOfflineManifest_(
       downloader, storage, drmEngine, manifest, originalManifestUri, metadata) {
-    const estimator = new shaka.offline.StreamBandwidthEstimator();
+    const estimator = new StreamBandwidthEstimator();
 
     const periods = manifest.periods.map((period) => {
       return this.createPeriod_(
@@ -958,7 +981,7 @@ shaka.offline.Storage = class {
 
     // Find the streams we want to download and create a stream db instance
     // for each of them.
-    const streamSet = shaka.offline.Storage.getStreamSet_(manifest);
+    const streamSet = Storage.getStreamSet_(manifest);
     const streamDBs = new Map();
 
     for (const stream of streamSet) {
@@ -1026,7 +1049,7 @@ shaka.offline.Storage = class {
     // Download each stream in parallel.
     const downloadGroup = stream.id;
 
-    shaka.offline.Storage.forEachSegment_(stream, startTime, (segment) => {
+    Storage.forEachSegment_(stream, startTime, (segment) => {
       const request = shaka.util.Networking.createSegmentRequest(
           segment.getUris(),
           segment.startByte,
@@ -1051,7 +1074,7 @@ shaka.offline.Storage = class {
 
     const initSegment = stream.initSegmentReference;
     if (initSegment) {
-      const request = shaka.util.Networking.createSegmentRequest(
+      const request = Networking.createSegmentRequest(
           initSegment.getUris(),
           initSegment.startByte,
           initSegment.endByte,
@@ -1110,7 +1133,7 @@ shaka.offline.Storage = class {
    * @private
    */
   requireSupport_() {
-    if (!shaka.offline.Storage.support()) {
+    if (!Storage.support()) {
       throw new shaka.util.Error(
           shaka.util.Error.Severity.CRITICAL,
           shaka.util.Error.Category.STORAGE,
@@ -1136,7 +1159,7 @@ shaka.offline.Storage = class {
       // from |openOperations_| when we still have a reference to |action|.
       return await action;
     } finally {
-      shaka.util.ArrayUtils.remove(this.openOperations_, action);
+      ArrayUtils.remove(this.openOperations_, action);
     }
   }
 
@@ -1176,7 +1199,7 @@ shaka.offline.Storage = class {
    */
   static async deleteAll() {
     /** @type {!shaka.offline.StorageMuxer} */
-    const muxer = new shaka.offline.StorageMuxer();
+    const muxer = new StorageMuxer();
     try {
       // Wipe all content from all storage mechanisms.
       await muxer.erase();
@@ -1208,10 +1231,10 @@ shaka.offline.Storage = class {
         keySystem: manifestDb.drmInfo.keySystem,
         licenseUri: manifestDb.drmInfo.licenseServerUri,
         serverCertificate: manifestDb.drmInfo.serverCertificate,
-        audioCapabilities: shaka.offline.Storage.getCapabilities_(
+        audioCapabilities: Storage.getCapabilities_(
             manifestDb,
             /* isVideo */ false),
-        videoCapabilities: shaka.offline.Storage.getCapabilities_(
+        videoCapabilities: Storage.getCapabilities_(
             manifestDb,
             /* isVideo */ true),
       };
@@ -1220,7 +1243,7 @@ shaka.offline.Storage = class {
     // in the database so we can try to remove them again later.  This allows us
     // to still delete the stored content but not "forget" about these sessions.
     // Later, we can remove the sessions to free up space.
-    const deleter = new shaka.offline.SessionDeleter();
+    const deleter = new SessionDeleter();
     const deletedSessionIds = await deleter.delete(drmConfig, net, sessions);
     await sessionIdCell.remove(deletedSessionIds);
     await sessionIdCell.add(sessions.filter(
@@ -1362,4 +1385,6 @@ shaka.offline.Storage = class {
   }
 };
 
-shaka.Player.registerSupportPlugin('offline', shaka.offline.Storage.support);
+shaka.Player.registerSupportPlugin('offline', Storage.support);
+
+export default Storage

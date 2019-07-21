@@ -34,7 +34,7 @@ var goog = window.goog;
 /**
  * @summary A set of utility functions for dealing with Streams and Manifests.
  */
-shaka.util.StreamUtils = class {
+class StreamUtils {
   /**
    * @param {shaka.extern.Variant} variant
    * @param {shaka.extern.Restrictions} restrictions
@@ -442,7 +442,7 @@ shaka.util.StreamUtils = class {
   static html5TrackToGenericShakaTrack_(html5Track) {
     /** @type {shaka.extern.Track} */
     const track = {
-      id: shaka.util.StreamUtils.html5TrackId(html5Track),
+      id: StreamUtils.html5TrackId(html5Track),
       active: false,
       type: '',
       bandwidth: 0,
@@ -743,4 +743,6 @@ shaka.util.StreamUtils = class {
 
 
 /** @private {number} */
-shaka.util.StreamUtils.nextTrackId_ = 0;
+StreamUtils.nextTrackId_ = 0;
+
+export default StreamUtils
