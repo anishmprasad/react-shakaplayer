@@ -26,7 +26,7 @@ var goog = window.goog;
 /**
  * @summary Utility functions for manifest parsing.
  */
-shaka.util.ManifestParserUtils = class {
+class ManifestParserUtils {
 	/**
 	 * Resolves an array of relative URIs to the given base URIs. This will result
 	 * in M*N number of URIs.
@@ -71,12 +71,12 @@ shaka.util.ManifestParserUtils = class {
 			keyIds: []
 		};
 	}
-};
+}
 
 /**
  * @enum {string}
  */
-shaka.util.ManifestParserUtils.ContentType = {
+ManifestParserUtils.ContentType = {
 	VIDEO: 'video',
 	AUDIO: 'audio',
 	TEXT: 'text',
@@ -86,7 +86,7 @@ shaka.util.ManifestParserUtils.ContentType = {
 /**
  * @enum {string}
  */
-shaka.util.ManifestParserUtils.TextStreamKind = {
+ManifestParserUtils.TextStreamKind = {
 	SUBTITLE: 'subtitle',
 	CLOSED_CAPTION: 'caption'
 };
@@ -99,4 +99,4 @@ shaka.util.ManifestParserUtils.TextStreamKind = {
  *
  * @const {number}
  */
-shaka.util.ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS = 1 / 15;
+ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS = 1 / 15;

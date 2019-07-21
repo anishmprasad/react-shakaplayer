@@ -30,7 +30,7 @@ var goog = window.goog;
  *    CELL: The name of the cell that holds the data.
  *    KEY: The key that the data is stored under in the cell.
  */
-shaka.offline.OfflineUri = class {
+export default class OfflineUri {
 	/**
 	 * @param {string} type
 	 * @param {string} mechanism
@@ -126,7 +126,7 @@ shaka.offline.OfflineUri = class {
 			return null;
 		}
 
-		return new shaka.offline.OfflineUri(type, mechanism, cell, key);
+		return new OfflineUri(type, mechanism, cell, key);
 	}
 
 	/**
@@ -136,7 +136,7 @@ shaka.offline.OfflineUri = class {
 	 * @return {!shaka.offline.OfflineUri}
 	 */
 	static manifest(mechanism, cell, key) {
-		return new shaka.offline.OfflineUri('manifest', mechanism, cell, key);
+		return new OfflineUri('manifest', mechanism, cell, key);
 	}
 
 	/**
@@ -146,6 +146,6 @@ shaka.offline.OfflineUri = class {
 	 * @return {!shaka.offline.OfflineUri}
 	 */
 	static segment(mechanism, cell, key) {
-		return new shaka.offline.OfflineUri('segment', mechanism, cell, key);
+		return new OfflineUri('segment', mechanism, cell, key);
 	}
-};
+}

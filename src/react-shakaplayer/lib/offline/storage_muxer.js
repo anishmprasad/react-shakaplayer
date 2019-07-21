@@ -37,7 +37,7 @@ var shaka = window.shaka;
  * @property {string} cell
  *  The name of the cell in the mechanism.
  */
-shaka.offline.StorageCellPath = {};
+let StorageCellPath = {};
 
 /**
  * @typedef {{
@@ -50,7 +50,7 @@ shaka.offline.StorageCellPath = {};
  * @property {shaka.extern.StorageCell} cell
  *   The storage cell that the path points to within the storage muxer.
  */
-shaka.offline.StorageCellHandle = {};
+let StorageCellHandle = {};
 
 /**
  * StorageMuxer is responsible for managing StorageMechanisms and addressing

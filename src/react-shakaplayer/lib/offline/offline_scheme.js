@@ -24,6 +24,10 @@
 // goog.require('shaka.util.AbortableOperation');
 // goog.require('shaka.util.Error');
 
+import NetworkingEngine from '../net/networking_engine';
+import OfflineUri from '../offline/offline_uri';
+import StorageMuxer from '../offline/storage_muxer';
+import AbortableOperation from '../util/abortable_operation';
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -31,7 +35,7 @@ var goog = window.goog;
  * @summary A plugin that handles requests for offline content.
  * @export
  */
-shaka.offline.OfflineScheme = class {
+class OfflineScheme {
 	/**
 	 * @param {string} uri
 	 * @param {shaka.extern.Request} request
@@ -42,14 +46,14 @@ shaka.offline.OfflineScheme = class {
 	 * @export
 	 */
 	static plugin(uri, request, requestType, progressUpdated) {
-		const offlineUri = shaka.offline.OfflineUri.parse(uri);
+		const offlineUri = OfflineUri.parse(uri);
 
 		if (offlineUri && offlineUri.isManifest()) {
-			return shaka.offline.OfflineScheme.getManifest_(uri);
+			return OfflineScheme.getManifest_(uri);
 		}
 
 		if (offlineUri && offlineUri.isSegment()) {
-			return shaka.offline.OfflineScheme.getSegment_(offlineUri.key(), offlineUri);
+			return OfflineScheme.getSegment_(offlineUri.key(), offlineUri);
 		}
 
 		return shaka.util.AbortableOperation.failed(
@@ -89,9 +93,9 @@ shaka.offline.OfflineScheme = class {
 		goog.asserts.assert(uri.isSegment(), "Only segment uri's should be given to getSegment");
 
 		/** @type {!shaka.offline.StorageMuxer} */
-		const muxer = new shaka.offline.StorageMuxer();
+		const muxer = new StorageMuxer();
 
-		return shaka.util.AbortableOperation.completed(undefined)
+		return AbortableOperation.completed(undefined)
 			.chain(() => muxer.init())
 			.chain(() => muxer.getCell(uri.mechanism(), uri.cell()))
 			.chain(cell => cell.getSegments([uri.key()]))
@@ -106,6 +110,6 @@ shaka.offline.OfflineScheme = class {
 			})
 			.finally(() => muxer.destroy());
 	}
-};
+}
 
-shaka.net.NetworkingEngine.registerScheme('offline', shaka.offline.OfflineScheme.plugin);
+NetworkingEngine.registerScheme('offline', OfflineScheme.plugin);

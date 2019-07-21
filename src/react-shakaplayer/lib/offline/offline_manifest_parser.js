@@ -126,6 +126,6 @@ class OfflineManifestParser {
 	}
 }
 
-ManifestParser.registerParserByMime('application/x-offline-manifest', shaka.offline.OfflineManifestParser);
+ManifestParser.registerParserByMime('application/x-offline-manifest', OfflineManifestParser);
 
 export default OfflineManifestParser;
