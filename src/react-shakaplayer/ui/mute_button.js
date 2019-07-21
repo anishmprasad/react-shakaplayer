@@ -23,6 +23,12 @@
 // goog.require('shaka.ui.Localization');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -34,7 +40,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.MuteButton = class extends shaka.ui.Element {
+class MuteButton extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -43,18 +49,18 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
 		super(parent, controls);
 
 		/** @private {!HTMLElement} */
-		this.button_ = shaka.util.Dom.createHTMLElement('button');
+		this.button_ = Dom.createHTMLElement('button');
 		this.button_.classList.add('shaka-mute-button');
 		this.button_.classList.add('material-icons');
-		this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.MUTE;
+		this.button_.textContent = Enums.MaterialDesignIcons.MUTE;
 		this.parent.appendChild(this.button_);
 		this.updateAriaLabel_();
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateAriaLabel_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateAriaLabel_();
 		});
 
@@ -72,31 +78,29 @@ shaka.ui.MuteButton = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateAriaLabel_() {
-		const LocIds = shaka.ui.Locales.Ids;
+		const LocIds = Locales.Ids;
 		const label = this.video.muted ? LocIds.UNMUTE : LocIds.MUTE;
 
-		this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL, this.localization.resolve(label));
+		this.button_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(label));
 	}
 
 	/**
 	 * @private
 	 */
 	updateIcon_() {
-		this.button_.textContent = this.video.muted
-			? shaka.ui.Enums.MaterialDesignIcons.UNMUTE
-			: shaka.ui.Enums.MaterialDesignIcons.MUTE;
+		this.button_.textContent = this.video.muted ? Enums.MaterialDesignIcons.UNMUTE : Enums.MaterialDesignIcons.MUTE;
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.MuteButton.Factory = class {
+MuteButton.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.MuteButton(rootElement, controls);
+		return new MuteButton(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('mute', new shaka.ui.MuteButton.Factory());
+Controls.registerElement('mute', new MuteButton.Factory());

@@ -22,6 +22,11 @@
 // goog.require('shaka.ui.Localization');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -33,7 +38,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.FastForwardButton = class extends shaka.ui.Element {
+export default class FastForwardButton extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -41,18 +46,18 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
 	constructor(parent, controls) {
 		super(parent, controls);
 
-		this.button_ = shaka.util.Dom.createHTMLElement('button');
+		this.button_ = Dom.createHTMLElement('button');
 		this.button_.classList.add('material-icons');
 		this.button_.classList.add('shaka-fast-forward-button');
 		this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.FAST_FORWARD;
 		this.parent.appendChild(this.button_);
 		this.updateAriaLabel_();
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateAriaLabel_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateAriaLabel_();
 		});
 
@@ -65,10 +70,7 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateAriaLabel_() {
-		this.button_.setAttribute(
-			shaka.ui.Constants.ARIA_LABEL,
-			this.localization.resolve(shaka.ui.Locales.Ids.FAST_FORWARD)
-		);
+		this.button_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(Locales.Ids.FAST_FORWARD));
 	}
 
 	/**
@@ -86,17 +88,17 @@ shaka.ui.FastForwardButton = class extends shaka.ui.Element {
 		const newRate = trickPlayRate < 0 || trickPlayRate > 4 ? 1 : trickPlayRate * 2;
 		this.player.trickPlay(newRate);
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.FastForwardButton.Factory = class {
+FastForwardButton.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.FastForwardButton(rootElement, controls);
+		return new FastForwardButton(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('fast_forward', new shaka.ui.FastForwardButton.Factory());
+Controls.registerElement('fast_forward', new FastForwardButton.Factory());

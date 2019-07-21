@@ -24,6 +24,11 @@
 // goog.require('shaka.ui.TextDisplayer');
 // goog.require('shaka.util.Platform');
 
+import polyfill from '../lib/polyfill/all';
+import { Controls } from './controls';
+import TextDisplayer from './text_displayer';
+import Platform from '../lib/util/platform';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -31,10 +36,10 @@ window.goog = window.goog || {};
 var goog = window.goog;
 
 /**
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @export
  */
-shaka.ui.Overlay = class {
+class Overlay {
 	/**
 	 * @param {!shaka.Player} player
 	 * @param {!HTMLElement} videoContainer
@@ -57,8 +62,8 @@ shaka.ui.Overlay = class {
 			videoContainer.classList.add('shaka-mobile');
 		}
 
-		/** @private {shaka.ui.Controls} */
-		this.controls_ = new shaka.ui.Controls(player, videoContainer, video, this.config_);
+		/** @private {Controls} */
+		this.controls_ = new Controls(player, videoContainer, video, this.config_);
 
 		// Run the initial setup so that no configure() call is required for default
 		// settings.
@@ -85,7 +90,7 @@ shaka.ui.Overlay = class {
 	 * @export
 	 */
 	isMobile() {
-		return shaka.util.Platform.isMobile();
+		return Platform.isMobile();
 	}
 
 	/**
@@ -94,7 +99,7 @@ shaka.ui.Overlay = class {
 	 */
 	getConfiguration() {
 		const ret = this.defaultConfig_();
-		shaka.util.ConfigUtils.mergeConfigObjects(
+		ConfigUtils.mergeConfigObjects(
 			ret,
 			this.config_,
 			this.defaultConfig_(),
@@ -117,12 +122,12 @@ shaka.ui.Overlay = class {
 
 		// ('fieldName', value) format
 		if (arguments.length == 2 && typeof config == 'string') {
-			config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
+			config = ConfigUtils.convertToConfigObject(config, value);
 		}
 
 		goog.asserts.assert(typeof config == 'object', 'Should be an object!');
 
-		shaka.util.ConfigUtils.mergeConfigObjects(
+		ConfigUtils.mergeConfigObjects(
 			this.config_,
 			config,
 			this.defaultConfig_(),
@@ -139,7 +144,7 @@ shaka.ui.Overlay = class {
 
 		this.controls_.configure(this.config_);
 
-		this.controls_.dispatchEvent(new shaka.util.FakeEvent('uiupdated'));
+		this.controls_.dispatchEvent(new FakeEvent('uiupdated'));
 	}
 
 	/**
@@ -159,7 +164,7 @@ shaka.ui.Overlay = class {
 	}
 
 	/**
-	 * @return {shaka.ui.Controls}
+	 * @return {Controls}
 	 * @export
 	 */
 	getControls() {
@@ -194,7 +199,7 @@ shaka.ui.Overlay = class {
 	 */
 	static scanPageForShakaElements_() {
 		// Install built-in polyfills to patch browser incompatibilities.
-		shaka.polyfill.installAll();
+		polyfill.installAll();
 		// Check to see if the browser supports the basic APIs Shaka needs.
 		if (!shaka.Player.isBrowserSupported()) {
 			shaka.log.error(
@@ -205,7 +210,7 @@ shaka.ui.Overlay = class {
 
 			// After scanning the page for elements, fire a special "loaded" event for
 			// when the load fails. This will allow the page to react to the failure.
-			shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-load-failed');
+			Overlay.dispatchLoadedEvent_('shaka-ui-load-failed');
 			return;
 		}
 
@@ -239,14 +244,11 @@ shaka.ui.Overlay = class {
 					castAppId = video['dataset']['shakaPlayerCastReceiverId'];
 				}
 
-				const ui = shaka.ui.Overlay.createUI_(
-					shaka.util.Dom.asHTMLElement(container),
-					shaka.util.Dom.asHTMLMediaElement(video)
-				);
+				const ui = Overlay.createUI_(Dom.asHTMLElement(container), Dom.asHTMLMediaElement(video));
 
 				ui.configure({ castReceiverAppId: castAppId });
 
-				if (shaka.util.Dom.asHTMLMediaElement(video).controls) {
+				if (Dom.asHTMLMediaElement(video).controls) {
 					ui.getControls().setEnabledNativeControls(true);
 				}
 			}
@@ -281,10 +283,7 @@ shaka.ui.Overlay = class {
 				if (currentVideo['dataset'] && currentVideo['dataset']['shakaPlayerCastReceiverId']) {
 					castAppId = currentVideo['dataset']['shakaPlayerCastReceiverId'];
 				}
-				const ui = shaka.ui.Overlay.createUI_(
-					shaka.util.Dom.asHTMLElement(container),
-					shaka.util.Dom.asHTMLMediaElement(currentVideo)
-				);
+				const ui = Overlay.createUI_(Dom.asHTMLElement(container), Dom.asHTMLMediaElement(currentVideo));
 
 				ui.configure({ castReceiverAppId: castAppId });
 			}
@@ -293,7 +292,7 @@ shaka.ui.Overlay = class {
 		// After scanning the page for elements, fire the "loaded" event.  This will
 		// let apps know they can use the UI library programmatically now, even if
 		// they didn't have any Shaka-related elements declared in their HTML.
-		shaka.ui.Overlay.dispatchLoadedEvent_('shaka-ui-loaded');
+		Overlay.dispatchLoadedEvent_('shaka-ui-loaded');
 	}
 
 	/**
@@ -311,12 +310,12 @@ shaka.ui.Overlay = class {
 	/**
 	 * @param {!HTMLElement} container
 	 * @param {!HTMLMediaElement} video
-	 * @return {!shaka.ui.Overlay}
+	 * @return {!Overlay}
 	 * @private
 	 */
 	static createUI_(container, video) {
 		const player = new shaka.Player(video);
-		const ui = new shaka.ui.Overlay(player, container, video);
+		const ui = new Overlay(player, container, video);
 
 		// If the browser's native controls are disabled, use UI TextDisplayer.
 		// Arrow functions cannot be used with "new", so the factory must use
@@ -324,7 +323,7 @@ shaka.ui.Overlay = class {
 		if (!video.controls) {
 			// eslint-disable-next-line no-restricted-syntax
 			const textDisplayer = function() {
-				return new shaka.ui.TextDisplayer(video, container);
+				return new TextDisplayer(video, container);
 			};
 			player.configure('textDisplayFactory', textDisplayer);
 		}
@@ -333,12 +332,12 @@ shaka.ui.Overlay = class {
 		video['ui'] = ui;
 		return ui;
 	}
-};
+}
 
 if (document.readyState == 'complete') {
 	// Don't fire this event synchronously.  In a compiled bundle, the "shaka"
 	// namespace might not be exported to the window until after this point.
-	Promise.resolve().then(shaka.ui.Overlay.scanPageForShakaElements_);
+	Promise.resolve().then(Overlay.scanPageForShakaElements_);
 } else {
-	window.addEventListener('load', shaka.ui.Overlay.scanPageForShakaElements_);
+	window.addEventListener('load', Overlay.scanPageForShakaElements_);
 }
