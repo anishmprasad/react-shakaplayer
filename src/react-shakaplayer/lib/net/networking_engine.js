@@ -28,8 +28,10 @@
 // goog.require('shaka.util.IDestroyable');
 // goog.require('shaka.util.ObjectUtils');
 // goog.require('shaka.util.OperationManager');
+import OperationManager from '../util/operation_manager';
 import FakeEventTarget from '../util/fake_event_target';
 import AbortableOperation from '../util/abortable_operation';
+import Backoff from '../net/backoff';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -67,7 +69,7 @@ class NetworkingEngine extends FakeEventTarget {
 		this.destroyed_ = false;
 
 		/** @private {!shaka.util.OperationManager} */
-		this.operationManager_ = new shaka.util.OperationManager();
+		this.operationManager_ = new OperationManager();
 
 		/** @private {!Set.<shaka.extern.RequestFilter>} */
 		this.requestFilters_ = new Set();
@@ -182,7 +184,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 * dependency between the two classes.
 	 */
 	static defaultRetryParameters() {
-		return shaka.net.Backoff.defaultRetryParameters();
+		return Backoff.defaultRetryParameters();
 	}
 
 	/**

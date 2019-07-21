@@ -22,6 +22,8 @@
 // goog.require('shaka.util.FakeEvent');
 // goog.require('shaka.util.MultiMap');
 
+import MultiMap from '../util/multi_map';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -44,7 +46,7 @@ export default class FakeEventTarget {
 		/**
 		 * @private {!shaka.util.MultiMap.<shaka.util.FakeEventTarget.ListenerType>}
 		 */
-		this.listeners_ = new shaka.util.MultiMap();
+		this.listeners_ = new MultiMap();
 
 		/**
 		 * The target of all dispatched events.  Defaults to |this|.

@@ -512,7 +512,7 @@ shaka.Player = class extends FakeEventTarget {
 		/** @private {Node} */
 		this.srcEqualsNode_ = { name: 'src-equals' };
 
-		const AbortableOperation = AbortableOperation;
+		// const AbortableOperation = AbortableOperation;
 
 		const actions = new Map();
 		actions.set(this.attachNode_, (has, wants) => {

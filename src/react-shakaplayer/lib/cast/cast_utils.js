@@ -15,9 +15,13 @@
  * limitations under the License.
  */
 
+/* eslint-disable */
+
 // goog.provide('shaka.cast.CastUtils');
 
 // goog.require('shaka.util.FakeEvent');
+
+import FakeEvent from '../util/fake_event';
 
 var shaka = window.shaka;
 
@@ -25,7 +29,7 @@ var shaka = window.shaka;
  * @summary A set of cast utility functions and variables shared between sender
  *   and receiver.
  */
-window.shaka.cast.CastUtils = class {
+export default class CastUtils {
 	/**
 	 * Serialize as JSON, but specially encode things JSON will not otherwise
 	 * represent.
@@ -39,7 +43,7 @@ window.shaka.cast.CastUtils = class {
 				return undefined;
 			}
 
-			if (value instanceof Event || value instanceof shaka.util.FakeEvent) {
+			if (value instanceof Event || value instanceof FakeEvent) {
 				// Events don't serialize to JSON well because of the DOM objects
 				// and other complex objects they contain, so we strip these out.
 				// Note that using Object.keys or JSON.stringify directly on the event
@@ -67,13 +71,13 @@ window.shaka.cast.CastUtils = class {
 
 			if (value instanceof TimeRanges) {
 				// TimeRanges must be unpacked into plain data for serialization.
-				return shaka.cast.CastUtils.unpackTimeRanges_(value);
+				return CastUtils.unpackTimeRanges_(value);
 			}
 
 			if (value instanceof Uint8Array) {
 				// Some of our code cares about Uint8Arrays actually being Uint8Arrays,
 				// so this gives them special treatment.
-				return shaka.cast.CastUtils.unpackUint8Array_(value);
+				return CastUtils.unpackUint8Array_(value);
 			}
 
 			if (typeof value == 'number') {
@@ -110,9 +114,9 @@ window.shaka.cast.CastUtils = class {
 			} else if (value && typeof value == 'object' && value['__type__'] == 'TimeRanges') {
 				// TimeRanges objects have been unpacked and sent as plain data.
 				// Simulate the original TimeRanges object.
-				return shaka.cast.CastUtils.simulateTimeRanges_(value);
+				return CastUtils.simulateTimeRanges_(value);
 			} else if (value && typeof value == 'object' && value['__type__'] == 'Uint8Array') {
-				return shaka.cast.CastUtils.makeUint8Array_(value);
+				return CastUtils.makeUint8Array_(value);
 			}
 			return value;
 		});
@@ -185,13 +189,13 @@ window.shaka.cast.CastUtils = class {
 	static makeUint8Array_(obj) {
 		return new Uint8Array(obj['entries']);
 	}
-};
+}
 
 /**
  * HTMLMediaElement events that are proxied while casting.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.VideoEvents = [
+CastUtils.VideoEvents = [
 	'ended',
 	'play',
 	'playing',
@@ -208,7 +212,7 @@ shaka.cast.CastUtils.VideoEvents = [
  * HTMLMediaElement attributes that are proxied while casting.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.VideoAttributes = [
+CastUtils.VideoAttributes = [
 	'buffered',
 	'currentTime',
 	'duration',
@@ -227,19 +231,19 @@ shaka.cast.CastUtils.VideoAttributes = [
  * HTMLMediaElement attributes that are transferred when casting begins.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.VideoInitStateAttributes = ['loop', 'playbackRate'];
+CastUtils.VideoInitStateAttributes = ['loop', 'playbackRate'];
 
 /**
  * HTMLMediaElement methods with no return value that are proxied while casting.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.VideoVoidMethods = ['pause', 'play'];
+CastUtils.VideoVoidMethods = ['pause', 'play'];
 
 /**
  * Player events that are proxied while casting.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.PlayerEvents = [
+CastUtils.PlayerEvents = [
 	'abrstatuschanged',
 	'adaptation',
 	'buffering',
@@ -263,7 +267,7 @@ shaka.cast.CastUtils.PlayerEvents = [
  * Frequency 1 translates to every update; frequency 2 to every 2 updates, etc.
  * @const {!Object.<string, number>}
  */
-shaka.cast.CastUtils.PlayerGetterMethods = {
+CastUtils.PlayerGetterMethods = {
 	// NOTE: The 'drmInfo' property is not proxied, as it is very large.
 	getAssetUri: 2,
 	getAudioLanguages: 2,
@@ -303,7 +307,7 @@ shaka.cast.CastUtils.PlayerGetterMethods = {
  * Frequency 1 translates to every update; frequency 2 to every 2 updates, etc.
  * @const {!Object.<string, number>}
  */
-shaka.cast.CastUtils.PlayerGetterMethodsThatRequireLive = {
+CastUtils.PlayerGetterMethodsThatRequireLive = {
 	getPlayheadTimeAsDate: 1,
 	getPresentationStartTimeAsDate: 20
 };
@@ -313,20 +317,20 @@ shaka.cast.CastUtils.PlayerGetterMethodsThatRequireLive = {
  * begins.
  * @const {!Array.<!Array.<string>>}
  */
-shaka.cast.CastUtils.PlayerInitState = [['getConfiguration', 'configure']];
+CastUtils.PlayerInitState = [['getConfiguration', 'configure']];
 
 /**
  * Player getter and setter methods that are used to transfer state after
  * load() is resolved.
  * @const {!Array.<!Array.<string>>}
  */
-shaka.cast.CastUtils.PlayerInitAfterLoadState = [['isTextTrackVisible', 'setTextTrackVisibility']];
+CastUtils.PlayerInitAfterLoadState = [['isTextTrackVisible', 'setTextTrackVisibility']];
 
 /**
  * Player methods with no return value that are proxied while casting.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.PlayerVoidMethods = [
+CastUtils.PlayerVoidMethods = [
 	'addTextTrack',
 	'cancelTrickPlay',
 	'configure',
@@ -345,7 +349,7 @@ shaka.cast.CastUtils.PlayerVoidMethods = [
  * Player methods returning a Promise that are proxied while casting.
  * @const {!Array.<string>}
  */
-shaka.cast.CastUtils.PlayerPromiseMethods = [
+CastUtils.PlayerPromiseMethods = [
 	'attach',
 	'detach',
 	// The manifestFactory parameter of load is not supported.
@@ -369,16 +373,16 @@ shaka.cast.CastUtils.PlayerPromiseMethods = [
  * @property {?number} startTime
  *   The playback start time, if currently playing.
  */
-shaka.cast.CastUtils.InitStateType;
+CastUtils.InitStateType;
 
 /**
  * The namespace for Shaka messages on the cast bus.
  * @const {string}
  */
-shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE = 'urn:x-cast:com.google.shaka.v2';
+CastUtils.SHAKA_MESSAGE_NAMESPACE = 'urn:x-cast:com.google.shaka.v2';
 
 /**
  * The namespace for generic messages on the cast bus.
  * @const {string}
  */
-shaka.cast.CastUtils.GENERIC_MESSAGE_NAMESPACE = 'urn:x-cast:com.google.cast.media';
+CastUtils.GENERIC_MESSAGE_NAMESPACE = 'urn:x-cast:com.google.cast.media';

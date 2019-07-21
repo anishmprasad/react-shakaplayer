@@ -23,6 +23,7 @@
 import SimpleAbrManager from '../abr/simple_abr_manager';
 import ConfigUtils from '../util/config_utils';
 import NetworkingEngine from '../net/networking_engine';
+import Platform from '../util/platform';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -137,7 +138,7 @@ class PlayerConfiguration {
 		// WebOS has a long hardware pipeline that responds slowly, making it easy
 		// to misidentify stalls. To avoid this, by default disable stall detection
 		// on WebOS.
-		if (shaka.util.Platform.isWebOS()) {
+		if (Platform.isWebOS()) {
 			streaming.stallEnabled = false;
 		}
 

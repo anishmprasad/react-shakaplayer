@@ -42,6 +42,7 @@ import EventManager from '../lib/util/event_manager'
 import FakeEvent from '../lib/util/fake_event'
 import FakeEventTarget from '../lib/util/fake_event_target'
 import Timer from '../lib/util/timer'
+import CastProxy from '../lib/cast/cast_proxy'
 
 /*eslint-disable*/
 window.shaka = window.shaka || {}

@@ -67,7 +67,7 @@ class EventManager {
 			return;
 		}
 
-		const binding = new shaka.util.EventManager.Binding_(target, type, listener, options);
+		const binding = new EventManager.Binding_(target, type, listener, options);
 		this.bindingMap_.push(type, binding);
 	}
 
@@ -165,7 +165,7 @@ EventManager.Binding_ = class {
 		this.listener = listener;
 
 		/** @type {(boolean|!AddEventListenerOptions)} */
-		this.options = shaka.util.EventManager.Binding_.convertOptions_(target, options);
+		this.options = EventManager.Binding_.convertOptions_(target, options);
 
 		this.target.addEventListener(type, listener, this.options);
 	}
