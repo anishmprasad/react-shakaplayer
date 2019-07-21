@@ -31,13 +31,23 @@
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.TextParser');
 
+import Cue from '../text/cue';
+import TextEngine from '../text/text_engine';
+import VttTextParser from '../text/vtt_text_parser';
+import DataViewReader from '../util/data_view_reader';
+import error from '../util/error';
+import Functional from '../util/functional';
+import Mp4Parser from '../util/mp4_parser';
+import StringUtils from '../util/string_utils';
+import TextParser from '../util/text_parser';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
  * @implements {shaka.extern.TextParser}
  */
-shaka.text.Mp4VttParser = class {
+class Mp4VttParser {
 	constructor() {
 		/**
 		 * The current time scale used by the VTT parser.
@@ -50,7 +60,7 @@ shaka.text.Mp4VttParser = class {
 
 	/** @override */
 	parseInit(data) {
-		const Mp4Parser = shaka.util.Mp4Parser;
+		// const Mp4Parser = shaka.util.Mp4Parser;
 
 		let sawWVTT = false;
 
@@ -84,21 +94,13 @@ shaka.text.Mp4VttParser = class {
 
 		if (!this.timescale_) {
 			// Missing timescale for VTT content. It should be located in the MDHD.
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_MP4_VTT
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_MP4_VTT);
 		}
 
 		if (!sawWVTT) {
 			// A WVTT box should have been seen (a valid vtt init segment with no
 			// actual subtitles).
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_MP4_VTT
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_MP4_VTT);
 		}
 	}
 
@@ -108,15 +110,11 @@ shaka.text.Mp4VttParser = class {
 			// Missing timescale for VTT content. We should have seen the init
 			// segment.
 			shaka.log.error('No init segment for MP4+VTT!');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_MP4_VTT
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_MP4_VTT);
 		}
 
-		const Mp4VttParser = shaka.text.Mp4VttParser;
-		const Mp4Parser = shaka.util.Mp4Parser;
+		// const Mp4VttParser = shaka.text.Mp4VttParser;
+		// const Mp4Parser = shaka.util.Mp4Parser;
 
 		let baseTime = 0;
 		/** @type {!Array.<shaka.text.Mp4VttParser.TimeSegment>} */
@@ -172,7 +170,7 @@ shaka.text.Mp4VttParser = class {
 
 		const dataView = new DataView(rawPayload.buffer, rawPayload.byteOffset, rawPayload.byteLength);
 		/** @type {!shaka.util.DataViewReader} */
-		const reader = new shaka.util.DataViewReader(dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+		const reader = new DataViewReader(dataView, DataViewReader.Endianness.BIG_ENDIAN);
 
 		for (const presentation of presentations) {
 			// If one presentation corresponds to multiple payloads, it is assumed
@@ -238,7 +236,7 @@ shaka.text.Mp4VttParser = class {
 			'MDAT which contain VTT cues and non-VTT data are not currently ' + 'supported!'
 		);
 
-		return /** @type {!Array.<!shaka.extern.Cue>} */ (cues.filter(shaka.util.Functional.isNotNull));
+		return /** @type {!Array.<!shaka.extern.Cue>} */ (cues.filter(Functional.isNotNull));
 	}
 
 	/**
@@ -344,19 +342,19 @@ shaka.text.Mp4VttParser = class {
 			.box(
 				'payl',
 				shaka.util.Mp4Parser.allData(data => {
-					payload = shaka.util.StringUtils.fromUTF8(data);
+					payload = StringUtils.fromUTF8(data);
 				})
 			)
 			.box(
 				'iden',
 				shaka.util.Mp4Parser.allData(data => {
-					id = shaka.util.StringUtils.fromUTF8(data);
+					id = StringUtils.fromUTF8(data);
 				})
 			)
 			.box(
 				'sttg',
 				shaka.util.Mp4Parser.allData(data => {
-					settings = shaka.util.StringUtils.fromUTF8(data);
+					settings = StringUtils.fromUTF8(data);
 				})
 			)
 			.parse(data);
@@ -380,20 +378,20 @@ shaka.text.Mp4VttParser = class {
 	 * @private
 	 */
 	static assembleCue_(payload, id, settings, startTime, endTime) {
-		const cue = new shaka.text.Cue(startTime, endTime, payload);
+		const cue = new Cue(startTime, endTime, payload);
 
 		if (id) {
 			cue.id = id;
 		}
 
 		if (settings) {
-			const parser = new shaka.util.TextParser(settings);
+			const parser = new TextParser(settings);
 
 			let word = parser.readWord();
 
 			while (word) {
 				// TODO: Check WebVTTConfigurationBox for region info.
-				if (!shaka.text.VttTextParser.parseCueSetting(cue, word, /* VTTRegions */ [])) {
+				if (!VttTextParser.parseCueSetting(cue, word, /* VTTRegions */ [])) {
 					shaka.log.warning(
 						'VTT parser encountered an invalid VTT setting: ',
 						word,
@@ -408,7 +406,7 @@ shaka.text.Mp4VttParser = class {
 
 		return cue;
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -427,6 +425,8 @@ shaka.text.Mp4VttParser = class {
  *    missing, the accumated durations preceeding this time segment will
  *    be used to create the start time.
  */
-shaka.text.Mp4VttParser.TimeSegment;
+Mp4VttParser.TimeSegment;
 
-shaka.text.TextEngine.registerParser('application/mp4; codecs="wvtt"', shaka.text.Mp4VttParser);
+TextEngine.registerParser('application/mp4; codecs="wvtt"', Mp4VttParser);
+
+export default Mp4VttParser;

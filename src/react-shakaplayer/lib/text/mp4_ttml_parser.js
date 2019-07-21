@@ -22,24 +22,29 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.Mp4Parser');
 
+import TextEngine from '../text/text_engine';
+import TtmlTextParser from '../text/ttml_text_parser';
+import error from '../util/error';
+import Mp4Parser from '../util/mp4_parser';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
 /**
  * @implements {shaka.extern.TextParser}
  */
-shaka.text.Mp4TtmlParser = class {
+class Mp4TtmlParser {
 	constructor() {
 		/**
 		 * @type {!shaka.extern.TextParser}
 		 * @private
 		 */
-		this.parser_ = new shaka.text.TtmlTextParser();
+		this.parser_ = new TtmlTextParser();
 	}
 
 	/** @override **/
 	parseInit(data) {
-		const Mp4Parser = shaka.util.Mp4Parser;
+		// const Mp4Parser = Mp4Parser;
 
 		let sawSTPP = false;
 
@@ -57,11 +62,7 @@ shaka.text.Mp4TtmlParser = class {
 			.parse(data);
 
 		if (!sawSTPP) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_MP4_TTML
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_MP4_TTML);
 		}
 	}
 
@@ -85,16 +86,14 @@ shaka.text.Mp4TtmlParser = class {
 			.parse(data);
 
 		if (!sawMDAT) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_MP4_TTML
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_MP4_TTML);
 		}
 
 		return payload;
 	}
-};
+}
 
-shaka.text.TextEngine.registerParser('application/mp4; codecs="stpp"', shaka.text.Mp4TtmlParser);
-shaka.text.TextEngine.registerParser('application/mp4; codecs="stpp.TTML.im1t"', shaka.text.Mp4TtmlParser);
+TextEngine.registerParser('application/mp4; codecs="stpp"', Mp4TtmlParser);
+TextEngine.registerParser('application/mp4; codecs="stpp.TTML.im1t"', Mp4TtmlParser);
+
+export default Mp4TtmlParser;

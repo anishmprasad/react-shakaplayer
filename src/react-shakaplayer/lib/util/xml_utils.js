@@ -20,13 +20,15 @@
 // goog.require('shaka.log');
 // goog.require('shaka.util.StringUtils');
 
+import StringUtils from '../util/string_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
  * @summary A set of XML utility functions.
  */
-shaka.util.XmlUtils = class {
+export default class XmlUtils {
 	/**
 	 * Finds a child XML element.
 	 * @param {!Node} elem The parent XML element.
@@ -36,7 +38,7 @@ shaka.util.XmlUtils = class {
 	 *   child XML element with the given tag name.
 	 */
 	static findChild(elem, name) {
-		const children = shaka.util.XmlUtils.findChildren(elem, name);
+		const children = XmlUtils.findChildren(elem, name);
 		if (children.length != 1) {
 			return null;
 		}
@@ -53,7 +55,7 @@ shaka.util.XmlUtils = class {
 	 *   child XML element with the given tag name.
 	 */
 	static findChildNS(elem, ns, name) {
-		const children = shaka.util.XmlUtils.findChildrenNS(elem, ns, name);
+		const children = XmlUtils.findChildrenNS(elem, ns, name);
 		if (children.length != 1) {
 			return null;
 		}
@@ -327,10 +329,10 @@ shaka.util.XmlUtils = class {
 	 */
 	static parseXml(data, expectedRootElemName) {
 		try {
-			const string = shaka.util.StringUtils.fromUTF8(data);
-			return shaka.util.XmlUtils.parseXmlString(string, expectedRootElemName);
+			const string = StringUtils.fromUTF8(data);
+			return XmlUtils.parseXmlString(string, expectedRootElemName);
 		} catch (exception) {
 			return null;
 		}
 	}
-};
+}

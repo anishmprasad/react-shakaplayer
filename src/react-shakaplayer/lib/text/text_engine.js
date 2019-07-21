@@ -23,6 +23,11 @@
 // goog.require('shaka.util.IDestroyable');
 // goog.require('shaka.util.MimeUtils');
 
+import { Cue } from '../text/cue';
+import error from '../util/error';
+import IDestroyable from '../util/i_destroyable';
+import MimeUtils from '../util/mime_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -30,7 +35,7 @@ var goog = window.goog;
  * @summary Manages text parsers and cues.
  * @implements {shaka.util.IDestroyable}
  */
-shaka.text.TextEngine = class {
+class TextEngine {
 	/** @param {shaka.extern.TextDisplayer} displayer */
 	constructor(displayer) {
 		/** @private {shaka.extern.TextParser} */
@@ -76,7 +81,7 @@ shaka.text.TextEngine = class {
 	 * @export
 	 */
 	static registerParser(mimeType, plugin) {
-		shaka.text.TextEngine.parserMap_[mimeType] = plugin;
+		TextEngine.parserMap_[mimeType] = plugin;
 	}
 
 	/**
@@ -84,7 +89,7 @@ shaka.text.TextEngine = class {
 	 * @export
 	 */
 	static unregisterParser(mimeType) {
-		delete shaka.text.TextEngine.parserMap_[mimeType];
+		delete TextEngine.parserMap_[mimeType];
 	}
 
 	/**
@@ -92,11 +97,11 @@ shaka.text.TextEngine = class {
 	 * @return {boolean}
 	 */
 	static isTypeSupported(mimeType) {
-		if (shaka.text.TextEngine.parserMap_[mimeType]) {
+		if (TextEngine.parserMap_[mimeType]) {
 			// An actual parser is available.
 			return true;
 		}
-		if (window.muxjs && mimeType == shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE) {
+		if (window.muxjs && mimeType == MimeUtils.CLOSED_CAPTION_MIMETYPE) {
 			// Will be handled by mux.js.
 			return true;
 		}
@@ -128,7 +133,7 @@ shaka.text.TextEngine = class {
 	initParser(mimeType) {
 		// No parser for CEA, which is extracted from video and side-loaded
 		// into TextEngine and TextDisplayer.
-		if (mimeType == shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE) {
+		if (mimeType == MimeUtils.CLOSED_CAPTION_MIMETYPE) {
 			return;
 		}
 
@@ -161,10 +166,10 @@ shaka.text.TextEngine = class {
 		} catch (exception) {
 			// This could be a failure from the parser itself (init segment required)
 			// or an exception from allCues.length being zero.
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.UNABLE_TO_EXTRACT_CUE_START_TIME,
+			throw new error(
+				error.Severity.CRITICAL,
+				error.Category.TEXT,
+				error.Code.UNABLE_TO_EXTRACT_CUE_START_TIME,
 				exception
 			);
 		}
@@ -384,7 +389,7 @@ shaka.text.TextEngine = class {
 				continue;
 			}
 			/** @type {!shaka.text.Cue} */
-			const cue = new shaka.text.Cue(caption.startTime, caption.endTime, caption.text);
+			const cue = new Cue(caption.startTime, caption.endTime, caption.text);
 			captionsMap
 				.get(id)
 				.get(startAndEndTime)
@@ -437,7 +442,9 @@ shaka.text.TextEngine = class {
 		const channel = this.closedCaptionsMap_.get(channelId);
 		return channel ? channel.size : 0;
 	}
-};
+}
 
 /** @private {!Object.<string, !shaka.extern.TextParserPlugin>} */
-shaka.text.TextEngine.parserMap_ = {};
+TextEngine.parserMap_ = {};
+
+export default TextEngine;
