@@ -40,7 +40,7 @@ const shaka = window.shaka;
 var goog = window.goog;
 
 /**
- * @event shaka.cast.CastProxy.CastStatusChangedEvent
+ * @event CastProxy.CastStatusChangedEvent
  * @description Fired when cast status changes.  The status change will be
  *   reflected in canCast() and isCasting().
  * @property {string} type
@@ -101,7 +101,7 @@ export default class CastProxy extends FakeEventTarget {
 			// It unblocks casting in the world where UI can be configured,
 			// but it's hacky and must be changed to a permanent solution
 			// allowing to change Receiver App ID for reals.
-			/** @private {shaka.cast.CastSender} */
+			/** @private {CastSender} */
 			this.sender_ = new CastSender(
 				receiverAppId,
 				() => this.onCastStatusChanged_(),
@@ -283,7 +283,7 @@ export default class CastProxy extends FakeEventTarget {
 		}
 
 		// Create the new one
-		this.sender_ = new shaka.cast.CastSender(
+		this.sender_ = new CastSender(
 			newAppId,
 			() => this.onCastStatusChanged_(),
 			() => this.onFirstCastStateUpdate_(),
@@ -394,7 +394,7 @@ export default class CastProxy extends FakeEventTarget {
 	}
 
 	/**
-	 * @return {shaka.cast.CastUtils.InitStateType} initState Video and player
+	 * @return {CastUtils.InitStateType} initState Video and player
 	 *   state to be sent to the receiver.
 	 * @private
 	 */
@@ -410,7 +410,7 @@ export default class CastProxy extends FakeEventTarget {
 		// Pause local playback before capturing state.
 		this.localVideo_.pause();
 
-		for (const name of shaka.cast.CastUtils.VideoInitStateAttributes) {
+		for (const name of CastUtils.VideoInitStateAttributes) {
 			initState['video'][name] = this.localVideo_[name];
 		}
 
@@ -420,7 +420,7 @@ export default class CastProxy extends FakeEventTarget {
 			initState['startTime'] = this.localVideo_.currentTime;
 		}
 
-		for (const pair of shaka.cast.CastUtils.PlayerInitState) {
+		for (const pair of CastUtils.PlayerInitState) {
 			const getter = pair[0];
 			const setter = pair[1];
 			const value = /** @type {Object} */ (this.localPlayer_)[getter]();
@@ -428,7 +428,7 @@ export default class CastProxy extends FakeEventTarget {
 			initState['player'][setter] = value;
 		}
 
-		for (const pair of shaka.cast.CastUtils.PlayerInitAfterLoadState) {
+		for (const pair of CastUtils.PlayerInitAfterLoadState) {
 			const getter = pair[0];
 			const setter = pair[1];
 			const value = /** @type {Object} */ (this.localPlayer_)[getter]();
@@ -467,7 +467,7 @@ export default class CastProxy extends FakeEventTarget {
 		goog.asserts.assert(this.sender_, 'Cast sender should not be null!');
 
 		// Transfer back the player state.
-		for (const pair of shaka.cast.CastUtils.PlayerInitState) {
+		for (const pair of CastUtils.PlayerInitState) {
 			const getter = pair[0];
 			const setter = pair[1];
 			const value = this.sender_.get('player', getter)();
@@ -498,7 +498,7 @@ export default class CastProxy extends FakeEventTarget {
 
 		// Get the video state into a temp variable since we will apply it async.
 		const videoState = {};
-		for (const name of shaka.cast.CastUtils.VideoInitStateAttributes) {
+		for (const name of CastUtils.VideoInitStateAttributes) {
 			videoState[name] = this.sender_.get('video', name);
 		}
 
@@ -510,11 +510,11 @@ export default class CastProxy extends FakeEventTarget {
 					return;
 				}
 
-				for (const name of shaka.cast.CastUtils.VideoInitStateAttributes) {
+				for (const name of CastUtils.VideoInitStateAttributes) {
 					this.localVideo_[name] = videoState[name];
 				}
 
-				for (const pair of shaka.cast.CastUtils.PlayerInitAfterLoadState) {
+				for (const pair of CastUtils.PlayerInitAfterLoadState) {
 					const getter = pair[0];
 					const setter = pair[1];
 					const value = this.sender_.get('player', getter)();
@@ -670,7 +670,7 @@ export default class CastProxy extends FakeEventTarget {
 		// If we are casting, but the first update has not come in yet, use local
 		// getters, but not local methods.
 		if (this.sender_ && this.sender_.isCasting() && !this.sender_.hasRemoteProperties()) {
-			if (shaka.cast.CastUtils.PlayerGetterMethods[name]) {
+			if (CastUtils.PlayerGetterMethods[name]) {
 				const value = /** @type {Object} */ (this.localPlayer_)[name];
 				goog.asserts.assert(typeof value == 'function', 'only methods on Player');
 				// eslint-disable-next-line no-restricted-syntax
