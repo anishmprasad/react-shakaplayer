@@ -30,7 +30,7 @@ var goog = window.goog;
  * @implements {shaka.util.IReleasable}
  * @final
  */
-shaka.media.StallDetector = class {
+class StallDetector {
 	/**
 	 * @param {shaka.media.StallDetector.Implementation} implementation
 	 * @param {number} stallThresholdSeconds
@@ -102,12 +102,12 @@ shaka.media.StallDetector = class {
 			this.onStall_(this.value_, stallSeconds);
 		}
 	}
-};
+}
 
 /**
  * @interface
  */
-shaka.media.StallDetector.Implementation = class {
+class Implementation {
 	/**
 	 * Check if the presentation time should be changing. This will return |true|
 	 * when we expect the presentation time to change.
@@ -129,7 +129,7 @@ shaka.media.StallDetector.Implementation = class {
 	 * @return {number}
 	 */
 	getWallSeconds() {}
-};
+}
 
 /**
  * Some platforms/browsers can get stuck in the middle of a buffered range (e.g.
@@ -138,7 +138,7 @@ shaka.media.StallDetector.Implementation = class {
  * @implements {shaka.media.StallDetector.Implementation}
  * @final
  */
-shaka.media.StallDetector.MediaElementImplementation = class {
+class MediaElementImplementation {
 	/**
 	 * @param {!HTMLMediaElement} mediaElement
 	 */
@@ -207,4 +207,6 @@ shaka.media.StallDetector.MediaElementImplementation = class {
 
 		return false;
 	}
-};
+}
+
+export { StallDetector, MediaElementImplementation, Implementation };

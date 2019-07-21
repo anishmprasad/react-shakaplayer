@@ -36,6 +36,24 @@
 // goog.require('shaka.util.Periods');
 // goog.require('shaka.util.PublicPromise');
 
+
+import MediaSourceEngine from '../media/media_source_engine'
+import Backoff from '../net/backoff'
+import NetworkingEngine from '../net/networking_engine'
+import DelayedTick from '../util/delayed_tick'
+import Destroyer from '../util/destroyer'
+import Error from '../util/error'
+import FakeEvent from '../util/fake_event'
+import Functional from '../util/functional'
+import IDestroyable from '../util/i_destroyable'
+import Iterables from '../util/iterables'
+import ManifestParserUtils from '../util/manifest_parser_utils'
+import MimeUtils from '../util/mime_utils'
+import Mp4Parser from '../util/mp4_parser'
+import Networking from '../util/networking'
+import Periods from '../util/periods'
+import PublicPromise from '../util/public_promise'
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -69,15 +87,15 @@ var goog = window.goog;
  * within the presentation timeline; however, the owner may forego calling
  * seeked() when the playhead moves outside the presentation timeline.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  */
-shaka.media.StreamingEngine = class {
+class StreamingEngine {
   /**
    * @param {shaka.extern.Manifest} manifest
-   * @param {shaka.media.StreamingEngine.PlayerInterface} playerInterface
+   * @param {StreamingEngine.PlayerInterface} playerInterface
    */
   constructor(manifest, playerInterface) {
-    /** @private {?shaka.media.StreamingEngine.PlayerInterface} */
+    /** @private {?StreamingEngine.PlayerInterface} */
     this.playerInterface_ = playerInterface;
 
     /** @private {?shaka.extern.Manifest} */
@@ -100,7 +118,7 @@ shaka.media.StreamingEngine = class {
      *      up) and can be switched to ([a PublicPromise, true]).
      *
      * @private {Array.<?{
-     *           promise: shaka.util.PublicPromise, resolved: boolean}>}
+     *           promise: PublicPromise, resolved: boolean}>}
      */
     this.canSwitchPeriod_ = [];
 
@@ -112,15 +130,15 @@ shaka.media.StreamingEngine = class {
      *      ([a Promise instance, true]).
      *
      * @private {!Map.<number,
-     *                 ?{promise: shaka.util.PublicPromise, resolved: boolean}>}
+     *                 ?{promise: PublicPromise, resolved: boolean}>}
      */
     this.canSwitchStream_ = new Map();
 
     /**
      * Maps a content type, e.g., 'audio', 'video', or 'text', to a MediaState.
      *
-     * @private {!Map.<shaka.util.ManifestParserUtils.ContentType,
-                         !shaka.media.StreamingEngine.MediaState_>}
+     * @private {!Map.<ManifestParserUtils.ContentType,
+                         !StreamingEngine.MediaState_>}
      */
     this.mediaStates_ = new Map();
 
@@ -135,7 +153,7 @@ shaka.media.StreamingEngine = class {
      * Used for delay and backoff of failure callbacks, so that apps do not
      * retry instantly.
      *
-     * @private {shaka.net.Backoff}
+     * @private {Backoff}
      */
     this.failureCallbackBackoff_ = null;
 
@@ -157,8 +175,8 @@ shaka.media.StreamingEngine = class {
     /** @private {number} */
     this.textStreamSequenceId_ = 0;
 
-    /** @private {!shaka.util.Destroyer} */
-    this.destroyer_ = new shaka.util.Destroyer(() => this.doDestroy_());
+    /** @private {!Destroyer} */
+    this.destroyer_ = new Destroyer(() => this.doDestroy_());
   }
 
   /** @override */
@@ -213,7 +231,7 @@ shaka.media.StreamingEngine = class {
     // allowed to retry streaming infinitely if it wishes.
     const autoReset = true;
     this.failureCallbackBackoff_ =
-        new shaka.net.Backoff(failureRetryParams, autoReset);
+        new Backoff(failureRetryParams, autoReset);
   }
 
 
@@ -257,10 +275,10 @@ shaka.media.StreamingEngine = class {
         this.manifest_.periods[needPeriodIndex]);
     if (!initialStreams.variant && !initialStreams.text) {
       shaka.log.error('init: no Streams chosen');
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STREAMING,
-          shaka.util.Error.Code.INVALID_STREAMS_CHOSEN);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.STREAMING,
+          Error.Code.INVALID_STREAMS_CHOSEN);
     }
 
     // Setup the initial set of Streams and then begin each update cycle. After
@@ -289,7 +307,7 @@ shaka.media.StreamingEngine = class {
    * @return {?shaka.extern.Period}
    */
   getBufferingPeriod() {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     const video = this.mediaStates_.get(ContentType.VIDEO);
     if (video) {
@@ -311,7 +329,7 @@ shaka.media.StreamingEngine = class {
    * @return {?shaka.extern.Stream}
    */
   getBufferingAudio() {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     return this.getStream_(ContentType.AUDIO);
   }
 
@@ -322,7 +340,7 @@ shaka.media.StreamingEngine = class {
    * @return {?shaka.extern.Stream}
    */
   getBufferingVideo() {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     return this.getStream_(ContentType.VIDEO);
   }
 
@@ -333,14 +351,14 @@ shaka.media.StreamingEngine = class {
    * @return {?shaka.extern.Stream}
    */
   getBufferingText() {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     return this.getStream_(ContentType.TEXT);
   }
 
   /**
    * Get the stream of the given type which we are currently buffering.  Returns
    * null if there is no stream for the given type.
-   * @param {shaka.util.ManifestParserUtils.ContentType} type
+   * @param {ManifestParserUtils.ContentType} type
    * @return {?shaka.extern.Stream}
    * @private
   */
@@ -365,7 +383,7 @@ shaka.media.StreamingEngine = class {
    * @return {!Promise}
    */
   async loadNewTextStream(stream) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     // Clear MediaSource's buffered text, so that the new text stream will
     // properly replace the old buffered text.
@@ -413,7 +431,7 @@ shaka.media.StreamingEngine = class {
    * Stop fetching text stream when the user chooses to hide the captions.
    */
   unloadTextStream() {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     this.unloadingTextStream_ = true;
 
     const state = this.mediaStates_.get(ContentType.TEXT);
@@ -430,7 +448,7 @@ shaka.media.StreamingEngine = class {
    * @param {boolean} on
    */
   setTrickPlay(on) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     const mediaState = this.mediaStates_.get(ContentType.VIDEO);
     if (!mediaState) {
@@ -493,7 +511,7 @@ shaka.media.StreamingEngine = class {
    * @param {shaka.extern.Stream} textStream
    */
   switchTextStream(textStream) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     goog.asserts.assert(textStream && textStream.type == ContentType.TEXT,
         'Wrong stream type passed to switchTextStream!');
     this.switchInternal_(textStream, /* clearBuffer= */ true,
@@ -503,7 +521,7 @@ shaka.media.StreamingEngine = class {
 
   /** Reload the current text stream. */
   reloadTextStream() {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     const mediaState = this.mediaStates_.get(ContentType.TEXT);
     if (mediaState) { // Don't reload if there's no text to begin with.
       this.switchInternal_(mediaState.stream, /* clearBuffer= */ true,
@@ -524,7 +542,7 @@ shaka.media.StreamingEngine = class {
    * @private
    */
   switchInternal_(stream, clearBuffer, safeMargin, force) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     const type = /** @type {!ContentType} */(stream.type);
     const mediaState = this.mediaStates_.get(type);
 
@@ -593,7 +611,7 @@ shaka.media.StreamingEngine = class {
     }
 
     if (mediaState.stream == stream && !force) {
-      const streamTag = shaka.media.StreamingEngine.logPrefix_(mediaState);
+      const streamTag = StreamingEngine.logPrefix_(mediaState);
       shaka.log.debug('switch: Stream ' + streamTag + ' already active');
       return;
     }
@@ -602,7 +620,7 @@ shaka.media.StreamingEngine = class {
       // Mime types are allowed to change for text streams.
       // Reinitialize the text parser, but only if we are going to fetch the
       // init segment again.
-      const fullMimeType = shaka.util.MimeUtils.getFullType(
+      const fullMimeType = MimeUtils.getFullType(
           stream.mimeType, stream.codecs);
       this.playerInterface_.mediaSourceEngine.reinitText(fullMimeType);
     }
@@ -610,7 +628,7 @@ shaka.media.StreamingEngine = class {
     mediaState.stream = stream;
     mediaState.needInitSegment = true;
 
-    const streamTag = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const streamTag = StreamingEngine.logPrefix_(mediaState);
     shaka.log.debug('switch: switching to Stream ' + streamTag);
 
     if (this.shouldAbortCurrentRequest_(mediaState, periodIndex)) {
@@ -649,7 +667,7 @@ shaka.media.StreamingEngine = class {
   /**
    * Returns whether we should abort the current request.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @param {number} periodIndex
    * @return {boolean}
    */
@@ -714,7 +732,7 @@ shaka.media.StreamingEngine = class {
    * within the presentation timeline.
    */
   seeked() {
-    const Iterables = shaka.util.Iterables;
+    const Iterables = Iterables;
     const presentationTime = this.playerInterface_.getPresentationTime();
     const smallGapLimit = this.config_.smallGapLimit;
     const checkBuffered = (type) => {
@@ -767,11 +785,11 @@ shaka.media.StreamingEngine = class {
    * Clear the buffer for a given stream.  Unlike clearBuffer_, this will handle
    * cases where a MediaState is performing an update.  After this runs, every
    * MediaState will have a pending update.
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @private
    */
   forceClearBuffer_(mediaState) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     if (mediaState.clearingBuffer) {
       // We're already clearing the buffer, so we don't need to clear the
@@ -843,10 +861,10 @@ shaka.media.StreamingEngine = class {
 
     // Init/re-init MediaSourceEngine. Note that a re-init is only valid for
     // text.
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     /**
-     * @type {!Map.<shaka.util.ManifestParserUtils.ContentType,
+     * @type {!Map.<ManifestParserUtils.ContentType,
      *              shaka.extern.Stream>}
      */
     const streamsByType = new Map();
@@ -899,11 +917,11 @@ shaka.media.StreamingEngine = class {
    * @param {shaka.extern.Stream} stream
    * @param {number} needPeriodIndex
    * @param {number} resumeAt
-   * @return {shaka.media.StreamingEngine.MediaState_}
+   * @return {StreamingEngine.MediaState_}
    * @private
    */
   createMediaState_(stream, needPeriodIndex, resumeAt) {
-    return /** @type {shaka.media.StreamingEngine.MediaState_} */ ({
+    return /** @type {StreamingEngine.MediaState_} */ ({
       stream: stream,
       type: stream.type,
       lastStream: null,
@@ -945,7 +963,7 @@ shaka.media.StreamingEngine = class {
 
     shaka.log.debug('(all) setting up Period ' + periodIndex);
     canSwitchRecord = {
-      promise: new shaka.util.PublicPromise(),
+      promise: new PublicPromise(),
       resolved: false,
     };
     this.canSwitchPeriod_[periodIndex] = canSwitchRecord;
@@ -986,7 +1004,7 @@ shaka.media.StreamingEngine = class {
         this.canSwitchPeriod_[periodIndex].promise.reject();
         delete this.canSwitchPeriod_[periodIndex];
         shaka.log.warning('(all) failed to setup Period ' + periodIndex);
-        goog.asserts.assert(error instanceof shaka.util.Error,
+        goog.asserts.assert(error instanceof Error,
             'Bad error type');
         this.playerInterface_.onError(error);
         // Don't stop other Periods from being set up.
@@ -1021,7 +1039,7 @@ shaka.media.StreamingEngine = class {
       } else {
         shaka.log.v1('(all) setting up Stream ' + stream.id);
         this.canSwitchStream_.set(stream.id, {
-          promise: new shaka.util.PublicPromise(),
+          promise: new PublicPromise(),
           resolved: false,
         });
         parallelWork.push(stream.createSegmentIndex());
@@ -1073,13 +1091,13 @@ shaka.media.StreamingEngine = class {
   /**
    * Called when |mediaState|'s update timer has expired.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @private
    */
   async onUpdate_(mediaState) {
     this.destroyer_.ensureNotDestroyed();
 
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     // Sanity check.
     goog.asserts.assert(
@@ -1152,24 +1170,24 @@ shaka.media.StreamingEngine = class {
   /**
    * Updates the given MediaState.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @return {?number} The number of seconds to wait until updating again or
    *   null if another update does not need to be scheduled.
-   * @throws {!shaka.util.Error} if an error occurs.
+   * @throws {!Error} if an error occurs.
    * @private
    */
   update_(mediaState) {
     goog.asserts.assert(this.manifest_, 'manifest_ should not be null');
     goog.asserts.assert(this.config_, 'config_ should not be null');
 
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     // If it's a text stream and the original id starts with 'CC', it's CEA
     // closed captions. Do not schedule update for closed captions text
     // mediastate, since closed captions are embedded in video streams.
     const isCaptionState = (state) => {
       return state.type == ContentType.TEXT &&
-          state.stream.mimeType == shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
+          state.stream.mimeType == MimeUtils.CLOSED_CAPTION_MIMETYPE;
     };
     if (isCaptionState(mediaState)) {
       this.playerInterface_.mediaSourceEngine.setSelectedClosedCaptionId(
@@ -1177,7 +1195,7 @@ shaka.media.StreamingEngine = class {
       return null;
     }
 
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     // Compute how far we've buffered ahead of the playhead.
     const presentationTime = this.playerInterface_.getPresentationTime();
@@ -1223,7 +1241,7 @@ shaka.media.StreamingEngine = class {
         // stream's endOfStream state.
         const textState = this.mediaStates_.get(ContentType.TEXT);
         if (textState && textState.stream.mimeType ==
-              shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE) {
+              MimeUtils.CLOSED_CAPTION_MIMETYPE) {
           textState.endOfStream = true;
         }
       }
@@ -1285,7 +1303,7 @@ shaka.media.StreamingEngine = class {
     const maxSegmentDuration =
         this.manifest_.presentationTimeline.getMaxSegmentDuration();
     const maxRunAhead = maxSegmentDuration *
-        shaka.media.StreamingEngine.MAX_RUN_AHEAD_SEGMENTS_;
+        StreamingEngine.MAX_RUN_AHEAD_SEGMENTS_;
     if (timeNeeded >= minTimeNeeded + maxRunAhead) {
       // Wait and give other media types time to catch up to this one.
       // For example, let video buffering catch up to audio buffering before
@@ -1306,7 +1324,7 @@ shaka.media.StreamingEngine = class {
    * buffer is empty; otherwise, returns the time at which the last segment
    * appended ends.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @param {number} presentationTime
    * @return {number} The next timestamp needed.
    * @private
@@ -1333,18 +1351,18 @@ shaka.media.StreamingEngine = class {
   /**
    * Gets the SegmentReference of the next segment needed.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @param {number} presentationTime
    * @param {?number} bufferEnd
    * @param {number} currentPeriodIndex
-   * @return {shaka.media.SegmentReference} The SegmentReference of the
+   * @return {SegmentReference} The SegmentReference of the
    *   next segment needed. Returns null if a segment could not be found, does
    *   not exist, or is not available.
    * @private
    */
   getSegmentReferenceNeeded_(
       mediaState, presentationTime, bufferEnd, currentPeriodIndex) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     if (mediaState.lastSegmentReference &&
         mediaState.stream == mediaState.lastStream) {
@@ -1405,7 +1423,7 @@ shaka.media.StreamingEngine = class {
   /**
    * Looks up the position of the segment containing the given timestamp.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @param {number} presentationTime The timestamp needed, relative to the
    *   start of the presentation.
    * @param {number} currentPeriodIndex
@@ -1415,7 +1433,7 @@ shaka.media.StreamingEngine = class {
    */
   lookupSegmentPosition_(
       mediaState, presentationTime, currentPeriodIndex) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
     const currentPeriod = this.manifest_.periods[currentPeriodIndex];
 
     shaka.log.debug(logPrefix,
@@ -1440,15 +1458,15 @@ shaka.media.StreamingEngine = class {
   /**
    * Gets the SegmentReference at the given position if it's available.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @param {number} currentPeriodIndex
    * @param {number} position
-   * @return {shaka.media.SegmentReference}
+   * @return {SegmentReference}
    *
    * @private
    */
   getSegmentReferenceIfAvailable_(mediaState, currentPeriodIndex, position) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
     const currentPeriod = this.manifest_.periods[currentPeriodIndex];
 
     const reference = mediaState.stream.getSegmentReference(position);
@@ -1485,16 +1503,16 @@ shaka.media.StreamingEngine = class {
    * associated SourceBuffer and evicts segments if either are required
    * beforehand. Schedules another update after completing successfully.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @param {number} presentationTime
    * @param {number} currentPeriodIndex The index of the current Period.
-   * @param {!shaka.media.SegmentReference} reference
+   * @param {!SegmentReference} reference
    * @private
    */
   async fetchAndAppend_(
       mediaState, presentationTime, currentPeriodIndex, reference) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    const StreamingEngine = shaka.media.StreamingEngine;
+    const ContentType = ManifestParserUtils.ContentType;
+    const StreamingEngine = StreamingEngine;
     const logPrefix = StreamingEngine.logPrefix_(mediaState);
     const currentPeriod = this.manifest_.periods[currentPeriodIndex];
 
@@ -1575,14 +1593,14 @@ shaka.media.StreamingEngine = class {
       if (this.fatalError_) {
         return;
       }
-      goog.asserts.assert(error instanceof shaka.util.Error,
+      goog.asserts.assert(error instanceof Error,
           'Should only receive a Shaka error');
 
       mediaState.performingUpdate = false;
 
       if (mediaState.type == ContentType.TEXT &&
           this.config_.ignoreTextStreamFailures) {
-        if (error.code == shaka.util.Error.Code.BAD_HTTP_STATUS) {
+        if (error.code == Error.Code.BAD_HTTP_STATUS) {
           shaka.log.warning(logPrefix,
               'Text stream failed to download. Proceeding without it.');
         } else {
@@ -1590,20 +1608,20 @@ shaka.media.StreamingEngine = class {
               'Text stream failed to parse. Proceeding without it.');
         }
         this.mediaStates_.delete(ContentType.TEXT);
-      } else if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+      } else if (error.code == Error.Code.OPERATION_ABORTED) {
         // If the network slows down, abort the current fetch request and start
         // a new one, and ignore the error message.
         mediaState.performingUpdate = false;
         mediaState.updateTimer = null;
         this.scheduleUpdate_(mediaState, 0);
-      } else if (error.code == shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR) {
+      } else if (error.code == Error.Code.QUOTA_EXCEEDED_ERROR) {
         this.handleQuotaExceeded_(mediaState, error);
       } else {
         shaka.log.error(logPrefix, 'failed fetch and append: code=' +
             error.code);
         mediaState.hasError = true;
 
-        error.severity = shaka.util.Error.Severity.CRITICAL;
+        error.severity = Error.Severity.CRITICAL;
         this.handleStreamingError_(error);
       }
     }
@@ -1627,7 +1645,7 @@ shaka.media.StreamingEngine = class {
     }
 
     for (const mediaState of this.mediaStates_.values()) {
-      const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+      const logPrefix = StreamingEngine.logPrefix_(mediaState);
       if (mediaState.hasError) {
         shaka.log.info(logPrefix, 'Retrying after failure...');
         mediaState.hasError = false;
@@ -1642,12 +1660,12 @@ shaka.media.StreamingEngine = class {
   /**
    * Handles a QUOTA_EXCEEDED_ERROR.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
-   * @param {!shaka.util.Error} error
+   * @param {StreamingEngine.MediaState_} mediaState
+   * @param {!Error} error
    * @private
    */
   handleQuotaExceeded_(mediaState, error) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     // The segment cannot fit into the SourceBuffer. Ideally, MediaSource would
     // have evicted old data to accommodate the segment; however, it may have
@@ -1710,7 +1728,7 @@ shaka.media.StreamingEngine = class {
    * timestamp offset or init segment are unset, since another call to switch()
    * will end up superseding them.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @param {number} currentPeriodIndex
    * @param {number} appendWindowStart
    * @param {number} appendWindowEnd
@@ -1723,7 +1741,7 @@ shaka.media.StreamingEngine = class {
       return;
     }
 
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
     const currentPeriod = this.manifest_.periods[currentPeriodIndex];
 
     // If we need an init segment then the Stream switched, so we've either
@@ -1777,23 +1795,23 @@ shaka.media.StreamingEngine = class {
   /**
    * Appends the given segment and evicts content if required to append.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @param {number} presentationTime
    * @param {shaka.extern.Period} period
    * @param {shaka.extern.Stream} stream
-   * @param {!shaka.media.SegmentReference} reference
+   * @param {!SegmentReference} reference
    * @param {!ArrayBuffer} segment
    * @return {!Promise}
    * @private
    */
   async append_(mediaState, presentationTime, period, stream, reference,
       segment) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     const hasClosedCaptions = stream.closedCaptions &&
         stream.closedCaptions.size > 0;
     if (stream.emsgSchemeIdUris != null && stream.emsgSchemeIdUris.length > 0) {
-      new shaka.util.Mp4Parser()
+      new Mp4Parser()
           .fullBox(
               'emsg',
               (box) => this.parseEMSG_(
@@ -1825,7 +1843,7 @@ shaka.media.StreamingEngine = class {
    * Parse the EMSG box from a MP4 container.
    *
    * @param {!shaka.extern.Period} period
-   * @param {!shaka.media.SegmentReference} reference
+   * @param {!SegmentReference} reference
    * @param {?Array.<string>} emsgSchemeIdUris Array of emsg
    *     scheme_id_uri for which emsg boxes should be parsed.
    * @param {!shaka.extern.ParsedBox} box
@@ -1868,7 +1886,7 @@ shaka.media.StreamingEngine = class {
         };
 
         // Dispatch an event to notify the application about the emsg box.
-        const event = new shaka.util.FakeEvent('emsg', {'detail': emsg});
+        const event = new FakeEvent('emsg', {'detail': emsg});
         this.playerInterface_.onEvent(event);
       }
     }
@@ -1878,12 +1896,12 @@ shaka.media.StreamingEngine = class {
   /**
    * Evicts media to meet the max buffer behind limit.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @param {number} presentationTime
    * @private
    */
   async evict_(mediaState, presentationTime) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
     shaka.log.v2(logPrefix, 'checking buffer length');
 
     // Use the max segment duration, if it is longer than the bufferBehind, to
@@ -1932,19 +1950,19 @@ shaka.media.StreamingEngine = class {
   /**
    * Sets up all known Periods when startup completes; otherwise, does nothing.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState The last
+   * @param {StreamingEngine.MediaState_} mediaState The last
    *   MediaState updated.
    * @param {shaka.extern.Stream} stream
    * @private
    */
   handleStartup_(mediaState, stream) {
-    const Functional = shaka.util.Functional;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const Functional = Functional;
+    const ContentType = ManifestParserUtils.ContentType;
     if (this.startupComplete_) {
       return;
     }
 
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     // If the only media state is text, then we may have loaded text before
     // any media content.  Marking as complete early will break MediaSource.
@@ -2011,13 +2029,13 @@ shaka.media.StreamingEngine = class {
   /**
    * Calls onChooseStreams() when necessary.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState The last
+   * @param {StreamingEngine.MediaState_} mediaState The last
    *   MediaState updated.
    * @private
    */
   async handlePeriodTransition_(mediaState) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
+    const ContentType = ManifestParserUtils.ContentType;
 
     const currentPeriodIndex =
         this.findPeriodContainingStream_(mediaState.stream);
@@ -2027,7 +2045,7 @@ shaka.media.StreamingEngine = class {
 
     const needPeriodIndex = mediaState.needPeriodIndex;
 
-    /** @type {Array.<shaka.media.StreamingEngine.MediaState_>} */
+    /** @type {Array.<StreamingEngine.MediaState_>} */
     const mediaStates = Array.from(this.mediaStates_.values());
 
     // For a Period transition to work, all media states must need the same
@@ -2039,7 +2057,7 @@ shaka.media.StreamingEngine = class {
     goog.asserts.assert(
         mediaStates.every((ms) => {
           return ms.needPeriodIndex == needPeriodIndex || ms.hasError ||
-              !shaka.media.StreamingEngine.isIdle_(ms);
+              !StreamingEngine.isIdle_(ms);
         }), 'All MediaStates should need the same Period or be performing' +
         'updates.');
 
@@ -2054,7 +2072,7 @@ shaka.media.StreamingEngine = class {
     }
 
     // Only call onChooseStreams() once per Period transition.
-    const allAreIdle = mediaStates.every(shaka.media.StreamingEngine.isIdle_);
+    const allAreIdle = mediaStates.every(StreamingEngine.isIdle_);
     if (!allAreIdle) {
       shaka.log.debug(
           logPrefix,
@@ -2078,7 +2096,7 @@ shaka.media.StreamingEngine = class {
       //  3. The current stream is not in the needed Period (another transition
       //     handled it).
       const allReady = mediaStates.every((ms) => {
-        const isIdle = shaka.media.StreamingEngine.isIdle_(ms);
+        const isIdle = StreamingEngine.isIdle_(ms);
         const currentPeriodIndex = this.findPeriodContainingStream_(ms.stream);
         return isIdle && ms.needPeriodIndex == needPeriodIndex &&
             currentPeriodIndex != needPeriodIndex;
@@ -2095,7 +2113,7 @@ shaka.media.StreamingEngine = class {
       shaka.log.v1(logPrefix, 'calling onChooseStreams()...');
       const chosenStreams = this.playerInterface_.onChooseStreams(needPeriod);
 
-      /** @type {!Map.<!shaka.util.ManifestParserUtils.ContentType,
+      /** @type {!Map.<!ManifestParserUtils.ContentType,
         *              shaka.extern.Stream>} */
       const streamsByType = new Map();
       if (chosenStreams.variant && chosenStreams.variant.video) {
@@ -2116,10 +2134,10 @@ shaka.media.StreamingEngine = class {
 
         shaka.log.error(logPrefix,
             'invalid Streams chosen: missing ' + type + ' Stream');
-        this.playerInterface_.onError(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.STREAMING,
-            shaka.util.Error.Code.INVALID_STREAMS_CHOSEN));
+        this.playerInterface_.onError(new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.STREAMING,
+            Error.Code.INVALID_STREAMS_CHOSEN));
         return;
       }
 
@@ -2143,10 +2161,10 @@ shaka.media.StreamingEngine = class {
 
         shaka.log.error(logPrefix,
             'invalid Streams chosen: unusable ' + type + ' Stream');
-        this.playerInterface_.onError(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.STREAMING,
-            shaka.util.Error.Code.INVALID_STREAMS_CHOSEN));
+        this.playerInterface_.onError(new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.STREAMING,
+            Error.Code.INVALID_STREAMS_CHOSEN));
         return;
       }
 
@@ -2173,7 +2191,7 @@ shaka.media.StreamingEngine = class {
 
 
   /**
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @return {boolean} True if the given MediaState is idle; otherwise, return
    *   false.
    * @private
@@ -2196,14 +2214,14 @@ shaka.media.StreamingEngine = class {
    * @private
    */
   findPeriodForTime_(time) {
-    const ManifestParserUtils = shaka.util.ManifestParserUtils;
+    const ManifestParserUtils = ManifestParserUtils;
     const threshold = ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS;
 
     // The last segment may end right before the end of the Period because of
     // rounding issues so we bias forward a little.
     const adjustedTime = time + threshold;
 
-    const period = shaka.util.Periods.findPeriodForTime(
+    const period = Periods.findPeriodForTime(
         /* periods= */ this.manifest_.periods,
         /* time= */ adjustedTime);
 
@@ -2259,17 +2277,17 @@ shaka.media.StreamingEngine = class {
   /**
    * Fetches the given segment.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
-   * @param {(!shaka.media.InitSegmentReference|!shaka.media.SegmentReference)}
+   * @param {!StreamingEngine.MediaState_} mediaState
+   * @param {(!InitSegmentReference|!SegmentReference)}
    *   reference
    *
    * @return {!Promise.<!ArrayBuffer>}
    * @private
    */
   async fetch_(mediaState, reference) {
-    const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+    const requestType = NetworkingEngine.RequestType.SEGMENT;
 
-    const request = shaka.util.Networking.createSegmentRequest(
+    const request = Networking.createSegmentRequest(
         reference.getUris(),
         reference.startByte,
         reference.endByte,
@@ -2291,13 +2309,13 @@ shaka.media.StreamingEngine = class {
    * of buffer, which can help avoiding rebuffering events.
    * The value of the safe margin should be provided by the ABR manager.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @param {boolean} flush
    * @param {number} safeMargin
    * @private
    */
   async clearBuffer_(mediaState, flush, safeMargin) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     goog.asserts.assert(
         !mediaState.performingUpdate && (mediaState.updateTimer == null),
@@ -2338,17 +2356,17 @@ shaka.media.StreamingEngine = class {
   /**
    * Schedules |mediaState|'s next update.
    *
-   * @param {!shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {!StreamingEngine.MediaState_} mediaState
    * @param {number} delay The delay in seconds.
    * @private
    */
   scheduleUpdate_(mediaState, delay) {
-    const logPrefix = shaka.media.StreamingEngine.logPrefix_(mediaState);
+    const logPrefix = StreamingEngine.logPrefix_(mediaState);
     shaka.log.v2(logPrefix, 'updating in ' + delay + ' seconds');
     goog.asserts.assert(mediaState.updateTimer == null,
         logPrefix + ' did not expect update to be scheduled');
 
-    mediaState.updateTimer = new shaka.util.DelayedTick(async () => {
+    mediaState.updateTimer = new DelayedTick(async () => {
       try {
         await this.onUpdate_(mediaState);
       } catch (error) {
@@ -2363,7 +2381,7 @@ shaka.media.StreamingEngine = class {
   /**
    * If |mediaState| is scheduled to update, stop it.
    *
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @private
    */
   cancelUpdate_(mediaState) {
@@ -2380,7 +2398,7 @@ shaka.media.StreamingEngine = class {
    * Handle streaming errors by delaying, then notifying the application by
    * error callback and by streaming failure callback.
    *
-   * @param {!shaka.util.Error} error
+   * @param {!Error} error
    * @private
    */
   async handleStreamingError_(error) {
@@ -2402,7 +2420,7 @@ shaka.media.StreamingEngine = class {
 
 
   /**
-   * @param {shaka.media.StreamingEngine.MediaState_} mediaState
+   * @param {StreamingEngine.MediaState_} mediaState
    * @return {string} A log prefix of the form ($CONTENT_TYPE:$STREAM_ID), e.g.,
    *   "(audio:5)" or "(video:hd)".
    * @private
@@ -2424,19 +2442,19 @@ shaka.media.StreamingEngine = class {
  * @property {?shaka.extern.Stream} text
  *   The chosen text stream.
  */
-shaka.media.StreamingEngine.ChosenStreams;
+StreamingEngine.ChosenStreams;
 
 
 /**
  * @typedef {{
  *   getPresentationTime: function():number,
  *   getBandwidthEstimate: function():number,
- *   mediaSourceEngine: !shaka.media.MediaSourceEngine,
- *   netEngine: shaka.net.NetworkingEngine,
+ *   mediaSourceEngine: !MediaSourceEngine,
+ *   netEngine: NetworkingEngine,
  *   onChooseStreams: function(!shaka.extern.Period):
- *                        shaka.media.StreamingEngine.ChosenStreams,
+ *                        StreamingEngine.ChosenStreams,
  *   onCanSwitch: function(),
- *   onError: function(!shaka.util.Error),
+ *   onError: function(!Error),
  *   onEvent: function(!Event),
  *   onManifestUpdate: function(),
  *   onSegmentAppended: function(),
@@ -2449,12 +2467,12 @@ shaka.media.StreamingEngine.ChosenStreams;
  *   viewer is seeing on screen right now.
  * @property {function():number} getBandwidthEstimate
  *   Get the estimated bandwidth in bits per second.
- * @property {!shaka.media.MediaSourceEngine} mediaSourceEngine
+ * @property {!MediaSourceEngine} mediaSourceEngine
  *   The MediaSourceEngine. The caller retains ownership.
- * @property {shaka.net.NetworkingEngine} netEngine
+ * @property {NetworkingEngine} netEngine
  *   The NetworkingEngine instance to use. The caller retains ownership.
  * @property {function(!shaka.extern.Period):
- *                shaka.media.StreamingEngine.ChosenStreams} onChooseStreams
+ *                StreamingEngine.ChosenStreams} onChooseStreams
  *   Called by StreamingEngine when the given Period needs to be buffered.
  *   StreamingEngine will switch to the variant and text stream returned from
  *   this function.
@@ -2463,9 +2481,9 @@ shaka.media.StreamingEngine.ChosenStreams;
  * @property {function()} onCanSwitch
  *   Called by StreamingEngine when the Period is set up and switching is
  *   permitted.
- * @property {function(!shaka.util.Error)} onError
+ * @property {function(!Error)} onError
  *   Called when an error occurs. If the error is recoverable (see
- *   {@link shaka.util.Error}) then the caller may invoke either
+ *   {@link Error}) then the caller may invoke either
  *   StreamingEngine.switch*() or StreamingEngine.seeked() to attempt recovery.
  * @property {function(!Event)} onEvent
  *   Called when an event occurs that should be sent to the app.
@@ -2480,21 +2498,21 @@ shaka.media.StreamingEngine.ChosenStreams;
  *   Optional callback which is called when startup has completed. Intended to
  *   be used by tests.
  */
-shaka.media.StreamingEngine.PlayerInterface;
+StreamingEngine.PlayerInterface;
 
 
 /**
  * @typedef {{
- *   type: shaka.util.ManifestParserUtils.ContentType,
+ *   type: ManifestParserUtils.ContentType,
  *   stream: shaka.extern.Stream,
  *   lastStream: ?shaka.extern.Stream,
- *   lastSegmentReference: shaka.media.SegmentReference,
+ *   lastSegmentReference: SegmentReference,
  *   restoreStreamAfterTrickPlay: ?shaka.extern.Stream,
  *   needInitSegment: boolean,
  *   needPeriodIndex: number,
  *   endOfStream: boolean,
  *   performingUpdate: boolean,
- *   updateTimer: shaka.util.DelayedTick,
+ *   updateTimer: DelayedTick,
  *   waitingToClearBuffer: boolean,
  *   waitingToFlushBuffer: boolean,
  *   clearBufferSafeMargin: number,
@@ -2502,7 +2520,7 @@ shaka.media.StreamingEngine.PlayerInterface;
  *   recovering: boolean,
  *   hasError: boolean,
  *   resumeAt: number,
- *   operation: shaka.net.NetworkingEngine.PendingRequest
+ *   operation: NetworkingEngine.PendingRequest
  * }}
  *
  * @description
@@ -2510,13 +2528,13 @@ shaka.media.StreamingEngine.PlayerInterface;
  * for a particular content type. At any given time there is a Stream object
  * associated with the state of the logical stream.
  *
- * @property {shaka.util.ManifestParserUtils.ContentType} type
+ * @property {ManifestParserUtils.ContentType} type
  *   The stream's content type, e.g., 'audio', 'video', or 'text'.
  * @property {shaka.extern.Stream} stream
  *   The current Stream.
  * @property {?shaka.extern.Stream} lastStream
  *   The Stream of the last segment that was appended.
- * @property {shaka.media.SegmentReference} lastSegmentReference
+ * @property {SegmentReference} lastSegmentReference
  *   The SegmentReference of the last segment that was appended.
  * @property {?shaka.extern.Stream} restoreStreamAfterTrickPlay
  *   The Stream to restore after trick play mode is turned off.
@@ -2530,7 +2548,7 @@ shaka.media.StreamingEngine.PlayerInterface;
  *   The index of the Period which needs to be buffered.
  * @property {boolean} performingUpdate
  *   True indicates that an update is in progress.
- * @property {shaka.util.DelayedTick} updateTimer
+ * @property {DelayedTick} updateTimer
  *   A timer used to update the media state.
  * @property {boolean} waitingToClearBuffer
  *   True indicates that the buffer must be cleared after the current update
@@ -2551,10 +2569,10 @@ shaka.media.StreamingEngine.PlayerInterface;
  *   An override for the time to start performing updates at.  If the playhead
  *   is behind this time, update_() will still start fetching segments from
  *   this time.  If the playhead is ahead of the time, this field is ignored.
- * @property {shaka.net.NetworkingEngine.PendingRequest} operation
+ * @property {NetworkingEngine.PendingRequest} operation
  *   Operation with the number of bytes to be downloaded.
  */
-shaka.media.StreamingEngine.MediaState_;
+StreamingEngine.MediaState_;
 
 
 /**
@@ -2568,7 +2586,7 @@ shaka.media.StreamingEngine.MediaState_;
  * @const {number}
  * @private
  */
-shaka.media.StreamingEngine.APPEND_WINDOW_START_FUDGE_ = 0.1;
+StreamingEngine.APPEND_WINDOW_START_FUDGE_ = 0.1;
 
 
 /**
@@ -2582,7 +2600,7 @@ shaka.media.StreamingEngine.APPEND_WINDOW_START_FUDGE_ = 0.1;
  * @const {number}
  * @private
  */
-shaka.media.StreamingEngine.APPEND_WINDOW_END_FUDGE_ = 0.01;
+StreamingEngine.APPEND_WINDOW_END_FUDGE_ = 0.01;
 
 
 /**
@@ -2598,4 +2616,7 @@ shaka.media.StreamingEngine.APPEND_WINDOW_END_FUDGE_ = 0.01;
  * @const {number}
  * @private
  */
-shaka.media.StreamingEngine.MAX_RUN_AHEAD_SEGMENTS_ = 1;
+StreamingEngine.MAX_RUN_AHEAD_SEGMENTS_ = 1;
+
+
+export default StreamingEngine

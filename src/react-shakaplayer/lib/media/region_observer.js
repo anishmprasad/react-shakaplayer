@@ -31,7 +31,7 @@ var shaka = window.shaka;
  * @implements {shaka.media.IPlayheadObserver}
  * @final
  */
-shaka.media.RegionObserver = class {
+class RegionObserver {
 	/**
 	 * Create a region observer for the given timeline. The observer does not
 	 * own the timeline, only uses it. This means that the observer should NOT
@@ -186,7 +186,7 @@ shaka.media.RegionObserver = class {
 
 		return RelativePosition.IN_THE_REGION;
 	}
-};
+}
 
 /**
  * An enum of relative positions between the playhead and a region. Each is
@@ -196,7 +196,7 @@ shaka.media.RegionObserver = class {
  * @enum {number}
  * @private
  */
-shaka.media.RegionObserver.RelativePosition_ = {
+RegionObserver.RelativePosition_ = {
 	BEFORE_THE_REGION: 1,
 	IN_THE_REGION: 2,
 	AFTER_THE_REGION: 3
@@ -209,7 +209,7 @@ shaka.media.RegionObserver.RelativePosition_ = {
  *
  * @typedef {function(shaka.extern.TimelineRegionInfo, boolean)}
  */
-shaka.media.RegionObserver.EventListener;
+RegionObserver.EventListener = {};
 
 /**
  * @typedef {{
@@ -220,4 +220,4 @@ shaka.media.RegionObserver.EventListener;
  *
  * @private
  */
-shaka.media.RegionObserver.Rule_;
+RegionObserver.Rule_ = {};
