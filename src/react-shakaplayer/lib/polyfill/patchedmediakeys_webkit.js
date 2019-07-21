@@ -31,6 +31,15 @@
 // goog.require('shaka.util.Timer');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import polyfill from './all'
+import EventManager from '../util/event_manager'
+import FakeEvent from '../util/fake_event'
+import FakeEventTarget from '../util/fake_event_target'
+import PublicPromise from '../util/public_promise'
+import StringUtils from '../util/string_utils'
+import Timer from '../util/timer'
+import Uint8ArrayUtils from '../util/uint8array_utils'
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -40,7 +49,7 @@ var goog = window.goog;
  * {@link https://bit.ly/EmeMar15 EME draft 12 March 2015} on top of
  * webkit-prefixed {@link https://bit.ly/Eme01b EME v0.1b}.
  */
-shaka.polyfill.PatchedMediaKeysWebkit = class {
+class PatchedMediaKeysWebkit {
   /**
    * Installs the polyfill if needed.
    */
@@ -199,7 +208,7 @@ shaka.polyfill.PatchedMediaKeysWebkit = class {
  *
  * @implements {MediaKeySystemAccess}
  */
-shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
+PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
   /**
    * @param {string} keySystem
    * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations
@@ -338,7 +347,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySystemAccess = class {
  *
  * @implements {MediaKeys}
  */
-shaka.polyfill.PatchedMediaKeysWebkit.MediaKeys = class {
+PatchedMediaKeysWebkit.MediaKeys = class {
   /**
    * @param {string} keySystem
    */
@@ -352,7 +361,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeys = class {
     this.media_ = null;
 
     /** @private {!shaka.util.EventManager} */
-    this.eventManager_ = new shaka.util.EventManager();
+    this.eventManager_ = new EventManager();
 
     /**
      * @private {Array.<!shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession>}
@@ -537,8 +546,8 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeys = class {
  *
  * @implements {MediaKeySession}
  */
-shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
-    class extends shaka.util.FakeEventTarget {
+PatchedMediaKeysWebkit.MediaKeySession =
+    class extends FakeEventTarget {
       /**
        * @param {!HTMLMediaElement} media
        * @param {string} keySystem
@@ -573,11 +582,11 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
         this.expiration = NaN;
 
         /** @type {!shaka.util.PublicPromise} */
-        this.closed = new shaka.util.PublicPromise();
+        this.closed = new PublicPromise();
 
         /** @type {!shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap} */
         this.keyStatuses =
-        new shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap();
+        new PatchedMediaKeysWebkit.MediaKeyStatusMap();
       }
 
       /**
@@ -713,7 +722,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
 
         goog.asserts.assert(this.generatePromise_ == null,
             'generatePromise_ should be null');
-        this.generatePromise_ = new shaka.util.PublicPromise();
+        this.generatePromise_ = new PublicPromise();
 
         // Because we are hacking media.src in createSession to better emulate
         // unprefixed EME's ability to create sessions and license requests
@@ -733,7 +742,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
             return Promise.reject(exception);
           }
 
-          const timer = new shaka.util.Timer(() => {
+          const timer = new Timer(() => {
             try {
               this.media_[generateKeyRequestName](
                   this.keySystem_, mangledInitData);
@@ -777,8 +786,8 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
           // The current EME version of clearkey wants a structured JSON
           // response. The v0.1b version wants just a raw key.  Parse the JSON
           // response and extract the key and key ID.
-          const StringUtils = shaka.util.StringUtils;
-          const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+          // const StringUtils = shaka.util.StringUtils;
+          // const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
           const licenseString = StringUtils.fromUTF8(response);
           const jwkSet = /** @type {JWKSet} */ (JSON.parse(licenseString));
           const kty = jwkSet.keys[0].kty;
@@ -796,7 +805,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
           keyId = null;
         }
 
-        const prefixApi = shaka.polyfill.PatchedMediaKeysWebkit.prefixApi_;
+        const prefixApi = PatchedMediaKeysWebkit.prefixApi_;
         const addKeyName = prefixApi('addKey');
         try {
           this.media_[addKeyName](this.keySystem_, key, keyId, this.sessionId);
@@ -815,7 +824,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
        */
       updateKeyStatus_(status) {
         this.keyStatuses.setStatus(status);
-        const event = new shaka.util.FakeEvent('keystatuseschange');
+        const event = new FakeEvent('keystatuseschange');
         this.dispatchEvent(event);
       }
 
@@ -842,7 +851,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
             'PatchedMediaKeysWebkit.MediaKeySession.update', response);
         goog.asserts.assert(this.sessionId, 'update without session ID');
 
-        const nextUpdatePromise = new shaka.util.PublicPromise();
+        const nextUpdatePromise = new PublicPromise();
         this.update_(nextUpdatePromise, response);
         return nextUpdatePromise;
       }
@@ -867,7 +876,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
           // using it to clean up resources in v0.1b.  We still consider the
           // session closed. We can't let the exception propagate because
           // MediaKeySession.close() should not throw.
-          const prefixApi = shaka.polyfill.PatchedMediaKeysWebkit.prefixApi_;
+          const prefixApi = PatchedMediaKeysWebkit.prefixApi_;
           const cancelKeyRequestName = prefixApi('cancelKeyRequest');
           try {
             this.media_[cancelKeyRequestName](this.keySystem_, this.sessionId);
@@ -899,7 +908,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeySession =
  * @todo Consolidate the MediaKeyStatusMap types in these polyfills.
  * @implements {MediaKeyStatusMap}
  */
-shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
+PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
   constructor() {
     /**
      * @type {number}
@@ -933,7 +942,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
   forEach(fn) {
     if (this.status_) {
       const fakeKeyId =
-          shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap.KEY_ID_;
+          PatchedMediaKeysWebkit.MediaKeyStatusMap.KEY_ID_;
       fn(this.status_, fakeKeyId);
     }
   }
@@ -949,7 +958,7 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
   /** @override */
   has(keyId) {
     const fakeKeyId =
-        shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap.KEY_ID_;
+        PatchedMediaKeysWebkit.MediaKeyStatusMap.KEY_ID_;
     if (this.status_ && shaka.util.Uint8ArrayUtils.equal(
         new Uint8Array(keyId), new Uint8Array(fakeKeyId))) {
       return true;
@@ -988,14 +997,16 @@ shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
  *
  * @private {string}
  */
-shaka.polyfill.PatchedMediaKeysWebkit.prefix_ = '';
+PatchedMediaKeysWebkit.prefix_ = '';
 
 
 /**
  * @const {!ArrayBuffer}
  * @private
  */
-shaka.polyfill.PatchedMediaKeysWebkit.MediaKeyStatusMap.KEY_ID_;
+PatchedMediaKeysWebkit.MediaKeyStatusMap.KEY_ID_;
 
 
-shaka.polyfill.register(shaka.polyfill.PatchedMediaKeysWebkit.install);
+polyfill.register(PatchedMediaKeysWebkit.install);
+
+export default PatchedMediaKeysWebkit

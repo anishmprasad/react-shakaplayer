@@ -21,6 +21,9 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.StringUtils');
 
+import error from '../util/error';
+import StringUtils from '../util/string_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -28,7 +31,7 @@ var goog = window.goog;
  * @summary DataViewReader abstracts a DataView object.
  * @export
  */
-shaka.util.DataViewReader = class {
+class DataViewReader {
 	/**
 	 * @param {!DataView} dataView The DataView.
 	 * @param {shaka.util.DataViewReader.Endianness} endianness The endianness.
@@ -256,7 +259,7 @@ shaka.util.DataViewReader = class {
 		const ret = new Uint8Array(this.dataView_.buffer, this.dataView_.byteOffset + start, this.position_ - start);
 		// Skip string termination.
 		this.position_ += 1;
-		return shaka.util.StringUtils.fromUTF8(ret);
+		return StringUtils.fromUTF8(ret);
 	}
 
 	/**
@@ -264,20 +267,18 @@ shaka.util.DataViewReader = class {
 	 * @private
 	 */
 	outOfBounds_() {
-		return new shaka.util.Error(
-			shaka.util.Error.Severity.CRITICAL,
-			shaka.util.Error.Category.MEDIA,
-			shaka.util.Error.Code.BUFFER_READ_OUT_OF_BOUNDS
-		);
+		return new error(error.Severity.CRITICAL, error.Category.MEDIA, error.Code.BUFFER_READ_OUT_OF_BOUNDS);
 	}
-};
+}
 
 /**
  * Endianness.
  * @enum {number}
  * @export
  */
-shaka.util.DataViewReader.Endianness = {
+DataViewReader.Endianness = {
 	BIG_ENDIAN: 0,
 	LITTLE_ENDIAN: 1
 };
+
+export default DataViewReader;

@@ -19,6 +19,7 @@
 
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -27,7 +28,7 @@ var shaka = window.shaka;
  * Many browsers do not yet provide this API, and Chrome currently provides
  * similar data through individual prefixed attributes on HTMLVideoElement.
  */
-shaka.polyfill.VideoPlaybackQuality = class {
+class VideoPlaybackQuality {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -64,6 +65,8 @@ shaka.polyfill.VideoPlaybackQuality = class {
 			totalFrameDelay: 0
 		};
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.VideoPlaybackQuality.install);
+polyfill.register(VideoPlaybackQuality.install);
+
+export default VideoPlaybackQuality;

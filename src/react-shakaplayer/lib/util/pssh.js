@@ -22,6 +22,9 @@
 // goog.require('shaka.util.Mp4Parser');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import Mp4Parser from '../util/mp4_parser';
+import Uint8ArrayUtils from '../util/uint8array_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -29,7 +32,7 @@ var goog = window.goog;
  * @summary
  * Parse a PSSH box and extract the system IDs.
  */
-shaka.util.Pssh = class {
+class Pssh {
 	/**
 	 * @param {!Uint8Array} psshBox
 	 * @throws {shaka.util.Error} if a PSSH box is truncated or contains a size
@@ -54,7 +57,7 @@ shaka.util.Pssh = class {
 		 * */
 		this.dataBoundaries = [];
 
-		new shaka.util.Mp4Parser().fullBox('pssh', box => this.parseBox_(box)).parse(psshBox.buffer);
+		new Mp4Parser().fullBox('pssh', box => this.parseBox_(box)).parse(psshBox.buffer);
 
 		if (this.dataBoundaries.length == 0) {
 			shaka.log.warning('No pssh box found!');
@@ -75,12 +78,12 @@ shaka.util.Pssh = class {
 			return;
 		}
 
-		const systemId = shaka.util.Uint8ArrayUtils.toHex(box.reader.readBytes(16));
+		const systemId = Uint8ArrayUtils.toHex(box.reader.readBytes(16));
 		const keyIds = [];
 		if (box.version > 0) {
 			const numKeyIds = box.reader.readUint32();
 			for (let i = 0; i < numKeyIds; ++i) {
-				const keyId = shaka.util.Uint8ArrayUtils.toHex(box.reader.readBytes(16));
+				const keyId = Uint8ArrayUtils.toHex(box.reader.readBytes(16));
 				keyIds.push(keyId);
 			}
 		}
@@ -101,4 +104,6 @@ shaka.util.Pssh = class {
 			shaka.log.warning('Mismatch between box size and data size!');
 		}
 	}
-};
+}
+
+export default Pssh;

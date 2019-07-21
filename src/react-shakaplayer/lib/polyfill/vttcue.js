@@ -20,13 +20,15 @@
 // goog.require('shaka.log');
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
 /**
  * @summary A polyfill to provide VTTCue.
  */
-shaka.polyfill.VTTCue = class {
+class VTTCue {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -44,13 +46,13 @@ shaka.polyfill.VTTCue = class {
 		const constructorLength = TextTrackCue.length;
 		if (constructorLength == 3) {
 			shaka.log.info('Using VTTCue polyfill from 3 argument TextTrackCue.');
-			window.VTTCue = shaka.polyfill.VTTCue.from3ArgsTextTrackCue_;
+			window.VTTCue = VTTCue.from3ArgsTextTrackCue_;
 		} else if (constructorLength == 6) {
 			shaka.log.info('Using VTTCue polyfill from 6 argument TextTrackCue.');
-			window.VTTCue = shaka.polyfill.VTTCue.from6ArgsTextTrackCue_;
-		} else if (shaka.polyfill.VTTCue.canUse3ArgsTextTrackCue_()) {
+			window.VTTCue = VTTCue.from6ArgsTextTrackCue_;
+		} else if (VTTCue.canUse3ArgsTextTrackCue_()) {
 			shaka.log.info('Using VTTCue polyfill from 3 argument TextTrackCue.');
-			window.VTTCue = shaka.polyfill.VTTCue.from3ArgsTextTrackCue_;
+			window.VTTCue = VTTCue.from3ArgsTextTrackCue_;
 		}
 	}
 
@@ -94,11 +96,13 @@ shaka.polyfill.VTTCue = class {
 	 */
 	static canUse3ArgsTextTrackCue_() {
 		try {
-			return !!shaka.polyfill.VTTCue.from3ArgsTextTrackCue_(1, 2, '');
+			return !!VTTCue.from3ArgsTextTrackCue_(1, 2, '');
 		} catch (error) {
 			return false;
 		}
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.VTTCue.install);
+polyfill.register(VTTCue.install);
+
+export default VTTCue;

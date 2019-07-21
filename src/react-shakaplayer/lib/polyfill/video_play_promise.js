@@ -20,13 +20,15 @@
 // goog.require('shaka.log');
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
  * @summary A polyfill to silence the play() Promise in HTML5 video.
  */
-shaka.polyfill.VideoPlayPromise = class {
+class VideoPlayPromise {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -57,6 +59,8 @@ shaka.polyfill.VideoPlayPromise = class {
 			};
 		}
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.VideoPlayPromise.install);
+polyfill.register(VideoPlayPromise.install);
+
+export default VideoPlayPromise;

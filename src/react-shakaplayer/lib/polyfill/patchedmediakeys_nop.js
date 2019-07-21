@@ -21,6 +21,8 @@
 // goog.require('shaka.log');
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -30,7 +32,7 @@ var goog = window.goog;
  * EME.
  * All methods will fail.
  */
-shaka.polyfill.PatchedMediaKeysNop = class {
+class PatchedMediaKeysNop {
 	/**
 	 * Installs the polyfill if needed.
 	 */
@@ -97,13 +99,13 @@ shaka.polyfill.PatchedMediaKeysNop = class {
 
 		return Promise.reject(new Error('MediaKeys not supported.'));
 	}
-};
+}
 
 /**
  * An unusable constructor for MediaKeys.
  * @implements {MediaKeys}
  */
-shaka.polyfill.PatchedMediaKeysNop.MediaKeys = class {
+PatchedMediaKeysNop.MediaKeys = class {
 	constructor() {
 		throw new TypeError('Illegal constructor.');
 	}
@@ -119,7 +121,7 @@ shaka.polyfill.PatchedMediaKeysNop.MediaKeys = class {
  * An unusable constructor for MediaKeySystemAccess.
  * @implements {MediaKeySystemAccess}
  */
-shaka.polyfill.PatchedMediaKeysNop.MediaKeySystemAccess = class {
+PatchedMediaKeysNop.MediaKeySystemAccess = class {
 	constructor() {
 		/** @override */
 		this.keySystem = ''; // For the compiler.
@@ -135,4 +137,6 @@ shaka.polyfill.PatchedMediaKeysNop.MediaKeySystemAccess = class {
 };
 
 // A low priority ensures this is the last and acts as a fallback.
-shaka.polyfill.register(shaka.polyfill.PatchedMediaKeysNop.install, -10);
+polyfill.register(PatchedMediaKeysNop.install, -10);
+
+export default PatchedMediaKeysNop;

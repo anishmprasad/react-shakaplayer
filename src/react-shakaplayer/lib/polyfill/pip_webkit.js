@@ -20,6 +20,8 @@
 // goog.require('shaka.log');
 // goog.require('shaka.polyfill');
 
+import polyfill from './all';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -27,7 +29,7 @@ var shaka = window.shaka;
  * @summary A polyfill to provide PiP support in Safari.
  * Note that Safari only supports PiP on video elements, not audio.
  */
-shaka.polyfill.PiPWebkit = class {
+class PiPWebkit {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -143,7 +145,7 @@ shaka.polyfill.PiPWebkit = class {
 			return Promise.reject(error);
 		}
 	}
-};
+}
 
 /**
  * The presentation mode string used to indicate PiP mode in Safari.
@@ -151,7 +153,7 @@ shaka.polyfill.PiPWebkit = class {
  * @const {string}
  * @private
  */
-shaka.polyfill.PiPWebkit.PIP_MODE_ = 'picture-in-picture';
+PiPWebkit.PIP_MODE_ = 'picture-in-picture';
 
 /**
  * The presentation mode string used to indicate inline mode in Safari.
@@ -159,6 +161,8 @@ shaka.polyfill.PiPWebkit.PIP_MODE_ = 'picture-in-picture';
  * @const {string}
  * @private
  */
-shaka.polyfill.PiPWebkit.INLINE_MODE_ = 'inline';
+PiPWebkit.INLINE_MODE_ = 'inline';
 
-shaka.polyfill.register(shaka.polyfill.PiPWebkit.install);
+polyfill.register(PiPWebkit.install);
+
+export default PiPWebkit;
