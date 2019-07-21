@@ -21,6 +21,8 @@
 // goog.require('shaka.util.IReleasable');
 // goog.require('shaka.util.Timer');
 
+import Timer from '../util/timer';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -35,7 +37,7 @@ var goog = window.goog;
  * @implements {shaka.util.IReleasable}
  * @final
  */
-shaka.media.PlayRateController = class {
+class PlayRateController {
 	/**
 	 * @param {shaka.media.PlayRateController.Harness} harness
 	 */
@@ -53,7 +55,7 @@ shaka.media.PlayRateController = class {
 		this.pollRate_ = 0.25;
 
 		/** @private {shaka.util.Timer} */
-		this.timer_ = new shaka.util.Timer(() => {
+		this.timer_ = new Timer(() => {
 			this.harness_.movePlayhead(this.rate_ * this.pollRate_);
 		});
 	}
@@ -166,7 +168,7 @@ shaka.media.PlayRateController = class {
 
 		return oldRate != newRate;
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -191,4 +193,6 @@ shaka.media.PlayRateController = class {
  *   forward abs(N) seconds. If N is negative, the playhead will move backwards
  *   abs(N) seconds.
  */
-shaka.media.PlayRateController.Harness;
+PlayRateController.Harness;
+
+export default PlayRateController;

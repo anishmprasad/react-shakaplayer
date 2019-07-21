@@ -30,7 +30,7 @@ var goog = window.goog;
  * @implements {shaka.media.IPlayheadObserver}
  * @final
  */
-shaka.media.PeriodObserver = class {
+export default class PeriodObserver {
 	/**
 	 * The period observer needs an always-up-to-date collection of periods,
 	 * and right now the only way to have that is to reference the manifest.

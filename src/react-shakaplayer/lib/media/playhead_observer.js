@@ -20,6 +20,8 @@
 
 // goog.require('shaka.util.IReleasable');
 
+import Timer from '../util/timer';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -28,10 +30,10 @@ var goog = window.goog;
  * that are dependent on playhead information. The observer is responsible for
  * managing its own listeners.
  *
- * @extends {shaka.util.IReleasable}
+ * @extends {IReleasable}
  * @interface
  */
-shaka.media.IPlayheadObserver = class {
+class IPlayheadObserver {
 	/**
 	 * Check again (using an update playhead summary) if an event should be fired.
 	 * If an event should be fired, fire it.
@@ -40,7 +42,7 @@ shaka.media.IPlayheadObserver = class {
 	 * @param {boolean} wasSeeking
 	 */
 	poll(positionInSeconds, wasSeeking) {}
-};
+}
 
 /**
  * The playhead observer mananger is responsible for owning playhead observer
@@ -50,7 +52,7 @@ shaka.media.IPlayheadObserver = class {
  * @implements {shaka.util.IReleasable}
  * @final
  */
-shaka.media.PlayheadObserverManager = class {
+class PlayheadObserverManager {
 	/**
 	 * @param {!HTMLMediaElement} mediaElement
 	 */
@@ -72,9 +74,9 @@ shaka.media.PlayheadObserverManager = class {
 		 * should be frequent enough to trigger an event close enough to its actual
 		 * occurrence without the user noticing a delay.
 		 *
-		 * @private {shaka.util.Timer}
+		 * @private {Timer}
 		 */
-		this.pollingLoop_ = new shaka.util.Timer(() => {
+		this.pollingLoop_ = new Timer(() => {
 			this.pollAllObservers_(/* seeking= */ false);
 		}).tickEvery(/* seconds= */ 0.25);
 	}
@@ -118,4 +120,6 @@ shaka.media.PlayheadObserverManager = class {
 			observer.poll(this.mediaElement_.currentTime, seeking);
 		}
 	}
-};
+}
+
+export { PlayheadObserverManager, IPlayheadObserver };

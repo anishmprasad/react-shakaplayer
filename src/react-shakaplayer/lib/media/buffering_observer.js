@@ -26,7 +26,7 @@ var shaka = window.shaka;
  *
  * @final
  */
-shaka.media.BufferingObserver = class {
+class BufferingObserver {
 	/**
 	 * @param {number} thresholdWhenStarving
 	 * @param {number} thresholdWhenSatisfied
@@ -101,7 +101,9 @@ shaka.media.BufferingObserver = class {
  *
  * @enum {number}
  */
-shaka.media.BufferingObserver.State = {
+BufferingObserver.State = {
 	STARVING: 0,
 	SATISFIED: 1
 };
+
+export default BufferingObserver

@@ -28,7 +28,7 @@ var shaka = window.shaka;
  * parsing the closed captions embedded in Dash videos streams.
  * @interface
  */
-shaka.media.IClosedCaptionParser = class {
+class IClosedCaptionParser {
 	/**
 	 * Initialize the caption parser. This should be called only once.
 	 * @param {!ArrayBuffer} data
@@ -50,7 +50,7 @@ shaka.media.IClosedCaptionParser = class {
 	 * Resets the CaptionStream.
 	 */
 	reset() {}
-};
+}
 
 /**
  * Closed Caption Parser provides all operations for parsing the closed captions
@@ -142,4 +142,4 @@ class NoopCaptionParser {
 	reset() {}
 }
 
-export { MuxJSClosedCaptionParser, NoopCaptionParser };
+export { MuxJSClosedCaptionParser, NoopCaptionParser, IClosedCaptionParser };

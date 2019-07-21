@@ -24,6 +24,9 @@
 // goog.require('shaka.util.IReleasable');
 // goog.require('shaka.util.Timer');
 
+import EventManager from '../util/event_manager';
+import Timer from '../util/timer';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -35,7 +38,7 @@ var goog = window.goog;
  *
  * @implements {shaka.util.IReleasable}
  */
-shaka.media.VideoWrapper = class {
+class VideoWrapper {
 	/**
 	 * @param {!HTMLMediaElement} video
 	 * @param {function()} onSeek Called when the video seeks.
@@ -52,7 +55,7 @@ shaka.media.VideoWrapper = class {
 		this.startTime_ = startTime;
 
 		/** @private {shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		this.eventManager_ = new EventManager();
 
 		/** @private {shaka.media.VideoWrapper.PlayheadMover} */
 		this.mover_ = new shaka.media.VideoWrapper.PlayheadMover(/* mediaElement= */ video, /* maxAttempts= */ 10);
@@ -180,7 +183,7 @@ shaka.media.VideoWrapper = class {
 
 		this.eventManager_.listen(this.video_, 'seeking', () => this.onSeek_());
 	}
-};
+}
 
 /**
  * A class used to move the playhead away from its current time.  Sometimes, IE
@@ -202,7 +205,7 @@ shaka.media.VideoWrapper = class {
  * @implements {shaka.util.IReleasable}
  * @final
  */
-shaka.media.VideoWrapper.PlayheadMover = class {
+class PlayheadMover {
 	/**
 	 * @param {!HTMLMediaElement} mediaElement
 	 *    The media element that the mover can manipulate.
@@ -283,4 +286,6 @@ shaka.media.VideoWrapper.PlayheadMover = class {
 		this.mediaElement_.currentTime = this.targetTime_;
 		this.remainingAttempts_--;
 	}
-};
+}
+
+export { PlayheadMover, VideoWrapper };

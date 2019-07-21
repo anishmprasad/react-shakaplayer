@@ -25,7 +25,7 @@ var shaka = window.shaka;
  *
  * @final
  */
-shaka.media.ActiveStreamMap = class {
+class ActiveStreamMap {
 	constructor() {
 		/**
 		 * A mapping between a period and the content last streamed in that period.
@@ -106,7 +106,7 @@ shaka.media.ActiveStreamMap = class {
 
 		return this.history_.get(period);
 	}
-};
+}
 
 /**
  * A structure used to track which streams were played during a specific
@@ -114,7 +114,7 @@ shaka.media.ActiveStreamMap = class {
  *
  * @final
  */
-shaka.media.ActiveStreamMap.Frame = class {
+ActiveStreamMap.Frame = class {
 	constructor() {
 		/** @type {?shaka.extern.Variant} */
 		this.variant = null;
@@ -122,3 +122,5 @@ shaka.media.ActiveStreamMap.Frame = class {
 		this.text = null;
 	}
 };
+
+export default ActiveStreamMap;

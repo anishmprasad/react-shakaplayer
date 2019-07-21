@@ -48,7 +48,7 @@ var goog = window.goog;
  *
  * @implements {shaka.util.IDestroyable}
  */
-shaka.media.MediaSourceEngine = class {
+class MediaSourceEngine {
   /**
    * @param {HTMLMediaElement} video The video element, whose source is tied to
    *   MediaSource during the lifetime of the MediaSourceEngine.
@@ -304,7 +304,7 @@ shaka.media.MediaSourceEngine = class {
     for (const contentType of streamsByType.keys()) {
       const stream = streamsByType.get(contentType);
       goog.asserts.assert(
-          shaka.media.MediaSourceEngine.isStreamSupported(stream),
+          MediaSourceEngine.isStreamSupported(stream),
           'Type negotiation should happen before MediaSourceEngine.init!');
 
       let mimeType = shaka.util.MimeUtils.getFullType(
@@ -313,10 +313,10 @@ shaka.media.MediaSourceEngine = class {
         this.reinitText(mimeType);
       } else {
         if ((forceTransmuxTS || !MediaSource.isTypeSupported(mimeType)) &&
-            shaka.media.Transmuxer.isSupported(mimeType, contentType)) {
-          this.transmuxers_[contentType] = new shaka.media.Transmuxer();
+            Transmuxer.isSupported(mimeType, contentType)) {
+          this.transmuxers_[contentType] = new Transmuxer();
           mimeType =
-              shaka.media.Transmuxer.convertTsCodecs(contentType, mimeType);
+              Transmuxer.convertTsCodecs(contentType, mimeType);
         }
         const sourceBuffer = this.mediaSource_.addSourceBuffer(mimeType);
         this.eventManager_.listen(
@@ -361,7 +361,7 @@ shaka.media.MediaSourceEngine = class {
     if (contentType == ContentType.TEXT) {
       return this.textEngine_.bufferStart();
     }
-    return shaka.media.TimeRangesUtils.bufferStart(
+    return TimeRangesUtils.bufferStart(
         this.getBuffered_(contentType));
   }
 
@@ -376,7 +376,7 @@ shaka.media.MediaSourceEngine = class {
     if (contentType == ContentType.TEXT) {
       return this.textEngine_.bufferEnd();
     }
-    return shaka.media.TimeRangesUtils.bufferEnd(
+    return TimeRangesUtils.bufferEnd(
         this.getBuffered_(contentType));
   }
 
@@ -395,7 +395,7 @@ shaka.media.MediaSourceEngine = class {
       return this.textEngine_.isBuffered(time);
     } else {
       const buffered = this.getBuffered_(contentType);
-      return shaka.media.TimeRangesUtils.isBuffered(
+      return TimeRangesUtils.isBuffered(
           buffered, time, smallGapLimit);
     }
   }
@@ -414,7 +414,7 @@ shaka.media.MediaSourceEngine = class {
       return this.textEngine_.bufferedAheadOf(time);
     } else {
       const buffered = this.getBuffered_(contentType);
-      return shaka.media.TimeRangesUtils.bufferedAheadOf(buffered, time);
+      return TimeRangesUtils.bufferedAheadOf(buffered, time);
     }
   }
 
@@ -427,7 +427,7 @@ shaka.media.MediaSourceEngine = class {
   getBufferedInfo(info) {
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
-    const getBufferedInfo = shaka.media.TimeRangesUtils.getBufferedInfo;
+    const getBufferedInfo = TimeRangesUtils.getBufferedInfo;
     info.total = getBufferedInfo(this.video_.buffered);
     info.audio = getBufferedInfo(this.getBuffered_(ContentType.AUDIO));
     info.video = getBufferedInfo(this.getBuffered_(ContentType.VIDEO));
@@ -1050,7 +1050,7 @@ shaka.media.MediaSourceEngine = class {
  *
  * @type {function(?):string}
  */
-shaka.media.MediaSourceEngine.createObjectURL = window.URL.createObjectURL;
+MediaSourceEngine.createObjectURL = window.URL.createObjectURL;
 
 
 /**
@@ -1065,6 +1065,8 @@ shaka.media.MediaSourceEngine.createObjectURL = window.URL.createObjectURL;
  * @property {!shaka.util.PublicPromise} p
  *   The PublicPromise which is associated with this operation.
  */
-shaka.media.MediaSourceEngine.Operation;
+MediaSourceEngine.Operation;
+
+export default MediaSourceEngine
 
 

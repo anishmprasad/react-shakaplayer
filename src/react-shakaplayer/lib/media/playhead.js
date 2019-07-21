@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
+
 // goog.provide('shaka.media.MediaSourcePlayhead');
 // goog.provide('shaka.media.Playhead');
 // goog.provide('shaka.media.SrcEqualsPlayhead');
@@ -27,6 +29,11 @@
 // goog.require('shaka.util.IReleasable');
 // goog.require('shaka.util.Timer');
 
+import Timer from '../util/timer';
+import { VideoWrapper } from '../media/video_wrapper';
+import TimeRangesUtils from '../media/time_ranges_utils';
+import GapJumpingController from '../media/gap_jumping_controller';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -37,10 +44,10 @@ var goog = window.goog;
  * restricting seeking to valid time ranges, and stopping playback for startup
  * and re-buffering.
  *
- * @extends {shaka.util.IReleasable}
+ * @extends {IReleasable}
  * @interface
  */
-shaka.media.Playhead = class {
+class Playhead {
 	/**
 	 * Set the start time. If the content has already started playback, this will
 	 * be ignored.
@@ -61,15 +68,15 @@ shaka.media.Playhead = class {
 	 * Notify the playhead that the buffered ranges have changed.
 	 */
 	notifyOfBufferingChange() {}
-};
+}
 
 /**
  * A playhead implementation that only relies on the media element.
  *
- * @implements {shaka.media.Playhead}
+ * @implements {Playhead}
  * @final
  */
-shaka.media.SrcEqualsPlayhead = class {
+class SrcEqualsPlayhead {
 	/**
 	 * @param {!HTMLMediaElement} mediaElement
 	 */
@@ -81,8 +88,8 @@ shaka.media.SrcEqualsPlayhead = class {
 		/** @private {?number} */
 		this.startTime_ = null;
 
-		/** @private {shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		/** @private {EventManager} */
+		this.eventManager_ = new EventManager();
 
 		// We listen for the loaded-metadata-event so that we know when we can
 		// interact with |currentTime|.
@@ -132,7 +139,7 @@ shaka.media.SrcEqualsPlayhead = class {
 
 	/** @override */
 	notifyOfBufferingChange() {}
-};
+}
 
 /**
  * A playhead implementation that relies on the media element and a manifest.
@@ -142,10 +149,10 @@ shaka.media.SrcEqualsPlayhead = class {
  * TODO: Clean up and simplify Playhead.  There are too many layers of, methods
  *       for, and conditions on timestamp adjustment.
  *
- * @implements {shaka.media.Playhead}
+ * @implements {Playhead}
  * @final
  */
-shaka.media.MediaSourcePlayhead = class {
+class MediaSourcePlayhead {
 	/**
 	 * @param {!HTMLMediaElement} mediaElement
 	 * @param {shaka.extern.Manifest} manifest
@@ -175,7 +182,7 @@ shaka.media.MediaSourcePlayhead = class {
 		/** @private {HTMLMediaElement} */
 		this.mediaElement_ = mediaElement;
 
-		/** @private {shaka.media.PresentationTimeline} */
+		/** @private {PresentationTimeline} */
 		this.timeline_ = manifest.presentationTimeline;
 
 		/** @private {number} */
@@ -190,8 +197,8 @@ shaka.media.MediaSourcePlayhead = class {
 		/** @private {?number} */
 		this.lastCorrectiveSeek_ = null;
 
-		/** @private {shaka.media.GapJumpingController} */
-		this.gapController_ = new shaka.media.GapJumpingController(
+		/** @private {GapJumpingController} */
+		this.gapController_ = new GapJumpingController(
 			mediaElement,
 			manifest.presentationTimeline,
 			config,
@@ -199,15 +206,11 @@ shaka.media.MediaSourcePlayhead = class {
 			onEvent
 		);
 
-		/** @private {shaka.media.VideoWrapper} */
-		this.videoWrapper_ = new shaka.media.VideoWrapper(
-			mediaElement,
-			() => this.onSeeking_(),
-			this.getStartTime_(startTime)
-		);
+		/** @private {VideoWrapper} */
+		this.videoWrapper_ = new VideoWrapper(mediaElement, () => this.onSeeking_(), this.getStartTime_(startTime));
 
-		/** @type {shaka.util.Timer} */
-		this.checkWindowTimer_ = new shaka.util.Timer(() => {
+		/** @type {Timer} */
+		this.checkWindowTimer_ = new Timer(() => {
 			this.onPollWindow_();
 		}).tickEvery(/* seconds= */ 0.25);
 	}
@@ -339,7 +342,7 @@ shaka.media.MediaSourcePlayhead = class {
 		const currentTime = this.videoWrapper_.getTime();
 		const targetTime = this.reposition_(currentTime);
 
-		const gapLimit = shaka.media.GapJumpingController.BROWSER_GAP_TOLERANCE;
+		const gapLimit = GapJumpingController.BROWSER_GAP_TOLERANCE;
 		if (Math.abs(targetTime - currentTime) > gapLimit) {
 			// You can only seek like this every so often. This is to prevent an
 			// infinite loop on systems where changing currentTime takes a significant
@@ -386,8 +389,7 @@ shaka.media.MediaSourcePlayhead = class {
 		goog.asserts.assert(this.config_, 'Cannot reposition playhead when it has beeen destroyed');
 
 		/** @type {function(number)} */
-		const isBuffered = playheadTime =>
-			shaka.media.TimeRangesUtils.isBuffered(this.mediaElement_.buffered, playheadTime);
+		const isBuffered = playheadTime => TimeRangesUtils.isBuffered(this.mediaElement_.buffered, playheadTime);
 
 		const rebufferingGoal = Math.max(this.minBufferTime_, this.config_.rebufferingGoal);
 
@@ -471,7 +473,7 @@ shaka.media.MediaSourcePlayhead = class {
 	 *
 	 * @param {!HTMLMediaElement} mediaElement
 	 * @param {shaka.extern.StreamingConfiguration} config
-	 * @return {shaka.media.StallDetector}
+	 * @return {StallDetector}
 	 * @private
 	 */
 	createStallDetector_(mediaElement, config) {
@@ -486,10 +488,7 @@ shaka.media.MediaSourcePlayhead = class {
 
 		// When we see a stall, we will try to "jump-start" playback by moving the
 		// playhead forward.
-		const detector = new shaka.media.StallDetector(
-			new shaka.media.StallDetector.MediaElementImplementation(mediaElement),
-			threshold
-		);
+		const detector = new StallDetector(new StallDetector.MediaElementImplementation(mediaElement), threshold);
 
 		detector.onStall((at, duration) => {
 			shaka.log.debug(
@@ -501,4 +500,6 @@ shaka.media.MediaSourcePlayhead = class {
 
 		return detector;
 	}
-};
+}
+
+export { Playhead, MediaSourcePlayhead, SrcEqualsPlayhead };

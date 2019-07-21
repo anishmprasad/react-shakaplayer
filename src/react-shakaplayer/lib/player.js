@@ -66,7 +66,7 @@ import { MuxJSClosedCaptionParser, NoopCaptionParser } from '../lib/media/closed
 import PeriodObserver from '../lib/media/period_observer';
 import PlayRateController from '../lib/media/play_rate_controller';
 import Playhead from '../lib/media/playhead';
-import PlayheadObserverManager from '../lib/media/playhead_observer';
+import {PlayheadObserverManager} from '../lib/media/playhead_observer';
 import { PreferenceBasedCriteria } from '../lib/media/adaptation_set_criteria';
 import RegionObserver from '../lib/media/region_observer';
 import RegionTimeline from '../lib/media/region_timeline';
