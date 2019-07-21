@@ -24,6 +24,9 @@
 
 import Dom from '../lib/util/dom_utils';
 import Utils from '../ui/ui_utils';
+import LanguageUiUtils from '../lib/util/language_utils';
+import mozilla from '../third_party/language-mapping-list/language-mapping-list';
+import Locales from '../dist/locales';
 
 export default class LanguageUtils {
 	/**
@@ -33,7 +36,7 @@ export default class LanguageUtils {
 	 * @param {function(string)} onLanguageSelected
 	 * @param {boolean} updateChosen
 	 * @param {!HTMLElement} currentSelectionElement
-	 * @param {shaka.ui.Localization} localization
+	 * @param {Localization} localization
 	 */
 	// TODO: Do the benefits of having this common code in a method still
 	// outweigh the complexity of the parameter list?
@@ -71,11 +74,11 @@ export default class LanguageUtils {
 			});
 
 			const span = Dom.createHTMLElement('span');
-			span.textContent = shaka.ui.LanguageUtils.getLanguageName(language, localization);
+			span.textContent = LanguageUtils.getLanguageName(language, localization);
 			button.appendChild(span);
 
 			if (updateChosen && language == selectedTrack.language) {
-				button.appendChild(shaka.ui.Utils.checkmarkIcon());
+				button.appendChild(Utils.checkmarkIcon());
 				span.classList.add('shaka-chosen-item');
 				button.setAttribute('aria-selected', 'true');
 				currentSelectionElement.textContent = span.textContent;
@@ -105,7 +108,7 @@ export default class LanguageUtils {
 	 * language list, but could be distinguished by their locale.
 	 *
 	 * @param {string} locale
-	 * @param {shaka.ui.Localization} localization
+	 * @param {Localization} localization
 	 * @return {string} The language's name for itself in its own script, or as
 	 *   close as we can get with the information we have.
 	 */
@@ -121,15 +124,15 @@ export default class LanguageUtils {
 		// are used to indicate something that isn't one specific language.
 		switch (locale) {
 			case 'mul':
-				return resolve(shaka.ui.Locales.Ids.MULTIPLE_LANGUAGES);
+				return resolve(Locales.Ids.MULTIPLE_LANGUAGES);
 			case 'und':
-				return resolve(shaka.ui.Locales.Ids.UNDETERMINED_LANGUAGE);
+				return resolve(Locales.Ids.UNDETERMINED_LANGUAGE);
 			case 'zxx':
-				return resolve(shaka.ui.Locales.Ids.NOT_APPLICABLE);
+				return resolve(Locales.Ids.NOT_APPLICABLE);
 		}
 
 		// Extract the base language from the locale as a fallback step.
-		const language = LanguageUtils.getBase(locale);
+		const language = LanguageUiUtils.getBase(locale);
 
 		// First try to resolve the full language name.
 		// If that fails, try the base.
@@ -142,7 +145,7 @@ export default class LanguageUtils {
 		} else if (language in mozilla.LanguageMapping) {
 			return mozilla.LanguageMapping[language].nativeName + ' (' + locale + ')';
 		} else {
-			return resolve(shaka.ui.Locales.Ids.UNRECOGNIZED_LANGUAGE) + ' (' + locale + ')';
+			return resolve(Locales.Ids.UNRECOGNIZED_LANGUAGE) + ' (' + locale + ')';
 		}
 	}
 }

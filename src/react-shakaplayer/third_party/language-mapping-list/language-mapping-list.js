@@ -23,7 +23,9 @@
  * SOFTWARE.
  */
 
-goog.provide('mozilla.LanguageMapping');
+// goog.provide('mozilla.LanguageMapping');
+
+let mozilla ={}
 
 /**
  * A mapping from language code to the native and English names for that
@@ -890,6 +892,8 @@ mozilla.LanguageMapping = {
     englishName: "Zulu"
   }
 };
+
+export default mozilla
 
 // We normalize language codes to all lower case, while this table
 // uses lower-UPPER format for 4 letter codes. This duplicates all entries

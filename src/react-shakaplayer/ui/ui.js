@@ -29,6 +29,8 @@ import { Controls } from './controls';
 import TextDisplayer from './text_displayer';
 import Platform from '../lib/util/platform';
 import Dom from '../lib/util/dom_utils';
+import ConfigUtils from '../lib/util/config_utils';
+import FakeEvent from '../lib/util/fake_event';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

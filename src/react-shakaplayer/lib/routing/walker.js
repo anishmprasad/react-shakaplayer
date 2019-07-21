@@ -30,6 +30,9 @@ import Node from '../routing/node';
 import Payload from '../routing/payload';
 import Destroyer from '../util/destroyer';
 import IDestroyable from '../util/i_destroyable';
+import ErrorUtils from '../util/error';
+
+const errorutil = new ErrorUtils();
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -67,7 +70,7 @@ var goog = window.goog;
  *  request as non-interruptible we ensure that calling load before attach
  *  finishes will work.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @final
  */
 export default class Walker {
@@ -98,7 +101,7 @@ export default class Walker {
 		 * new work is added (and this is not null) it can be resolved. The only
 		 * time when this should be non-null is when we are waiting for more work.
 		 *
-		 * @private {shaka.util.PublicPromise}
+		 * @private {PublicPromise}
 		 */
 		this.waitForWork_ = null;
 
@@ -108,7 +111,7 @@ export default class Walker {
 		/** @private {?shaka.routing.Walker.ActiveRoute_} */
 		this.currentRoute_ = null;
 
-		/** @private {shaka.util.AbortableOperation} */
+		/** @private {AbortableOperation} */
 		this.currentStep_ = null;
 
 		/**
@@ -121,7 +124,7 @@ export default class Walker {
 		 */
 		this.mainLoopPromise_ = Promise.resolve().then(() => this.mainLoop_());
 
-		/** @private {!shaka.util.Destroyer} */
+		/** @private {!Destroyer} */
 		this.destroyer_ = new Destroyer(() => this.doDestroy_());
 	}
 
@@ -245,7 +248,7 @@ export default class Walker {
 
 		// Wait on a new promise so that we can be resolved by |waitForWork|. This
 		// avoids us acting like a busy-wait.
-		this.waitForWork_ = new shaka.util.PublicPromise();
+		this.waitForWork_ = new PublicPromise();
 		return this.waitForWork_;
 	}
 
@@ -357,7 +360,7 @@ export default class Walker {
 				this.currentRoute_ = null;
 			}
 		} catch (error) {
-			if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+			if (error.code == errorutil.code.OPERATION_ABORTED) {
 				goog.asserts.assert(
 					this.currentRoute_.interruptible,
 					'Do not put abortable steps in non-interruptible routes!'
@@ -405,7 +408,7 @@ export default class Walker {
  *   enterNode: function(
  *       shaka.routing.Node,
  *       shaka.routing.Payload,
- *       shaka.routing.Payload):!shaka.util.AbortableOperation,
+ *       shaka.routing.Payload):!AbortableOperation,
  *   handleError: function(
  *       shaka.routing.Payload,
  *       !Error):!Promise.<shaka.routing.Node>,

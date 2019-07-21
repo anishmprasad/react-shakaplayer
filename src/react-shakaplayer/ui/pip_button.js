@@ -29,7 +29,9 @@ import Dom from '../lib/util/dom_utils';
 import Element from './element';
 import { Controls } from './controls';
 import Enums from './enums';
-import OverflowMenu from './overflow_menu'
+import OverflowMenu from './overflow_menu';
+import Locales from '../dist/locales';
+import Constants from '../ui/constants';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};
@@ -153,10 +155,7 @@ export default class PipButton extends Element {
 	onEnterPictureInPicture_() {
 		const LocIds = Locales.Ids;
 		this.pipIcon_.textContent = Enums.MaterialDesignIcons.EXIT_PIP;
-		this.pipButton_.setAttribute(
-			Constants.ARIA_LABEL,
-			this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE)
-		);
+		this.pipButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.EXIT_PICTURE_IN_PICTURE));
 		this.currentPipState_.textContent = this.localization.resolve(LocIds.ON);
 	}
 
@@ -164,10 +163,7 @@ export default class PipButton extends Element {
 	onLeavePictureInPicture_() {
 		const LocIds = Locales.Ids;
 		this.pipIcon_.textContent = Enums.MaterialDesignIcons.PIP;
-		this.pipButton_.setAttribute(
-			Constants.ARIA_LABEL,
-			this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE)
-		);
+		this.pipButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.ENTER_PICTURE_IN_PICTURE));
 		this.currentPipState_.textContent = this.localization.resolve(LocIds.OFF);
 	}
 

@@ -93,6 +93,9 @@ import PlayerConfiguration from '../lib/util/player_configuration';
 import Stats from '../lib/util/stats';
 import StreamUtils from '../lib/util/stream_utils';
 
+import ConfigUtils from '../lib/util/config_utils';
+
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;

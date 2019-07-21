@@ -25,11 +25,13 @@
 // goog.require('shaka.util.Dom');
 
 import Element from './element';
-// import Locales from './locales/'
+import Locales from '../dist/locales';
 import Localization from './localization';
 import OverflowMenu from './overflow_menu';
 import Utils from './ui_utils';
 import Dom from '../lib/util/dom_utils';
+import Enums from '../ui/enums';
+import Constants from '../ui/constants';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};
@@ -38,14 +40,14 @@ window.goog = window.goog || {};
 var goog = window.goog;
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {Element}
  * @final
  * @export
  */
 class CastButton extends Element {
 	/**
 	 * @param {!HTMLElement} parent
-	 * @param {!shaka.ui.Controls} controls
+	 * @param {!Controls} controls
 	 */
 	constructor(parent, controls) {
 		super(parent, controls);
@@ -81,11 +83,11 @@ class CastButton extends Element {
 		// Setup button display and state according to the current cast status
 		this.onCastStatusChange_();
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateLocalizedStrings_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateLocalizedStrings_();
 		});
 
@@ -126,8 +128,8 @@ class CastButton extends Element {
 	onCastStatusChange_() {
 		const canCast = this.castProxy_.canCast() && this.controls.isCastAllowed();
 		const isCasting = this.castProxy_.isCasting();
-		const materialDesignIcons = shaka.ui.Enums.MaterialDesignIcons;
-		shaka.ui.Utils.setDisplay(this.castButton_, canCast);
+		const materialDesignIcons = Enums.MaterialDesignIcons;
+		Utils.setDisplay(this.castButton_, canCast);
 		this.castIcon_.textContent = isCasting ? materialDesignIcons.EXIT_CAST : materialDesignIcons.CAST;
 
 		// Aria-pressed set to true when casting, set to false otherwise.
@@ -149,7 +151,7 @@ class CastButton extends Element {
 		if (this.castProxy_.isCasting()) {
 			this.castCurrentSelectionSpan_.textContent = this.castProxy_.receiverName();
 		} else {
-			this.castCurrentSelectionSpan_.textContent = this.localization.resolve(shaka.ui.Locales.Ids.OFF);
+			this.castCurrentSelectionSpan_.textContent = this.localization.resolve(Locales.Ids.OFF);
 		}
 	}
 
@@ -157,9 +159,9 @@ class CastButton extends Element {
 	 * @private
 	 */
 	updateLocalizedStrings_() {
-		const LocIds = shaka.ui.Locales.Ids;
+		const LocIds = Locales.Ids;
 
-		this.castButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL, this.localization.resolve(LocIds.CAST));
+		this.castButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.CAST));
 		this.castNameSpan_.textContent = this.localization.resolve(LocIds.CAST);
 
 		// If we're not casting, string "not casting" will be displayed,
@@ -175,7 +177,7 @@ class CastButton extends Element {
 CastButton.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.CastButton(rootElement, controls);
+		return new CastButton(rootElement, controls);
 	}
 };
 

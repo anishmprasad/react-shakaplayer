@@ -28,10 +28,13 @@
 import Element from './element';
 import Enums from './enums';
 import LanguageUtils from './language_utils';
-// import Locales from './locales';
+import Locales from '../dist/locales';
 import Localization from './localization';
 import OverflowMenu from './overflow_menu';
 import Dom from '../lib/util/dom_utils';
+import Constants from '../ui/constants';
+import Utils from '../ui/ui_utils';
+import FakeEvent from '../lib/util/fake_event';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};
