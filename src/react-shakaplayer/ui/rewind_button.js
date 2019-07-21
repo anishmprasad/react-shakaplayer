@@ -23,6 +23,13 @@
 // goog.require('shaka.ui.Localization');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+import OverflowMenu from './overflow_menu';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -30,31 +37,31 @@ window.goog = window.goog || {};
 var goog = window.goog;
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {Element}
  * @final
  * @export
  */
-shaka.ui.RewindButton = class extends shaka.ui.Element {
+export default class RewindButton extends Element {
 	/**
 	 * @param {!HTMLElement} parent
-	 * @param {!shaka.ui.Controls} controls
+	 * @param {!Controls} controls
 	 */
 	constructor(parent, controls) {
 		super(parent, controls);
 
 		/** @private {!HTMLElement} */
-		this.button_ = shaka.util.Dom.createHTMLElement('button');
+		this.button_ = Dom.createHTMLElement('button');
 		this.button_.classList.add('material-icons');
 		this.button_.classList.add('shaka-rewind-button');
-		this.button_.textContent = shaka.ui.Enums.MaterialDesignIcons.REWIND;
+		this.button_.textContent = Enums.MaterialDesignIcons.REWIND;
 		this.parent.appendChild(this.button_);
 		this.updateAriaLabel_();
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateAriaLabel_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateAriaLabel_();
 		});
 
@@ -67,10 +74,7 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateAriaLabel_() {
-		this.button_.setAttribute(
-			shaka.ui.Constants.ARIA_LABEL,
-			this.localization.resolve(shaka.ui.Locales.Ids.REWIND)
-		);
+		this.button_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(Locales.Ids.REWIND));
 	}
 
 	/**
@@ -89,17 +93,17 @@ shaka.ui.RewindButton = class extends shaka.ui.Element {
 		const newRate = trickPlayRate > 0 || trickPlayRate < -4 ? -1 : trickPlayRate * 2;
 		this.player.trickPlay(newRate);
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.RewindButton.Factory = class {
+RewindButton.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.RewindButton(rootElement, controls);
+		return new RewindButton(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('rewind', new shaka.ui.RewindButton.Factory());
+Controls.registerElement('rewind', new RewindButton.Factory());

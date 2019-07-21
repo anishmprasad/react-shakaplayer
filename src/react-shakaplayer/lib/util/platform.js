@@ -57,7 +57,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static supportsMediaType(mimeType) {
-		const video = shaka.util.Platform.anyMediaElement_();
+		const video = Platform.anyMediaElement_();
 		return video.canPlayType(mimeType) != '';
 	}
 
@@ -67,7 +67,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static isEdge() {
-		return shaka.util.Platform.userAgentContains_('Edge/');
+		return Platform.userAgentContains_('Edge/');
 	}
 
 	/**
@@ -76,7 +76,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static isIE() {
-		return shaka.util.Platform.userAgentContains_('Trident/');
+		return Platform.userAgentContains_('Trident/');
 	}
 
 	/**
@@ -85,7 +85,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static isTizen() {
-		return shaka.util.Platform.userAgentContains_('Tizen');
+		return Platform.userAgentContains_('Tizen');
 	}
 
 	/**
@@ -94,7 +94,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static isTizen3() {
-		return shaka.util.Platform.userAgentContains_('Tizen 3');
+		return Platform.userAgentContains_('Tizen 3');
 	}
 
 	/**
@@ -103,7 +103,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static isWebOS() {
-		return shaka.util.Platform.userAgentContains_('Web0S');
+		return Platform.userAgentContains_('Web0S');
 	}
 
 	/**
@@ -112,7 +112,7 @@ class Platform {
 	 * @return {boolean}
 	 */
 	static isChromecast() {
-		return shaka.util.Platform.userAgentContains_('CrKey');
+		return Platform.userAgentContains_('CrKey');
 	}
 
 	/**
@@ -123,7 +123,7 @@ class Platform {
 	static isChrome() {
 		// The Edge user agent will also contain the "Chrome" keyword, so we need
 		// to make sure this is not Edge.
-		return shaka.util.Platform.userAgentContains_('Chrome') && !shaka.util.Platform.isEdge();
+		return Platform.userAgentContains_('Chrome') && !Platform.isEdge();
 	}
 
 	/**
@@ -170,13 +170,13 @@ class Platform {
 	 * @return {!HTMLMediaElement}
 	 */
 	static anyMediaElement_() {
-		const Platform = shaka.util.Platform;
+		const Platform = Platform;
 		if (Platform.cachedMediaElement_) {
 			return Platform.cachedMediaElement_;
 		}
 
 		if (!Platform.cacheExpirationTimer_) {
-			Platform.cacheExpirationTimer_ = new shaka.util.Timer(() => {
+			Platform.cacheExpirationTimer_ = new Timer(() => {
 				Platform.cachedMediaElement_ = null;
 			});
 		}
@@ -193,7 +193,7 @@ class Platform {
 	}
 }
 
-/** @private {shaka.util.Timer} */
+/** @private {Timer} */
 Platform.cacheExpirationTimer_ = null;
 
 /** @private {HTMLMediaElement} */

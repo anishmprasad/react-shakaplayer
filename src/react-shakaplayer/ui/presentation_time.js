@@ -20,6 +20,13 @@
 // goog.require('shaka.ui.Element');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+import OverflowMenu from './overflow_menu';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -31,7 +38,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
+export default class PresentationTimeTracker extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -39,7 +46,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 	constructor(parent, controls) {
 		super(parent, controls);
 
-		this.currentTime_ = shaka.util.Dom.createHTMLElement('button');
+		this.currentTime_ = Dom.createHTMLElement('button');
 		this.currentTime_.classList.add('shaka-current-time');
 		this.currentTime_.textContent = '0:00';
 		this.parent.appendChild(this.currentTime_);
@@ -86,7 +93,7 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 				this.currentTime_.textContent = '- ' + this.buildTimeString_(displayTime, showHour);
 				this.currentTime_.disabled = false;
 			} else {
-				this.currentTime_.textContent = this.localization.resolve(shaka.ui.Locales.Ids.LIVE);
+				this.currentTime_.textContent = this.localization.resolve(Locales.Ids.LIVE);
 				this.currentTime_.disabled = true;
 			}
 		} else {
@@ -131,21 +138,21 @@ shaka.ui.PresentationTimeTracker = class extends shaka.ui.Element {
 	 */
 	onTracksChanged_() {
 		if (this.player.isLive()) {
-			const ariaLabel = shaka.ui.Locales.Ids.SKIP_TO_LIVE;
-			this.currentTime_.setAttribute(shaka.ui.Constants.ARIA_LABEL, this.localization.resolve(ariaLabel));
+			const ariaLabel = Locales.Ids.SKIP_TO_LIVE;
+			this.currentTime_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(ariaLabel));
 		}
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.PresentationTimeTracker.Factory = class {
+PresentationTimeTracker.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.PresentationTimeTracker(rootElement, controls);
+		return new PresentationTimeTracker(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('time_and_duration', new shaka.ui.PresentationTimeTracker.Factory());
+Controls.registerElement('time_and_duration', new PresentationTimeTracker.Factory());

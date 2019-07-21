@@ -25,6 +25,14 @@
 // goog.require('shaka.ui.OverflowMenu');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+import OverflowMenu from './overflow_menu';
+import LanguageUtils from '../ui/language_utils';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -36,7 +44,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.TextSelection = class extends shaka.ui.Element {
+export default class TextSelection extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -48,7 +56,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
 		this.addTextLangMenu_();
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateLocalizedStrings_();
 			// If captions/subtitles are off, this string needs localization.
 			// TODO: is there a more efficient way of updating just the strings
@@ -56,7 +64,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 			this.updateTextLanguages_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateLocalizedStrings_();
 			// If captions/subtitles are off, this string needs localization.
 			// TODO: is there a more efficient way of updating just the strings
@@ -94,13 +102,13 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 	 */
 	addCaptionButton_() {
 		/** @private {!HTMLElement} */
-		this.captionButton_ = shaka.util.Dom.createHTMLElement('button');
+		this.captionButton_ = Dom.createHTMLElement('button');
 		this.captionButton_.classList.add('shaka-caption-button');
 
 		/** @private {!HTMLElement} */
-		this.captionIcon_ = shaka.util.Dom.createHTMLElement('i');
+		this.captionIcon_ = Dom.createHTMLElement('i');
 		this.captionIcon_.classList.add('material-icons');
-		this.captionIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
+		this.captionIcon_.textContent = Enums.MaterialDesignIcons.CLOSED_CAPTIONS;
 
 		if (this.player && this.player.isTextTrackVisible()) {
 			this.captionButton_.setAttribute('aria-pressed', 'true');
@@ -109,16 +117,16 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 		}
 		this.captionButton_.appendChild(this.captionIcon_);
 
-		const label = shaka.util.Dom.createHTMLElement('label');
+		const label = Dom.createHTMLElement('label');
 		label.classList.add('shaka-overflow-button-label');
 
 		/** @private {!HTMLElement} */
-		this.captionsNameSpan_ = shaka.util.Dom.createHTMLElement('span');
+		this.captionsNameSpan_ = Dom.createHTMLElement('span');
 
 		label.appendChild(this.captionsNameSpan_);
 
 		/** @private {!HTMLElement} */
-		this.currentCaptions_ = shaka.util.Dom.createHTMLElement('span');
+		this.currentCaptions_ = Dom.createHTMLElement('span');
 		this.currentCaptions_.classList.add('shaka-current-selection-span');
 		label.appendChild(this.currentCaptions_);
 		this.captionButton_.appendChild(label);
@@ -130,35 +138,35 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 	 */
 	addTextLangMenu_() {
 		/** @private {!HTMLElement} */
-		this.textLangMenu_ = shaka.util.Dom.createHTMLElement('div');
+		this.textLangMenu_ = Dom.createHTMLElement('div');
 		this.textLangMenu_.classList.add('shaka-text-languages');
 		this.textLangMenu_.classList.add('shaka-no-propagation');
 		this.textLangMenu_.classList.add('shaka-show-controls-on-mouse-over');
 		this.textLangMenu_.classList.add('shaka-settings-menu');
 
 		/** @private {!HTMLElement} */
-		this.backFromCaptionsButton_ = shaka.util.Dom.createHTMLElement('button');
+		this.backFromCaptionsButton_ = Dom.createHTMLElement('button');
 		this.backFromCaptionsButton_.classList.add('shaka-back-to-overflow-button');
 		this.textLangMenu_.appendChild(this.backFromCaptionsButton_);
 
-		const backIcon = shaka.util.Dom.createHTMLElement('i');
+		const backIcon = Dom.createHTMLElement('i');
 		backIcon.classList.add('material-icons');
-		backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
+		backIcon.textContent = Enums.MaterialDesignIcons.BACK;
 		this.backFromCaptionsButton_.appendChild(backIcon);
 
 		/** @private {!HTMLElement} */
-		this.backFromCaptionsSpan_ = shaka.util.Dom.createHTMLElement('span');
+		this.backFromCaptionsSpan_ = Dom.createHTMLElement('span');
 		this.backFromCaptionsButton_.appendChild(this.backFromCaptionsSpan_);
 
 		// Add the off option
-		const off = shaka.util.Dom.createHTMLElement('button');
+		const off = Dom.createHTMLElement('button');
 		off.setAttribute('aria-selected', 'true');
 		this.textLangMenu_.appendChild(off);
 
-		off.appendChild(shaka.ui.Utils.checkmarkIcon());
+		off.appendChild(Utils.checkmarkIcon());
 
 		/** @private {!HTMLElement} */
-		this.captionsOffSpan_ = shaka.util.Dom.createHTMLElement('span');
+		this.captionsOffSpan_ = Dom.createHTMLElement('span');
 
 		this.captionsOffSpan_.classList.add('shaka-auto-span');
 		off.appendChild(this.captionsOffSpan_);
@@ -169,10 +177,10 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
 	/** @private */
 	onCaptionClick_() {
-		this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
-		shaka.ui.Utils.setDisplay(this.textLangMenu_, true);
+		this.controls.dispatchEvent(new FakeEvent('submenuopen'));
+		Utils.setDisplay(this.textLangMenu_, true);
 		// Focus on the currently selected language button.
-		shaka.ui.Utils.focusOnTheChosenItem(this.textLangMenu_);
+		Utils.focusOnTheChosenItem(this.textLangMenu_);
 	}
 
 	/** @private */
@@ -188,7 +196,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 		}
 
 		// TODO: document this event
-		this.controls.dispatchEvent(new shaka.util.FakeEvent('captionselectionupdated'));
+		this.controls.dispatchEvent(new FakeEvent('captionselectionupdated'));
 	}
 
 	/** @private */
@@ -200,7 +208,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 			return langAndRole.language;
 		});
 
-		shaka.ui.LanguageUtils.updateLanguages(
+		LanguageUtils.updateLanguages(
 			tracks,
 			this.textLangMenu_,
 			languages,
@@ -214,7 +222,7 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 		);
 
 		// Add the Off button
-		const offButton = shaka.util.Dom.createHTMLElement('button');
+		const offButton = Dom.createHTMLElement('button');
 		offButton.classList.add('shaka-turn-captions-off-button');
 		this.eventManager.listen(offButton, 'click', () => {
 			const p = this.player.setTextTrackVisibility(false);
@@ -228,15 +236,15 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 
 		if (!this.player.isTextTrackVisible()) {
 			offButton.setAttribute('aria-selected', 'true');
-			offButton.appendChild(shaka.ui.Utils.checkmarkIcon());
+			offButton.appendChild(Utils.checkmarkIcon());
 			this.captionsOffSpan_.classList.add('shaka-chosen-item');
-			this.currentCaptions_.textContent = this.localization.resolve(shaka.ui.Locales.Ids.OFF);
+			this.currentCaptions_.textContent = this.localization.resolve(Locales.Ids.OFF);
 		}
 
-		shaka.ui.Utils.focusOnTheChosenItem(this.textLangMenu_);
+		Utils.focusOnTheChosenItem(this.textLangMenu_);
 
 		// TODO: document this event
-		this.controls.dispatchEvent(new shaka.util.FakeEvent('captionselectionupdated'));
+		this.controls.dispatchEvent(new FakeEvent('captionselectionupdated'));
 	}
 
 	/**
@@ -256,13 +264,10 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateLocalizedStrings_() {
-		const LocIds = shaka.ui.Locales.Ids;
+		const LocIds = Locales.Ids;
 
-		this.captionButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL, this.localization.resolve(LocIds.CAPTIONS));
-		this.backFromCaptionsButton_.setAttribute(
-			shaka.ui.Constants.ARIA_LABEL,
-			this.localization.resolve(LocIds.BACK)
-		);
+		this.captionButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.CAPTIONS));
+		this.backFromCaptionsButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.BACK));
 		this.captionsNameSpan_.textContent = this.localization.resolve(LocIds.CAPTIONS);
 		this.backFromCaptionsSpan_.textContent = this.localization.resolve(LocIds.CAPTIONS);
 		this.captionsOffSpan_.textContent = this.localization.resolve(LocIds.OFF);
@@ -271,20 +276,20 @@ shaka.ui.TextSelection = class extends shaka.ui.Element {
 	/** @private */
 	onTracksChanged_() {
 		const hasText = this.player.getTextTracks().length > 0;
-		shaka.ui.Utils.setDisplay(this.captionButton_, hasText);
+		Utils.setDisplay(this.captionButton_, hasText);
 		this.updateTextLanguages_();
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.TextSelection.Factory = class {
+TextSelection.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.TextSelection(rootElement, controls);
+		return new TextSelection(rootElement, controls);
 	}
 };
 
-shaka.ui.OverflowMenu.registerElement('captions', new shaka.ui.TextSelection.Factory());
+OverflowMenu.registerElement('captions', new TextSelection.Factory());

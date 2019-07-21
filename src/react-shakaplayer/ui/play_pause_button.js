@@ -23,6 +23,13 @@
 // goog.require('shaka.ui.Localization');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+import OverflowMenu from './overflow_menu';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -30,20 +37,20 @@ window.goog = window.goog || {};
 var goog = window.goog;
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {Element}
  * @final
  * @export
  */
-shaka.ui.PlayPauseButton = class extends shaka.ui.Element {
+class PlayPauseButton extends Element {
 	/**
 	 * @param {!HTMLElement} parent
-	 * @param {!shaka.ui.Controls} controls
+	 * @param {!Controls} controls
 	 */
 	constructor(parent, controls) {
 		super(parent, controls);
 
 		/** @private {!HTMLElement} */
-		this.button_ = shaka.util.Dom.createHTMLElement('button');
+		this.button_ = Dom.createHTMLElement('button');
 		this.button_.classList.add('shaka-play-pause-button');
 		this.button_.classList.add('material-icons');
 		this.parent.appendChild(this.button_);
@@ -51,12 +58,12 @@ shaka.ui.PlayPauseButton = class extends shaka.ui.Element {
 		this.updateIcon_();
 		this.updateAriaLabel_();
 
-		const LOCALE_UPDATED = shaka.ui.Localization.LOCALE_UPDATED;
+		const LOCALE_UPDATED = Localization.LOCALE_UPDATED;
 		this.eventManager.listen(this.localization, LOCALE_UPDATED, () => {
 			this.updateAriaLabel_();
 		});
 
-		const LOCALE_CHANGED = shaka.ui.Localization.LOCALE_CHANGED;
+		const LOCALE_CHANGED = Localization.LOCALE_CHANGED;
 		this.eventManager.listen(this.localization, LOCALE_CHANGED, () => {
 			this.updateAriaLabel_();
 		});
@@ -92,28 +99,28 @@ shaka.ui.PlayPauseButton = class extends shaka.ui.Element {
 
 	/** @private */
 	updateAriaLabel_() {
-		const LocIds = shaka.ui.Locales.Ids;
+		const LocIds = Locales.Ids;
 		const label = this.isPaused_() ? LocIds.PLAY : LocIds.PAUSE;
 
-		this.button_.setAttribute(shaka.ui.Constants.ARIA_LABEL, this.localization.resolve(label));
+		this.button_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(label));
 	}
 
 	/** @private */
 	updateIcon_() {
-		const Icons = shaka.ui.Enums.MaterialDesignIcons;
+		const Icons = Enums.MaterialDesignIcons;
 		this.button_.textContent = this.isPaused_() ? Icons.PLAY : Icons.PAUSE;
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.PlayPauseButton.Factory = class {
+PlayPauseButton.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.PlayPauseButton(rootElement, controls);
+		return new PlayPauseButton(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('play_pause', new shaka.ui.PlayPauseButton.Factory());
+Controls.registerElement('play_pause', new PlayPauseButton.Factory());

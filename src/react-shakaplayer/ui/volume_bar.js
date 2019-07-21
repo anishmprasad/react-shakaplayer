@@ -21,6 +21,14 @@
 // goog.require('shaka.ui.Locales');
 // goog.require('shaka.ui.Localization');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+import OverflowMenu from './overflow_menu';
+import LanguageUtils from '../ui/language_utils';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -32,7 +40,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.VolumeBar = class extends shaka.ui.Element {
+export default class VolumeBar extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -44,7 +52,7 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
 		// less/range_elements.less for a complete explanation.
 		// TODO: Factor this into a range-element component.
 		/** @private {!HTMLElement} */
-		this.container_ = shaka.util.Dom.createHTMLElement('div');
+		this.container_ = Dom.createHTMLElement('div');
 		this.container_.classList.add('shaka-volume-bar-container');
 
 		this.bar_ = /** @type {!HTMLInputElement} */ (document.createElement('input'));
@@ -68,11 +76,11 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
 			this.onVolumeInput_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateAriaLabel_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateAriaLabel_();
 		});
 
@@ -92,9 +100,9 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
 
 		// TODO: Can we do this with LESS?
 		const gradient = ['to right'];
-		gradient.push(shaka.ui.Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR + this.bar_.value * 100 + '%');
-		gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR + this.bar_.value * 100 + '%');
-		gradient.push(shaka.ui.Constants.VOLUME_BAR_BASE_COLOR + '100%');
+		gradient.push(Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR + this.bar_.value * 100 + '%');
+		gradient.push(Constants.VOLUME_BAR_BASE_COLOR + this.bar_.value * 100 + '%');
+		gradient.push(Constants.VOLUME_BAR_BASE_COLOR + '100%');
 		this.container_.style.background = 'linear-gradient(' + gradient.join(',') + ')';
 	}
 
@@ -114,19 +122,19 @@ shaka.ui.VolumeBar = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateAriaLabel_() {
-		this.bar_.setAttribute(shaka.ui.Constants.ARIA_LABEL, this.localization.resolve(shaka.ui.Locales.Ids.VOLUME));
+		this.bar_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(Locales.Ids.VOLUME));
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.VolumeBar.Factory = class {
+VolumeBar.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.VolumeBar(rootElement, controls);
+		return new VolumeBar(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('volume', new shaka.ui.VolumeBar.Factory());
+Controls.registerElement('volume', new VolumeBar.Factory());

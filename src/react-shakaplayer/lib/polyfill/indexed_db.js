@@ -24,6 +24,7 @@
 // goog.require('shaka.polyfill');
 
 import polyfill from './all';
+import Platform from '../util/platform';
 
 var shaka = window.shaka;
 // var goog = window.goog;
@@ -38,7 +39,7 @@ export default class IndexedDB {
 	static install() {
 		shaka.log.debug('IndexedDB.install');
 
-		if (shaka.util.Platform.isChromecast()) {
+		if (Platform.isChromecast()) {
 			shaka.log.debug('Removing IndexedDB from ChromeCast');
 			delete window.indexedDB;
 			goog.asserts.assert(!window.indexedDB, 'Failed to override window.indexedDB');

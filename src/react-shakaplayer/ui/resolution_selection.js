@@ -24,6 +24,13 @@
 // goog.require('shaka.ui.OverflowMenu');
 // goog.require('shaka.util.Dom');
 
+import Localization from './localization';
+import Dom from '../lib/util/dom_utils';
+import Element from './element';
+import { Controls } from './controls';
+import Enums from './enums';
+import OverflowMenu from './overflow_menu';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -31,14 +38,14 @@ window.goog = window.goog || {};
 var goog = window.goog;
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {Element}
  * @final
  * @export
  */
-shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
+export default class ResolutionSelection extends Element {
 	/**
 	 * @param {!HTMLElement} parent
-	 * @param {!shaka.ui.Controls} controls
+	 * @param {!Controls} controls
 	 */
 	constructor(parent, controls) {
 		super(parent, controls);
@@ -47,11 +54,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
 		this.addResolutionMenu_();
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateLocalizedStrings_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateLocalizedStrings_();
 		});
 
@@ -88,7 +95,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
 		const icon = shaka.util.Dom.createHTMLElement('i');
 		icon.classList.add('material-icons');
-		icon.textContent = shaka.ui.Enums.MaterialDesignIcons.RESOLUTION;
+		icon.textContent = Enums.MaterialDesignIcons.RESOLUTION;
 		this.resolutionButton_.appendChild(icon);
 
 		const label = shaka.util.Dom.createHTMLElement('label');
@@ -125,7 +132,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
 		const backIcon = shaka.util.Dom.createHTMLElement('i');
 		backIcon.classList.add('material-icons');
-		backIcon.textContent = shaka.ui.Enums.MaterialDesignIcons.BACK;
+		backIcon.textContent = Enums.MaterialDesignIcons.BACK;
 		this.backFromResolutionButton_.appendChild(backIcon);
 
 		/** @private {!HTMLElement}*/
@@ -143,12 +150,12 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 		// Hide resolution menu and button for audio-only content and src= content
 		// without resolution information.
 		if (tracks.length && !tracks[0].height) {
-			shaka.ui.Utils.setDisplay(this.resolutionMenu_, false);
-			shaka.ui.Utils.setDisplay(this.resolutionButton_, false);
+			Utils.setDisplay(this.resolutionMenu_, false);
+			Utils.setDisplay(this.resolutionButton_, false);
 			return;
 		}
 		// Otherwise, restore it.
-		shaka.ui.Utils.setDisplay(this.resolutionButton_, true);
+		Utils.setDisplay(this.resolutionButton_, true);
 
 		tracks.sort((t1, t2) => {
 			return t1.height - t2.height;
@@ -167,10 +174,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 
 		// Remove old shaka-resolutions
 		// 1. Save the back to menu button
-		const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(
-			this.resolutionMenu_,
-			'shaka-back-to-overflow-button'
-		);
+		const backButton = Utils.getFirstDescendantWithClassName(this.resolutionMenu_, 'shaka-back-to-overflow-button');
 
 		// 2. Remove everything
 		shaka.util.Dom.removeAllChildren(this.resolutionMenu_);
@@ -193,7 +197,7 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 			if (!abrEnabled && track == selectedTrack) {
 				// If abr is disabled, mark the selected track's resolution.
 				button.setAttribute('aria-selected', 'true');
-				button.appendChild(shaka.ui.Utils.checkmarkIcon());
+				button.appendChild(Utils.checkmarkIcon());
 				span.classList.add('shaka-chosen-item');
 				this.currentResolution_.textContent = span.textContent;
 			}
@@ -212,29 +216,29 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 		/** @private {!HTMLElement}*/
 		this.abrOnSpan_ = shaka.util.Dom.createHTMLElement('span');
 		this.abrOnSpan_.classList.add('shaka-auto-span');
-		this.abrOnSpan_.textContent = this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
+		this.abrOnSpan_.textContent = this.localization.resolve(Locales.Ids.AUTO_QUALITY);
 		autoButton.appendChild(this.abrOnSpan_);
 
 		// If abr is enabled reflect it by marking 'Auto' as selected.
 		if (abrEnabled) {
 			autoButton.setAttribute('aria-selected', 'true');
-			autoButton.appendChild(shaka.ui.Utils.checkmarkIcon());
+			autoButton.appendChild(Utils.checkmarkIcon());
 
 			this.abrOnSpan_.classList.add('shaka-chosen-item');
 
-			this.currentResolution_.textContent = this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
+			this.currentResolution_.textContent = this.localization.resolve(Locales.Ids.AUTO_QUALITY);
 		}
 
 		this.resolutionMenu_.appendChild(autoButton);
-		shaka.ui.Utils.focusOnTheChosenItem(this.resolutionMenu_);
+		Utils.focusOnTheChosenItem(this.resolutionMenu_);
 		this.controls.dispatchEvent(new shaka.util.FakeEvent('resolutionselectionupdated'));
 	}
 
 	/** @private */
 	onResolutionClick_() {
 		this.controls.dispatchEvent(new shaka.util.FakeEvent('submenuopen'));
-		shaka.ui.Utils.setDisplay(this.resolutionMenu_, true);
-		shaka.ui.Utils.focusOnTheChosenItem(this.resolutionMenu_);
+		Utils.setDisplay(this.resolutionMenu_, true);
+		Utils.focusOnTheChosenItem(this.resolutionMenu_);
 	}
 
 	/**
@@ -253,22 +257,16 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateLocalizedStrings_() {
-		const LocIds = shaka.ui.Locales.Ids;
+		const LocIds = Locales.Ids;
 
-		this.resolutionButton_.setAttribute(
-			shaka.ui.Constants.ARIA_LABEL,
-			this.localization.resolve(LocIds.RESOLUTION)
-		);
-		this.backFromResolutionButton_.setAttribute(
-			shaka.ui.Constants.ARIA_LABEL,
-			this.localization.resolve(LocIds.RESOLUTION)
-		);
+		this.resolutionButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.RESOLUTION));
+		this.backFromResolutionButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.RESOLUTION));
 		this.backFromResolutionSpan_.textContent = this.localization.resolve(LocIds.RESOLUTION);
 		this.resolutionNameSpan_.textContent = this.localization.resolve(LocIds.RESOLUTION);
 		this.abrOnSpan_.textContent = this.localization.resolve(LocIds.AUTO_QUALITY);
 
 		if (this.player.getConfiguration().abr.enabled) {
-			this.currentResolution_.textContent = this.localization.resolve(shaka.ui.Locales.Ids.AUTO_QUALITY);
+			this.currentResolution_.textContent = this.localization.resolve(Locales.Ids.AUTO_QUALITY);
 		}
 	}
 };
@@ -277,11 +275,11 @@ shaka.ui.ResolutionSelection = class extends shaka.ui.Element {
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.ResolutionSelection.Factory = class {
+ResolutionSelection.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.ResolutionSelection(rootElement, controls);
+		return new ResolutionSelection(rootElement, controls);
 	}
 };
 
-shaka.ui.OverflowMenu.registerElement('quality', new shaka.ui.ResolutionSelection.Factory());
+OverflowMenu.registerElement('quality', new ResolutionSelection.Factory());

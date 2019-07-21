@@ -75,7 +75,7 @@ export default class Fullscreen {
 			});
 		}
 
-		const proxy = shaka.polyfill.Fullscreen.proxyEvent_;
+		const proxy = Fullscreen.proxyEvent_;
 		document.addEventListener('webkitfullscreenchange', proxy);
 		document.addEventListener('webkitfullscreenerror', proxy);
 		document.addEventListener('mozfullscreenchange', proxy);
