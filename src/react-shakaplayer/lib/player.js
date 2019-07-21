@@ -56,6 +56,43 @@
 // goog.require('shaka.util.Stats');
 // goog.require('shaka.util.StreamUtils');
 
+import ActiveStreamMap from '../lib/media/active_stream_map';
+import AdaptationSetCriteria from '../lib/media/adaptation_set_criteria';
+import BufferingObserver from '../lib/media/buffering_observer';
+import DrmEngine from '../lib/media/drm_engine';
+import ManifestParser from '../lib/media/manifest_parser';
+import MediaSourceEngine from '../lib/media/media_source_engine';
+import { MuxJSClosedCaptionParser, NoopCaptionParser } from '../lib/media/closed_caption_parser';
+import PeriodObserver from '../lib/media/period_observer';
+import PlayRateController from '../lib/media/play_rate_controller';
+import Playhead from '../lib/media/playhead';
+import PlayheadObserverManager from '../lib/media/playhead_observer';
+import { PreferenceBasedCriteria } from '../lib/media/adaptation_set_criteria';
+import RegionObserver from '../lib/media/region_observer';
+import RegionTimeline from '../lib/media/region_timeline';
+import {SegmentReference} from '../lib/media/segment_reference';
+import StreamingEngine from '../lib/media/streaming_engine';
+
+import NetworkingEngine from '../lib/net/networking_engine';
+import Walker from '../lib/routing/walker';
+import SimpleTextDisplayer from '../lib/text/simple_text_displayer';
+
+import ArrayUtils from '../lib/util/array_utils';
+import Error from '../lib/util/error';
+import EventManager from '../lib/util/event_manager';
+import FakeEvent from '../lib/util/fake_event';
+import FakeEventTarget from '../lib/util/fake_event_target';
+import IDestroyable from '../lib/util/i_destroyable';
+import LanguageUtils from '../lib/util/language_utils';
+import ManifestParserUtils from '../lib/util/manifest_parser_utils';
+import MimeUtils from '../lib/util/mime_utils';
+import MultiMap from '../lib/util/multi_map';
+import Periods from '../lib/util/periods';
+import Platform from '../lib/util/platform';
+import PlayerConfiguration from '../lib/util/player_configuration';
+import Stats from '../lib/util/stats';
+import StreamUtils from '../lib/util/stream_utils';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -67,7 +104,7 @@ var goog = window.goog;
  * @description Fired when a playback error occurs.
  * @property {string} type
  *   'error'
- * @property {!shaka.util.Error} detail
+ * @property {!Error} detail
  *   An object which contains details on the error.  The error's 'category' and
  *   'code' properties will identify the specific error that occurred.  In an
  *   uncompiled build, you can also use the 'message' and 'stack' properties
@@ -279,12 +316,11 @@ var goog = window.goog;
  * @exportDoc
  */
 
- import FakeEventTarget from './util/fake_event_target'
 
 /**
  * @summary The main player object for Shaka Player.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @export
  */
 shaka.Player = class extends FakeEventTarget {
@@ -315,26 +351,26 @@ shaka.Player = class extends FakeEventTarget {
 		 */
 		this.isTextVisible_ = false;
 
-		/** @private {shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		/** @private {EventManager} */
+		this.eventManager_ = new EventManager();
 
-		/** @private {shaka.net.NetworkingEngine} */
+		/** @private {NetworkingEngine} */
 		this.networkingEngine_ = null;
 
-		/** @private {shaka.media.DrmEngine} */
+		/** @private {DrmEngine} */
 		this.drmEngine_ = null;
 
-		/** @private {shaka.media.MediaSourceEngine} */
+		/** @private {MediaSourceEngine} */
 		this.mediaSourceEngine_ = null;
 
-		/** @private {shaka.media.Playhead} */
+		/** @private {Playhead} */
 		this.playhead_ = null;
 
 		/**
 		 * The playhead observers are used to monitor the position of the playhead
 		 * and some other source of data (e.g. buffered content), and raise events.
 		 *
-		 * @private {shaka.media.PlayheadObserverManager}
+		 * @private {PlayheadObserverManager}
 		 */
 		this.playheadObservers_ = null;
 
@@ -343,23 +379,23 @@ shaka.Player = class extends FakeEventTarget {
 		 * provides the missing functionality that we need to provide trick play,
 		 * for example a negative playback rate.
 		 *
-		 * @private {shaka.media.PlayRateController}
+		 * @private {PlayRateController}
 		 */
 		this.playRateController_ = null;
 
 		// We use the buffering observer and timer to track when we move from having
 		// enough buffered content to not enough. They only exist when content has
 		// been loaded and are not re-used between loads.
-		/** @private {shaka.util.Timer} */
+		/** @private {Timer} */
 		this.bufferPoller_ = null;
 
-		/** @private {shaka.media.BufferingObserver} */
+		/** @private {BufferingObserver} */
 		this.bufferObserver_ = null;
 
-		/** @private {shaka.media.RegionTimeline} */
+		/** @private {RegionTimeline} */
 		this.regionTimeline_ = null;
 
-		/** @private {shaka.media.StreamingEngine} */
+		/** @private {StreamingEngine} */
 		this.streamingEngine_ = null;
 
 		/** @private {shaka.extern.ManifestParser} */
@@ -410,9 +446,9 @@ shaka.Player = class extends FakeEventTarget {
 		 * current period (the one containing playhead) differs from the active
 		 * period (the one being streamed in by streaming engine).
 		 *
-		 * @private {!shaka.media.ActiveStreamMap}
+		 * @private {!ActiveStreamMap}
 		 */
-		this.activeStreams_ = new shaka.media.ActiveStreamMap();
+		this.activeStreams_ = new ActiveStreamMap();
 
 		/** @private {?shaka.extern.PlayerConfiguration} */
 		this.config_ = this.defaultConfig_();
@@ -427,11 +463,11 @@ shaka.Player = class extends FakeEventTarget {
 		/** @private {{width: number, height: number}} */
 		this.maxHwRes_ = { width: Infinity, height: Infinity };
 
-		/** @private {shaka.util.Stats} */
+		/** @private {Stats} */
 		this.stats_ = null;
 
-		/** @private {!shaka.media.AdaptationSetCriteria} */
-		this.currentAdaptationSetCriteria_ = new shaka.media.PreferenceBasedCriteria(
+		/** @private {!AdaptationSetCriteria} */
+		this.currentAdaptationSetCriteria_ = new PreferenceBasedCriteria(
 			this.config_.preferredAudioLanguage,
 			this.config_.preferredVariantRole,
 			this.config_.preferredAudioChannelCount
@@ -455,25 +491,25 @@ shaka.Player = class extends FakeEventTarget {
 			this.retryStreaming();
 		});
 
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.detachNode_ = { name: 'detach' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.attachNode_ = { name: 'attach' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.unloadNode_ = { name: 'unload' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.parserNode_ = { name: 'manifest-parser' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.manifestNode_ = { name: 'manifest' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.mediaSourceNode_ = { name: 'media-source' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.drmNode_ = { name: 'drm-engine' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.loadNode_ = { name: 'load' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.srcEqualsDrmNode_ = { name: 'src-equals-drm-engine' };
-		/** @private {shaka.routing.Node} */
+		/** @private {Node} */
 		this.srcEqualsNode_ = { name: 'src-equals' };
 
 		const AbortableOperation = AbortableOperation;
@@ -517,22 +553,20 @@ shaka.Player = class extends FakeEventTarget {
 			return this.onSrcEquals_(has, wants);
 		});
 
-		/** @private {shaka.routing.Walker.Implementation} */
+		/** @private {Walker.Implementation} */
 		const walkerImplementation = {
 			getNext: (at, has, goingTo, wants) => {
 				return this.getNextStep_(at, has, goingTo, wants);
 			},
 			enterNode: (node, has, wants) => {
-				this.dispatchEvent(
-					new shaka.util.FakeEvent(/* name= */ 'onstatechange', /* data= */ { state: node.name })
-				);
+				this.dispatchEvent(new FakeEvent(/* name= */ 'onstatechange', /* data= */ { state: node.name }));
 
 				const action = actions.get(node);
 				return action(has, wants);
 			},
 			handleError: async (has, error) => {
 				shaka.log.warning('The walker saw an error:');
-				if (error instanceof shaka.util.Error) {
+				if (error instanceof Error) {
 					shaka.log.warning('Error Code:', error.code);
 				} else {
 					shaka.log.warning('Error Message:', error.message);
@@ -554,18 +588,12 @@ shaka.Player = class extends FakeEventTarget {
 				return has.mediaElement ? this.attachNode_ : this.detachNode_;
 			},
 			onIdle: node => {
-				this.dispatchEvent(
-					new shaka.util.FakeEvent(/* name= */ 'onstateidle', /* data= */ { state: node.name })
-				);
+				this.dispatchEvent(new FakeEvent(/* name= */ 'onstateidle', /* data= */ { state: node.name }));
 			}
 		};
 
-		/** @private {shaka.routing.Walker} */
-		this.walker_ = new shaka.routing.Walker(
-			this.detachNode_,
-			shaka.Player.createEmptyPayload_(),
-			walkerImplementation
-		);
+		/** @private {Walker} */
+		this.walker_ = new Walker(this.detachNode_, shaka.Player.createEmptyPayload_(), walkerImplementation);
 
 		// Even though |attach| will start in later interpreter cycles, it should be
 		// the LAST thing we do in the constructor because conceptually it relies on
@@ -678,19 +706,19 @@ shaka.Player = class extends FakeEventTarget {
 		// DRM support is not strictly necessary, but the APIs at least need to be
 		// there.  Our no-op DRM polyfill should handle that.
 		// TODO(#1017): Consider making even DrmEngine optional.
-		const drmSupport = shaka.media.DrmEngine.isBrowserSupported();
+		const drmSupport = DrmEngine.isBrowserSupported();
 		if (!drmSupport) {
 			return false;
 		}
 
 		// If we have MediaSource (MSE) support, we should be able to use Shaka.
-		if (shaka.util.Platform.supportsMediaSource()) {
+		if (Platform.supportsMediaSource()) {
 			return true;
 		}
 
 		// If we don't have MSE, we _may_ be able to use Shaka.  Look for native HLS
 		// support, and call this platform usable if we have it.
-		return shaka.util.Platform.supportsMediaType('application/x-mpegurl');
+		return Platform.supportsMediaType('application/x-mpegurl');
 	}
 
 	/**
@@ -706,9 +734,9 @@ shaka.Player = class extends FakeEventTarget {
 	 */
 	static async probeSupport() {
 		goog.asserts.assert(shaka.Player.isBrowserSupported(), 'Must have basic support');
-		const drm = await shaka.media.DrmEngine.probeSupport();
-		const manifest = shaka.media.ManifestParser.probeSupport();
-		const media = shaka.media.MediaSourceEngine.probeSupport();
+		const drm = await DrmEngine.probeSupport();
+		const manifest = ManifestParser.probeSupport();
+		const media = MediaSourceEngine.probeSupport();
 		const ret = {
 			manifest: manifest,
 			media: media,
@@ -749,7 +777,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// If the platform does not support media source, we will never want to
 		// initialize media source.
-		if (!shaka.util.Platform.supportsMediaSource()) {
+		if (!Platform.supportsMediaSource()) {
 			initializeMediaSource = false;
 		}
 
@@ -828,7 +856,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// If the platform does not support media source, we will never want to
 		// initialize media source.
-		if (!shaka.util.Platform.supportsMediaSource()) {
+		if (!Platform.supportsMediaSource()) {
 			initializeMediaSource = false;
 		}
 
@@ -905,7 +933,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// We dispatch the loading event when someone calls |load| because we want
 		// to surface the user intent.
-		this.dispatchEvent(new shaka.util.FakeEvent('loading'));
+		this.dispatchEvent(new FakeEvent('loading'));
 
 		// Right away we know what the asset uri and start-of-load time are. We will
 		// fill-in the rest of the information later.
@@ -966,13 +994,7 @@ shaka.Player = class extends FakeEventTarget {
 		events.onStart = () => shaka.log.info('Starting load of ' + assetUri + '...');
 		return new Promise((resolve, reject) => {
 			events.onSkip = () =>
-				reject(
-					new shaka.util.Error(
-						shaka.util.Error.Severity.CRITICAL,
-						shaka.util.Error.Category.PLAYER,
-						shaka.util.Error.Code.NO_VIDEO_ELEMENT
-					)
-				);
+				reject(new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.NO_VIDEO_ELEMENT));
 
 			events.onEnd = () => resolve();
 			events.onCancel = () => reject(this.createAbortLoadError_());
@@ -984,14 +1006,14 @@ shaka.Player = class extends FakeEventTarget {
 	 * Check if src= should be used to load the asset at |uri|. Assume that media
 	 * source is the default option, and that src= is for special cases.
 	 *
-	 * @param {shaka.routing.Payload} payload
+	 * @param {Payload} payload
 	 * @return {boolean}
 	 *    |true| if the content should be loaded with src=, |false| if the content
 	 *    should be loaded with MediaSource.
 	 * @private
 	 */
 	shouldUseSrcEquals_(payload) {
-		const Platform = shaka.util.Platform;
+		const Platform = Platform;
 
 		// If an explicit ManifestParser factory has been given, we can't do src=.
 		if (payload.factory) {
@@ -1013,7 +1035,7 @@ shaka.Player = class extends FakeEventTarget {
 		// TODO: Too generic to belong to ManifestParser now.  Refactor.
 		if (!mimeType) {
 			// Try using the uri extension.
-			const extension = shaka.media.ManifestParser.getExtension(uri);
+			const extension = ManifestParser.getExtension(uri);
 			mimeType = {
 				mp4: 'video/mp4',
 				m4v: 'video/mp4',
@@ -1043,7 +1065,7 @@ shaka.Player = class extends FakeEventTarget {
 				return false;
 			}
 
-			const canPlayMediaSource = shaka.media.ManifestParser.isSupported(uri, mimeType);
+			const canPlayMediaSource = ManifestParser.isSupported(uri, mimeType);
 
 			// If MediaSource isn't an option, the native option is our only chance.
 			if (!canPlayMediaSource) {
@@ -1083,8 +1105,8 @@ shaka.Player = class extends FakeEventTarget {
 	 *  - Registering error listeners to the media element.
 	 *  - Caching the video element for use outside of the load graph.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @return {!Promise}
 	 * @private
 	 */
@@ -1127,8 +1149,8 @@ shaka.Player = class extends FakeEventTarget {
 	 *  - Removing error listeners from the media element.
 	 *  - Dropping the cached reference to the video element.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @return {!Promise}
 	 * @private
 	 */
@@ -1156,8 +1178,8 @@ shaka.Player = class extends FakeEventTarget {
 	 * This method assumes that any component could be |null| and should be safe
 	 * to call from any point in the load graph.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @return {!Promise}
 	 * @private
 	 */
@@ -1170,7 +1192,7 @@ shaka.Player = class extends FakeEventTarget {
 			this.loadMode_ = shaka.Player.LoadMode.NOT_LOADED;
 		}
 
-		this.dispatchEvent(new shaka.util.FakeEvent('unloading'));
+		this.dispatchEvent(new FakeEvent('unloading'));
 
 		// Remove everything that has to do with loading content from our payload
 		// since we are releasing everything that depended on it.
@@ -1274,15 +1296,15 @@ shaka.Player = class extends FakeEventTarget {
 	 * This method assumes that it is safe for it to execute. The load-graph is
 	 * responsible for ensuring all assumptions are true.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 *
 	 * @return {!Promise}
 	 * @private
 	 */
 	async onInitializeMediaSourceEngine_(has, wants) {
 		goog.asserts.assert(
-			shaka.util.Platform.supportsMediaSource(),
+			Platform.supportsMediaSource(),
 			'We should not be initializing media source on a platform that does ' + 'not support media source.'
 		);
 		goog.asserts.assert(has.mediaElement, 'We should have a media element when initializing media source.');
@@ -1293,9 +1315,9 @@ shaka.Player = class extends FakeEventTarget {
 
 		goog.asserts.assert(this.mediaSourceEngine_ == null, 'We should not have a media source engine yet.');
 
-		const closedCaptionsParser = shaka.media.MuxJSClosedCaptionParser.isSupported()
-			? new shaka.media.MuxJSClosedCaptionParser()
-			: new shaka.media.NoopCaptionParser();
+		const closedCaptionsParser = MuxJSClosedCaptionParser.isSupported()
+			? new MuxJSClosedCaptionParser()
+			: new NoopCaptionParser();
 
 		// When changing text visibility we need to update both the text displayer
 		// and streaming engine because we don't always stream text. To ensure that
@@ -1322,8 +1344,8 @@ shaka.Player = class extends FakeEventTarget {
 	 * This method assumes that it is safe for it to execute, the load-graph is
 	 * responsible for ensuring all assumptions are true.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @return {!Promise}
 	 * @private
 	 */
@@ -1357,7 +1379,7 @@ shaka.Player = class extends FakeEventTarget {
 		if (has.factory) {
 			this.parser_ = has.factory();
 		} else {
-			this.parser_ = await shaka.media.ManifestParser.create(
+			this.parser_ = await ManifestParser.create(
 				assetUri,
 				networkingEngine,
 				this.config_.manifest.retryParameters,
@@ -1375,9 +1397,9 @@ shaka.Player = class extends FakeEventTarget {
 	 * This method assumes that it is safe for it to execute, the load-graph is
 	 * responsible for ensuring all assumptions are true.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
-	 * @return {!shaka.util.AbortableOperation}
+	 * @param {Payload} has
+	 * @param {Payload} wants
+	 * @return {!AbortableOperation}
 	 * @private
 	 */
 	onParseManifest_(has, wants) {
@@ -1406,7 +1428,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// This will be needed by the parser once it starts parsing, so we will
 		// initialize it now even through it appears a little out-of-place.
-		this.regionTimeline_ = new shaka.media.RegionTimeline();
+		this.regionTimeline_ = new RegionTimeline();
 		this.regionTimeline_.setListeners(
 			/* onRegionAdded */ region => {
 				this.onRegionEvent_('timelineregionadded', region);
@@ -1427,21 +1449,17 @@ shaka.Player = class extends FakeEventTarget {
 			onError: error => this.onError_(error)
 		};
 
-		return new shaka.util.AbortableOperation(
+		return new AbortableOperation(
 			/* promise= */ (async () => {
 				this.manifest_ = await this.parser_.start(assetUri, playerInterface);
 
 				// This event is fired after the manifest is parsed, but before any
 				// filtering takes place.
-				this.dispatchEvent(new shaka.util.FakeEvent('manifestparsed'));
+				this.dispatchEvent(new FakeEvent('manifestparsed'));
 
 				// We require all manifests to have already one period.
 				if (this.manifest_.periods.length == 0) {
-					throw new shaka.util.Error(
-						shaka.util.Error.Severity.CRITICAL,
-						shaka.util.Error.Category.MANIFEST,
-						shaka.util.Error.Code.NO_PERIODS
-					);
+					throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.NO_PERIODS);
 				}
 
 				// Make sure that all periods are either: audio-only, video-only, or
@@ -1463,8 +1481,8 @@ shaka.Player = class extends FakeEventTarget {
 	 * The load-graph is responsible for ensuring all assumptions made by this
 	 * method are valid before executing it.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @return {!Promise}
 	 */
 	async onInitializeDrm_(has, wants) {
@@ -1498,7 +1516,7 @@ shaka.Player = class extends FakeEventTarget {
 		this.drmEngine_.configure(this.config_.drm);
 
 		await this.drmEngine_.initForPlayback(
-			shaka.util.Periods.getAllVariantsFrom(this.manifest_.periods),
+			Periods.getAllVariantsFrom(this.manifest_.periods),
 			this.manifest_.offlineSessionIds
 		);
 
@@ -1522,8 +1540,8 @@ shaka.Player = class extends FakeEventTarget {
 	 *  - Initializing Streaming Engine
 	 *  - Starting playback at |wants.startTime|
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @private
 	 */
 	async onLoad_(has, wants) {
@@ -1554,7 +1572,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// Stats are for a single playback/load session. Stats must be initialized
 		// before we allow calls to |updateStateHistory|.
-		this.stats_ = new shaka.util.Stats();
+		this.stats_ = new Stats();
 
 		const updateStateHistory = () => this.updateStateHistory_();
 		const onRateChange = () => this.onRateChange_();
@@ -1577,7 +1595,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// Copy preferred languages from the config again, in case the config was
 		// changed between construction and playback.
-		this.currentAdaptationSetCriteria_ = new shaka.media.PreferenceBasedCriteria(
+		this.currentAdaptationSetCriteria_ = new PreferenceBasedCriteria(
 			this.config_.preferredAudioLanguage,
 			this.config_.preferredVariantRole,
 			this.config_.preferredAudioChannelCount
@@ -1600,7 +1618,7 @@ shaka.Player = class extends FakeEventTarget {
 		this.playhead_ = this.createPlayhead(has.startTime);
 		this.playheadObservers_ = this.createPlayheadObserversForMSE_();
 
-		this.playRateController_ = new shaka.media.PlayRateController({
+		this.playRateController_ = new PlayRateController({
 			getRate: () => has.mediaElement.playbackRate,
 			setRate: rate => {
 				has.mediaElement.playbackRate = rate;
@@ -1632,7 +1650,7 @@ shaka.Player = class extends FakeEventTarget {
 		// The event must be fired after we filter by restrictions but before the
 		// active stream is picked to allow those listening for the "streaming"
 		// event to make changes before streaming starts.
-		this.dispatchEvent(new shaka.util.FakeEvent('streaming'));
+		this.dispatchEvent(new FakeEvent('streaming'));
 
 		// Start streaming content. This will start the flow of content down to
 		// media source, including picking the initial streams to play.
@@ -1686,12 +1704,12 @@ shaka.Player = class extends FakeEventTarget {
 	 * The load-graph is responsible for ensuring all assumptions made by this
 	 * method are valid before executing it.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} has
+	 * @param {Payload} wants
 	 * @return {!Promise}
 	 */
 	async onInitializeSrcEqualsDrm_(has, wants) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 
 		goog.asserts.assert(
 			this.networkingEngine_,
@@ -1771,9 +1789,9 @@ shaka.Player = class extends FakeEventTarget {
 	 * This method assumes that it is safe for it to execute, the load-graph is
 	 * responsible for ensuring all assumptions are true.
 	 *
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
-	 * @return {!shaka.util.AbortableOperation}
+	 * @param {Payload} has
+	 * @param {Payload} wants
+	 * @return {!AbortableOperation}
 	 *
 	 * @private
 	 */
@@ -1792,15 +1810,15 @@ shaka.Player = class extends FakeEventTarget {
 		this.assetUri_ = has.uri;
 
 		// Stats are for a single playback/load session.
-		this.stats_ = new shaka.util.Stats();
+		this.stats_ = new Stats();
 
-		this.playhead_ = new shaka.media.SrcEqualsPlayhead(has.mediaElement);
+		this.playhead_ = new SrcEqualsPlayhead(has.mediaElement);
 
 		if (has.startTime != null) {
 			this.playhead_.setStartTime(has.startTime);
 		}
 
-		this.playRateController_ = new shaka.media.PlayRateController({
+		this.playRateController_ = new PlayRateController({
 			getRate: () => has.mediaElement.playbackRate,
 			setRate: rate => {
 				has.mediaElement.playbackRate = rate;
@@ -1856,10 +1874,10 @@ shaka.Player = class extends FakeEventTarget {
 		// The event doesn't mean as much for src= playback, since we don't control
 		// streaming.  But we should fire it in this path anyway since some
 		// applications may be expecting it as a life-cycle event.
-		this.dispatchEvent(new shaka.util.FakeEvent('streaming'));
+		this.dispatchEvent(new FakeEvent('streaming'));
 
 		// This is fully loaded when we have loaded the first frame.
-		const fullyLoaded = new shaka.util.PublicPromise();
+		const fullyLoaded = new PublicPromise();
 		if (this.video_.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
 			// Already done!
 			fullyLoaded.resolve();
@@ -1875,13 +1893,13 @@ shaka.Player = class extends FakeEventTarget {
 				fullyLoaded.reject(this.videoErrorToShakaError_());
 			});
 		}
-		return new shaka.util.AbortableOperation(
+		return new AbortableOperation(
 			fullyLoaded,
 			/* onAbort= */ () => {
-				const abortedError = new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.PLAYER,
-					shaka.util.Error.Code.OPERATION_ABORTED
+				const abortedError = new Error(
+					Error.Severity.CRITICAL,
+					Error.Category.PLAYER,
+					Error.Code.OPERATION_ABORTED
 				);
 				fullyLoaded.reject(abortedError);
 				return Promise.resolve(); // Abort complete.
@@ -1929,7 +1947,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	chooseCodecsAndFilterManifest_() {
-		const MimeUtils = shaka.util.MimeUtils;
+		const MimeUtils = MimeUtils;
 
 		// Collect a list of variants for all periods.
 		/** @type {!Array.<shaka.extern.Variant>} */
@@ -1940,10 +1958,7 @@ shaka.Player = class extends FakeEventTarget {
 		// For some content (#1013), surround-sound variants will use a different
 		// codec than stereo variants, so it is important to choose codecs **after**
 		// considering the audio channel config.
-		variants = shaka.util.StreamUtils.filterVariantsByAudioChannelCount(
-			variants,
-			this.config_.preferredAudioChannelCount
-		);
+		variants = StreamUtils.filterVariantsByAudioChannelCount(variants, this.config_.preferredAudioChannelCount);
 
 		function variantCodecs(variant) {
 			// Only consider the base of the codec string.  For example, these should
@@ -1962,8 +1977,8 @@ shaka.Player = class extends FakeEventTarget {
 		}
 
 		// Now organize variants into buckets by codecs.
-		/** @type {!shaka.util.MultiMap.<shaka.extern.Variant>} */
-		const variantsByCodecs = new shaka.util.MultiMap();
+		/** @type {!MultiMap.<shaka.extern.Variant>} */
+		const variantsByCodecs = new MultiMap();
 		for (const variant of variants) {
 			const group = variantCodecs(variant);
 			variantsByCodecs.push(group, variant);
@@ -2011,18 +2026,18 @@ shaka.Player = class extends FakeEventTarget {
 	 * fake instances. Configuration and initialization will be handled after
 	 * |createDrmEngine|.
 	 *
-	 * @param {shaka.media.DrmEngine.PlayerInterface} playerInterface
-	 * @return {!shaka.media.DrmEngine}
+	 * @param {DrmEngine.PlayerInterface} playerInterface
+	 * @return {!DrmEngine}
 	 */
 	createDrmEngine(playerInterface) {
-		return new shaka.media.DrmEngine(playerInterface);
+		return new DrmEngine(playerInterface);
 	}
 
 	/**
 	 * Creates a new instance of NetworkingEngine.  This can be replaced by tests
 	 * to create fake instances instead.
 	 *
-	 * @return {!shaka.net.NetworkingEngine}
+	 * @return {!NetworkingEngine}
 	 */
 	createNetworkingEngine() {
 		/** @type {function(number, number)} */
@@ -2035,7 +2050,7 @@ shaka.Player = class extends FakeEventTarget {
 			}
 		};
 
-		return new shaka.net.NetworkingEngine(onProgressUpdated_);
+		return new NetworkingEngine(onProgressUpdated_);
 	}
 
 	/**
@@ -2043,12 +2058,12 @@ shaka.Player = class extends FakeEventTarget {
 	 * create fake instances instead.
 	 *
 	 * @param {?number} startTime
-	 * @return {!shaka.media.Playhead}
+	 * @return {!Playhead}
 	 */
 	createPlayhead(startTime) {
 		goog.asserts.assert(this.manifest_, 'Must have manifest');
 		goog.asserts.assert(this.video_, 'Must have video');
-		return new shaka.media.MediaSourcePlayhead(
+		return new MediaSourcePlayhead(
 			this.video_,
 			this.manifest_,
 			this.config_.streaming,
@@ -2062,7 +2077,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * Create the observers for MSE playback. These observers are responsible for
 	 * notifying the app and player of specific events during MSE playback.
 	 *
-	 * @return {!shaka.media.PlayheadObserverManager}
+	 * @return {!PlayheadObserverManager}
 	 * @private
 	 */
 	createPlayheadObserversForMSE_() {
@@ -2072,12 +2087,12 @@ shaka.Player = class extends FakeEventTarget {
 
 		// Create the period observer. This will allow us to notify the app when we
 		// transition between periods.
-		const periodObserver = new shaka.media.PeriodObserver(this.manifest_);
+		const periodObserver = new PeriodObserver(this.manifest_);
 		periodObserver.setListeners(period => this.onChangePeriod_());
 
 		// Create the region observer. This will allow us to notify the app when we
 		// move in and out of timeline regions.
-		const regionObserver = new shaka.media.RegionObserver(this.regionTimeline_);
+		const regionObserver = new RegionObserver(this.regionTimeline_);
 		const onEnterRegion = (region, seeking) => {
 			this.onRegionEvent_('timelineregionenter', region);
 		};
@@ -2095,7 +2110,7 @@ shaka.Player = class extends FakeEventTarget {
 		regionObserver.setListeners(onEnterRegion, onExitRegion, onSkipRegion);
 
 		// Now that we have all our observers, create a manager for them.
-		const manager = new shaka.media.PlayheadObserverManager(this.video_);
+		const manager = new PlayheadObserverManager(this.video_);
 		manager.manage(periodObserver);
 		manager.manage(regionObserver);
 
@@ -2123,17 +2138,17 @@ shaka.Player = class extends FakeEventTarget {
 		// logic in BufferingObserver to work correctly.
 		const satisfiedThreshold = Math.min(shaka.Player.TYPICAL_BUFFERING_THRESHOLD_, rebufferingGoal / 2);
 
-		this.bufferObserver_ = new shaka.media.BufferingObserver(starvingThreshold, satisfiedThreshold);
+		this.bufferObserver_ = new BufferingObserver(starvingThreshold, satisfiedThreshold);
 
 		// Force us back to a buffering state. This ensure everything is starting in
 		// the same state.
-		this.bufferObserver_.setState(shaka.media.BufferingObserver.State.STARVING);
+		this.bufferObserver_.setState(BufferingObserver.State.STARVING);
 		this.updateBufferState_();
 
 		// TODO: We should take some time to look into the effects of our
 		//       quarter-second refresh practice. We often use a quarter-second
 		//       but we have no documentation about why.
-		this.bufferPoller_ = new shaka.util.Timer(() => {
+		this.bufferPoller_ = new Timer(() => {
 			this.pollBufferState_();
 		}).tickEvery(/* seconds= */ 0.25);
 	}
@@ -2162,7 +2177,7 @@ shaka.Player = class extends FakeEventTarget {
 				break;
 		}
 
-		const bufferLead = shaka.media.TimeRangesUtils.bufferedAheadOf(this.video_.buffered, this.video_.currentTime);
+		const bufferLead = TimeRangesUtils.bufferedAheadOf(this.video_.buffered, this.video_.currentTime);
 
 		const stateChanged = this.bufferObserver_.update(bufferLead, bufferedToEnd);
 
@@ -2177,20 +2192,20 @@ shaka.Player = class extends FakeEventTarget {
 	 * way to inject fake media source engine instances.
 	 *
 	 * @param {!HTMLMediaElement} mediaElement
-	 * @param {!shaka.media.IClosedCaptionParser} closedCaptionsParser
+	 * @param {!IClosedCaptionParser} closedCaptionsParser
 	 * @param {!shaka.extern.TextDisplayer} textDisplayer
 	 *
-	 * @return {!shaka.media.MediaSourceEngine}
+	 * @return {!MediaSourceEngine}
 	 */
 	createMediaSourceEngine(mediaElement, closedCaptionsParser, textDisplayer) {
-		return new shaka.media.MediaSourceEngine(mediaElement, closedCaptionsParser, textDisplayer);
+		return new MediaSourceEngine(mediaElement, closedCaptionsParser, textDisplayer);
 	}
 
 	/**
 	 * Creates a new instance of StreamingEngine.  This can be replaced by tests
 	 * to create fake instances instead.
 	 *
-	 * @return {!shaka.media.StreamingEngine}
+	 * @return {!StreamingEngine}
 	 */
 	createStreamingEngine() {
 		goog.asserts.assert(
@@ -2198,7 +2213,7 @@ shaka.Player = class extends FakeEventTarget {
 			'Must not be destroyed'
 		);
 
-		/** @type {shaka.media.StreamingEngine.PlayerInterface} */
+		/** @type {StreamingEngine.PlayerInterface} */
 		const playerInterface = {
 			getPresentationTime: () => this.playhead_.getTime(),
 			getBandwidthEstimate: () => this.abrManager_.getBandwidthEstimate(),
@@ -2212,7 +2227,7 @@ shaka.Player = class extends FakeEventTarget {
 			onSegmentAppended: () => this.onSegmentAppended_()
 		};
 
-		return new shaka.media.StreamingEngine(this.manifest_, playerInterface);
+		return new StreamingEngine(this.manifest_, playerInterface);
 	}
 
 	/**
@@ -2240,12 +2255,12 @@ shaka.Player = class extends FakeEventTarget {
 
 		// ('fieldName', value) format
 		if (arguments.length == 2 && typeof config == 'string') {
-			config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
+			config = ConfigUtils.convertToConfigObject(config, value);
 		}
 
 		goog.asserts.assert(typeof config == 'object', 'Should be an object!');
 
-		const ret = shaka.util.PlayerConfiguration.mergeConfigObjects(this.config_, config, this.defaultConfig_());
+		const ret = PlayerConfiguration.mergeConfigObjects(this.config_, config, this.defaultConfig_());
 
 		this.applyConfig_();
 		return ret;
@@ -2280,7 +2295,7 @@ shaka.Player = class extends FakeEventTarget {
 			const activeVideo = this.streamingEngine_.getBufferingVideo();
 			/** @type {shaka.extern.Period} */
 			const period = this.getPresentationPeriod_();
-			const activeVariant = shaka.util.StreamUtils.getVariantByStreams(activeAudio, activeVideo, period.variants);
+			const activeVariant = StreamUtils.getVariantByStreams(activeAudio, activeVideo, period.variants);
 			if (
 				this.abrManager_ &&
 				activeVariant &&
@@ -2333,7 +2348,7 @@ shaka.Player = class extends FakeEventTarget {
 		goog.asserts.assert(this.config_, 'Config must not be null!');
 
 		const ret = this.defaultConfig_();
-		shaka.util.PlayerConfiguration.mergeConfigObjects(ret, this.config_, this.defaultConfig_());
+		PlayerConfiguration.mergeConfigObjects(ret, this.config_, this.defaultConfig_());
 		return ret;
 	}
 
@@ -2362,7 +2377,7 @@ shaka.Player = class extends FakeEventTarget {
 			delete this.config_[key];
 		}
 
-		shaka.util.PlayerConfiguration.mergeConfigObjects(this.config_, this.defaultConfig_(), this.defaultConfig_());
+		PlayerConfiguration.mergeConfigObjects(this.config_, this.defaultConfig_(), this.defaultConfig_());
 		this.applyConfig_();
 	}
 
@@ -2388,7 +2403,7 @@ shaka.Player = class extends FakeEventTarget {
 	}
 
 	/**
-	 * @return {shaka.net.NetworkingEngine} A reference to the Player's networking
+	 * @return {NetworkingEngine} A reference to the Player's networking
 	 *     engine.  Applications may use this to make requests through Shaka's
 	 *     networking plugins.
 	 * @export
@@ -2580,7 +2595,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @export
 	 */
 	isBuffering() {
-		const State = shaka.media.BufferingObserver.State;
+		const State = BufferingObserver.State;
 		return this.bufferObserver_ ? this.bufferObserver_.getState() == State.STARVING : false;
 	}
 
@@ -2673,7 +2688,7 @@ shaka.Player = class extends FakeEventTarget {
 
 			// Convert each variant to a track.
 			for (const variant of this.getSelectableVariants_()) {
-				const track = shaka.util.StreamUtils.variantToTrack(variant);
+				const track = StreamUtils.variantToTrack(variant);
 				track.active = variant == currentVariant;
 
 				tracks.push(track);
@@ -2686,7 +2701,7 @@ shaka.Player = class extends FakeEventTarget {
 			// audioTracks to generate a variant list that is usable for changing
 			// languages.
 			const audioTracks = Array.from(this.video_.audioTracks);
-			return audioTracks.map(audio => shaka.util.StreamUtils.html5AudioTrackToTrack(audio));
+			return audioTracks.map(audio => StreamUtils.html5AudioTrackToTrack(audio));
 		} else {
 			return [];
 		}
@@ -2709,7 +2724,7 @@ shaka.Player = class extends FakeEventTarget {
 
 			// Convert all selectable text streams to tracks.
 			for (const text of this.getSelectableText_()) {
-				const track = shaka.util.StreamUtils.textStreamToTrack(text);
+				const track = StreamUtils.textStreamToTrack(text);
 				track.active = text == currentText;
 
 				tracks.push(track);
@@ -2718,7 +2733,7 @@ shaka.Player = class extends FakeEventTarget {
 			return tracks;
 		} else if (this.video_ && this.video_.src && this.video_.textTracks) {
 			const textTracks = Array.from(this.video_.textTracks);
-			const StreamUtils = shaka.util.StreamUtils;
+			const StreamUtils = StreamUtils;
 			return textTracks.map(text => StreamUtils.html5TextTrackToTrack(text));
 		} else {
 			return [];
@@ -2759,7 +2774,7 @@ shaka.Player = class extends FakeEventTarget {
 		} else if (this.video_ && this.video_.src && this.video_.textTracks) {
 			const textTracks = Array.from(this.video_.textTracks);
 			for (const textTrack of textTracks) {
-				if (shaka.util.StreamUtils.html5TrackId(textTrack) == track.id) {
+				if (StreamUtils.html5TrackId(textTrack) == track.id) {
 					// Leave the track in 'hidden' if it's selected but not showing.
 					textTrack.mode = this.isTextVisible_ ? 'showing' : 'hidden';
 				} else {
@@ -2790,7 +2805,7 @@ shaka.Player = class extends FakeEventTarget {
 		);
 
 		const tracks = this.getTextTracks().filter(track => {
-			return track.mimeType == shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
+			return track.mimeType == MimeUtils.CLOSED_CAPTION_MIMETYPE;
 		});
 
 		if (tracks.length > 0) {
@@ -2823,7 +2838,7 @@ shaka.Player = class extends FakeEventTarget {
 		})[0];
 
 		if (activeTrack) {
-			return activeTrack.mimeType == shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
+			return activeTrack.mimeType == MimeUtils.CLOSED_CAPTION_MIMETYPE;
 		}
 
 		return false;
@@ -2877,7 +2892,7 @@ shaka.Player = class extends FakeEventTarget {
 			// should only contain playable variants, but if restrictions change and
 			// |selectVariantTrack| is called before the track list is updated, we
 			// could get a now-restricted variant.
-			if (!shaka.util.StreamUtils.isPlayable(variant)) {
+			if (!StreamUtils.isPlayable(variant)) {
 				shaka.log.error('Unable to switch to restricted track', track.id);
 				return;
 			}
@@ -2889,7 +2904,7 @@ shaka.Player = class extends FakeEventTarget {
 			// Workaround for https://github.com/google/shaka-player/issues/1299
 			// When track is selected, back-propogate the language to
 			// currentAudioLanguage_.
-			this.currentAdaptationSetCriteria_ = new shaka.media.ExampleBasedCriteria(variant);
+			this.currentAdaptationSetCriteria_ = new ExampleBasedCriteria(variant);
 
 			// Update AbrManager variants to match these new settings.
 			this.chooseVariant_(period.variants);
@@ -2898,7 +2913,7 @@ shaka.Player = class extends FakeEventTarget {
 			// you can choose audio languages this way.
 			const audioTracks = Array.from(this.video_.audioTracks);
 			for (const audioTrack of audioTracks) {
-				if (shaka.util.StreamUtils.html5TrackId(audioTrack) == track.id) {
+				if (StreamUtils.html5TrackId(audioTrack) == track.id) {
 					// This will reset the "enabled" of other tracks to false.
 					audioTrack.enabled = true;
 				}
@@ -2967,7 +2982,7 @@ shaka.Player = class extends FakeEventTarget {
 			/** @type {shaka.extern.Period} */
 			const period = this.getPresentationPeriod_();
 
-			this.currentAdaptationSetCriteria_ = new shaka.media.PreferenceBasedCriteria(language, role || '', 0);
+			this.currentAdaptationSetCriteria_ = new PreferenceBasedCriteria(language, role || '', 0);
 
 			// TODO: Refactor to only change audio and not affect text.
 			this.chooseStreamsAndSwitch_(period);
@@ -3067,7 +3082,7 @@ shaka.Player = class extends FakeEventTarget {
 					// Find the text stream that best matches the user's preferences.
 					/** @type {shaka.extern.Period} */
 					const period = this.getPresentationPeriod_();
-					const streams = shaka.util.StreamUtils.filterStreamsByLanguageAndRole(
+					const streams = StreamUtils.filterStreamsByLanguageAndRole(
 						period.textStreams,
 						this.currentTextLanguage_,
 						this.currentTextRole_
@@ -3184,7 +3199,7 @@ shaka.Player = class extends FakeEventTarget {
 		};
 
 		if (this.loadMode_ == shaka.Player.LoadMode.SRC_EQUALS) {
-			const TimeRangesUtils = shaka.media.TimeRangesUtils;
+			const TimeRangesUtils = TimeRangesUtils;
 			info.total = TimeRangesUtils.getBufferedInfo(this.video_.buffered);
 		}
 
@@ -3208,7 +3223,7 @@ shaka.Player = class extends FakeEventTarget {
 		const loaded =
 			this.loadMode_ == shaka.Player.LoadMode.MEDIA_SOURCE || this.loadMode_ == shaka.Player.LoadMode.SRC_EQUALS;
 		if (!loaded) {
-			return shaka.util.Stats.getEmptyBlob();
+			return Stats.getEmptyBlob();
 		}
 
 		this.updateStateHistory_();
@@ -3276,7 +3291,7 @@ shaka.Player = class extends FakeEventTarget {
 		/** @type {shaka.extern.Period} */
 		const period = this.getPresentationPeriod_();
 
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 
 		// Get the Period duration.
 		/** @type {number} */
@@ -3291,15 +3306,15 @@ shaka.Player = class extends FakeEventTarget {
 		/** @type {number} */
 		const periodDuration = nextPeriodStart - period.startTime;
 		if (periodDuration == Infinity) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.RECOVERABLE,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.CANNOT_ADD_EXTERNAL_TEXT_TO_LIVE_STREAM
+			throw new Error(
+				Error.Severity.RECOVERABLE,
+				Error.Category.MANIFEST,
+				Error.Code.CANNOT_ADD_EXTERNAL_TEXT_TO_LIVE_STREAM
 			);
 		}
 
-		/** @type {!shaka.media.SegmentReference} */
-		const segmentReference = new shaka.media.SegmentReference(1, 0, periodDuration, () => [uri], 0, null);
+		/** @type {!SegmentReference} */
+		const segmentReference = new SegmentReference(1, 0, periodDuration, () => [uri], 0, null);
 
 		/** @type {shaka.extern.Stream} */
 		const stream = {
@@ -3350,7 +3365,7 @@ shaka.Player = class extends FakeEventTarget {
 		this.chooseStreamsAndSwitch_(period);
 		this.onTracksChanged_();
 
-		return shaka.util.StreamUtils.textStreamToTrack(stream);
+		return StreamUtils.textStreamToTrack(stream);
 	}
 
 	/**
@@ -3436,7 +3451,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	defaultConfig_() {
-		const config = shaka.util.PlayerConfiguration.createDefault();
+		const config = PlayerConfiguration.createDefault();
 
 		config.streaming.failureCallback = error => {
 			this.defaultStreamingFailureCallback_(error);
@@ -3449,25 +3464,21 @@ shaka.Player = class extends FakeEventTarget {
 		const self = this;
 		// eslint-disable-next-line no-restricted-syntax
 		config.textDisplayFactory = function() {
-			return new shaka.text.SimpleTextDisplayer(self.video_);
+			return new SimpleTextDisplayer(self.video_);
 		};
 
 		return config;
 	}
 
 	/**
-	 * @param {!shaka.util.Error} error
+	 * @param {!Error} error
 	 * @private
 	 */
 	defaultStreamingFailureCallback_(error) {
-		const retryErrorCodes = [
-			shaka.util.Error.Code.BAD_HTTP_STATUS,
-			shaka.util.Error.Code.HTTP_ERROR,
-			shaka.util.Error.Code.TIMEOUT
-		];
+		const retryErrorCodes = [Error.Code.BAD_HTTP_STATUS, Error.Code.HTTP_ERROR, Error.Code.TIMEOUT];
 
 		if (this.isLive() && retryErrorCodes.includes(error.code)) {
-			error.severity = shaka.util.Error.Severity.RECOVERABLE;
+			error.severity = Error.Severity.RECOVERABLE;
 
 			shaka.log.warning('Live streaming error.  Retrying automatically...');
 			this.retryStreaming();
@@ -3481,8 +3492,8 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	createTextStreamsForClosedCaptions_(periods) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
-		const TextStreamKind = shaka.util.ManifestParserUtils.TextStreamKind;
+		const ContentType = ManifestParserUtils.ContentType;
+		const TextStreamKind = ManifestParserUtils.TextStreamKind;
 
 		for (const period of periods) {
 			// A map of the closed captions id and the new dummy text stream.
@@ -3504,7 +3515,7 @@ shaka.Player = class extends FakeEventTarget {
 								},
 								initSegmentReference: null,
 								presentationTimeOffset: 0,
-								mimeType: shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE,
+								mimeType: MimeUtils.CLOSED_CAPTION_MIMETYPE,
 								codecs: '',
 								kind: TextStreamKind.CLOSED_CAPTION,
 								encrypted: false,
@@ -3537,8 +3548,8 @@ shaka.Player = class extends FakeEventTarget {
 	 */
 	filterAllPeriods_(periods) {
 		goog.asserts.assert(this.video_, 'Must not be destroyed');
-		const ArrayUtils = shaka.util.ArrayUtils;
-		const StreamUtils = shaka.util.StreamUtils;
+		const ArrayUtils = ArrayUtils;
+		const StreamUtils = StreamUtils;
 
 		/** @type {?shaka.extern.Stream} */
 		const activeAudio = this.streamingEngine_ ? this.streamingEngine_.getBufferingAudio() : null;
@@ -3556,24 +3567,20 @@ shaka.Player = class extends FakeEventTarget {
 		// If none of the periods are playable, throw
 		// CONTENT_UNSUPPORTED_BY_BROWSER.
 		if (validPeriodsCount == 0) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER
+			throw new Error(
+				Error.Severity.CRITICAL,
+				Error.Category.MANIFEST,
+				Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER
 			);
 		}
 
 		// If only some of the periods are playable, throw UNPLAYABLE_PERIOD.
 		if (validPeriodsCount < periods.length) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.UNPLAYABLE_PERIOD
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.UNPLAYABLE_PERIOD);
 		}
 
 		for (const period of periods) {
-			const tracksChanged = shaka.util.StreamUtils.applyRestrictions(
+			const tracksChanged = StreamUtils.applyRestrictions(
 				period.variants,
 				this.config_.restrictions,
 				this.maxHwRes_
@@ -3593,7 +3600,7 @@ shaka.Player = class extends FakeEventTarget {
 	 */
 	filterNewPeriod_(period) {
 		goog.asserts.assert(this.video_, 'Must not be destroyed');
-		const StreamUtils = shaka.util.StreamUtils;
+		const StreamUtils = StreamUtils;
 
 		/** @type {?shaka.extern.Stream} */
 		const activeAudio = this.streamingEngine_ ? this.streamingEngine_.getBufferingAudio() : null;
@@ -3609,20 +3616,12 @@ shaka.Player = class extends FakeEventTarget {
 		// special error when there were tracks but they were all filtered.
 		const hasPlayableVariant = variants.some(StreamUtils.isPlayable);
 		if (!hasPlayableVariant) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.UNPLAYABLE_PERIOD
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.UNPLAYABLE_PERIOD);
 		}
 
 		this.checkRestrictedVariants_(period.variants);
 
-		const tracksChanged = shaka.util.StreamUtils.applyRestrictions(
-			variants,
-			this.config_.restrictions,
-			this.maxHwRes_
-		);
+		const tracksChanged = StreamUtils.applyRestrictions(variants, this.config_.restrictions, this.maxHwRes_);
 
 		// Trigger the track change event if the restrictions now prevent use from
 		// using a variant that we previously thought we could use.
@@ -3795,7 +3794,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// Surface the buffering event so that the app knows if/when we are
 		// buffering.
-		const event = new shaka.util.FakeEvent('buffering', { buffering: isBuffering });
+		const event = new FakeEvent('buffering', { buffering: isBuffering });
 		this.dispatchEvent(event);
 	}
 
@@ -3851,7 +3850,7 @@ shaka.Player = class extends FakeEventTarget {
 			return;
 		}
 
-		const State = shaka.media.BufferingObserver.State;
+		const State = BufferingObserver.State;
 
 		const history = this.stats_.getStateHistory();
 
@@ -3905,7 +3904,7 @@ shaka.Player = class extends FakeEventTarget {
 		goog.asserts.assert(allVariants.length, 'Should have thrown for no Variants.');
 
 		const playableVariants = allVariants.filter(variant => {
-			return shaka.util.StreamUtils.isPlayable(variant);
+			return StreamUtils.isPlayable(variant);
 		});
 
 		// Update the abr manager with newly filtered variants.
@@ -3923,7 +3922,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	chooseTextStream_(textStreams) {
-		const subset = shaka.util.StreamUtils.filterStreamsByLanguageAndRole(
+		const subset = StreamUtils.filterStreamsByLanguageAndRole(
 			textStreams,
 			this.currentTextLanguage_,
 			this.currentTextRole_
@@ -3970,7 +3969,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * routed to |onError|.
 	 *
 	 * @param {!shaka.extern.Period} period
-	 * @return {shaka.media.StreamingEngine.ChosenStreams}
+	 * @return {StreamingEngine.ChosenStreams}
 	 *    An object containing the chosen variant and text stream.
 	 * @private
 	 */
@@ -4001,7 +4000,7 @@ shaka.Player = class extends FakeEventTarget {
 	 *
 	 * @param {shaka.extern.Period} period
 	 *    The period that we are selecting streams from.
-	 * @return {shaka.media.StreamingEngine.ChosenStreams}
+	 * @return {StreamingEngine.ChosenStreams}
 	 *    An object containing the chosen variant and text stream.
 	 * @private
 	 */
@@ -4096,7 +4095,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	shouldShowText_(audioStream, textStream) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		/** @type {string} */
 		const preferredTextLocale = LanguageUtils.normalize(this.config_.preferredTextLanguage);
@@ -4209,7 +4208,7 @@ shaka.Player = class extends FakeEventTarget {
 	onAdaptation_() {
 		// Delay the 'adaptation' event so that StreamingEngine has time to absorb
 		// the changes before the user tries to query it.
-		this.delayDispatchEvent_(new shaka.util.FakeEvent('adaptation'));
+		this.delayDispatchEvent_(new FakeEvent('adaptation'));
 	}
 
 	/**
@@ -4219,7 +4218,7 @@ shaka.Player = class extends FakeEventTarget {
 	onTracksChanged_() {
 		// Delay the 'trackschanged' event so StreamingEngine has time to absorb the
 		// changes before the user tries to query it.
-		this.delayDispatchEvent_(new shaka.util.FakeEvent('trackschanged'));
+		this.delayDispatchEvent_(new FakeEvent('trackschanged'));
 	}
 
 	/**
@@ -4229,7 +4228,7 @@ shaka.Player = class extends FakeEventTarget {
 	onVariantChanged_() {
 		// Delay the 'variantchanged' event so StreamingEngine has time to absorb
 		// the changes before the user tries to query it.
-		this.delayDispatchEvent_(new shaka.util.FakeEvent('variantchanged'));
+		this.delayDispatchEvent_(new FakeEvent('variantchanged'));
 	}
 
 	/**
@@ -4239,29 +4238,29 @@ shaka.Player = class extends FakeEventTarget {
 	onTextChanged_() {
 		// Delay the 'textchanged' event so StreamingEngine time to absorb the
 		// changes before the user tries to query it.
-		this.delayDispatchEvent_(new shaka.util.FakeEvent('textchanged'));
+		this.delayDispatchEvent_(new FakeEvent('textchanged'));
 	}
 
 	/** @private */
 	onTextTrackVisibility_() {
-		this.delayDispatchEvent_(new shaka.util.FakeEvent('texttrackvisibility'));
+		this.delayDispatchEvent_(new FakeEvent('texttrackvisibility'));
 	}
 
 	/** @private */
 	onAbrStatusChanged_() {
 		this.delayDispatchEvent_(
-			new shaka.util.FakeEvent('abrstatuschanged', {
+			new FakeEvent('abrstatuschanged', {
 				newStatus: this.config_.abr.enabled
 			})
 		);
 	}
 
 	/**
-	 * @param {!shaka.util.Error} error
+	 * @param {!Error} error
 	 * @private
 	 */
 	onError_(error) {
-		goog.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
+		goog.asserts.assert(error instanceof Error, 'Wrong error type!');
 
 		// Errors dispatched after |destroy| is called are not meaningful and should
 		// be safe to ignore.
@@ -4269,7 +4268,7 @@ shaka.Player = class extends FakeEventTarget {
 			return;
 		}
 
-		const event = new shaka.util.FakeEvent('error', { detail: error });
+		const event = new FakeEvent('error', { detail: error });
 		this.dispatchEvent(event);
 		if (event.defaultPrevented) {
 			error.handled = true;
@@ -4298,13 +4297,13 @@ shaka.Player = class extends FakeEventTarget {
 			eventElement: region.eventElement
 		};
 
-		this.dispatchEvent(new shaka.util.FakeEvent(eventName, { detail: clone }));
+		this.dispatchEvent(new FakeEvent(eventName, { detail: clone }));
 	}
 
 	/**
 	 * Turn the media element's error object into a Shaka Player error object.
 	 *
-	 * @return {shaka.util.Error}
+	 * @return {Error}
 	 * @private
 	 */
 	videoErrorToShakaError_() {
@@ -4334,10 +4333,10 @@ shaka.Player = class extends FakeEventTarget {
 		// Extra error information from Chrome:
 		const message = this.video_.error.message;
 
-		return new shaka.util.Error(
-			shaka.util.Error.Severity.CRITICAL,
-			shaka.util.Error.Category.MEDIA,
-			shaka.util.Error.Code.VIDEO_ERROR,
+		return new Error(
+			Error.Severity.CRITICAL,
+			Error.Category.MEDIA,
+			Error.Code.VIDEO_ERROR,
 			code,
 			extended,
 			message
@@ -4399,7 +4398,7 @@ shaka.Player = class extends FakeEventTarget {
 		// Only filter tracks for keys if we have some key statuses to look at.
 		if (keyIds.length) {
 			for (const variant of period.variants) {
-				const streams = shaka.util.StreamUtils.getVariantStreams(variant);
+				const streams = StreamUtils.getVariantStreams(variant);
 
 				for (const stream of streams) {
 					const originalAllowed = variant.allowedByKeySystem;
@@ -4423,7 +4422,7 @@ shaka.Player = class extends FakeEventTarget {
 		// getBufferingVariant()
 		const activeAudio = this.streamingEngine_.getBufferingAudio();
 		const activeVideo = this.streamingEngine_.getBufferingVideo();
-		const activeVariant = shaka.util.StreamUtils.getVariantByStreams(activeAudio, activeVideo, period.variants);
+		const activeVariant = StreamUtils.getVariantByStreams(activeAudio, activeVideo, period.variants);
 
 		if (activeVariant && !activeVariant.allowedByKeySystem) {
 			shaka.log.debug('Choosing new streams after key status changed');
@@ -4447,7 +4446,7 @@ shaka.Player = class extends FakeEventTarget {
 			this.parser_.onExpirationUpdated(keyId, expiration);
 		}
 
-		const event = new shaka.util.FakeEvent('expirationupdated');
+		const event = new FakeEvent('expirationupdated');
 		this.dispatchEvent(event);
 	}
 
@@ -4463,7 +4462,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * Applies playRangeStart and playRangeEnd to the given timeline. This will
 	 * only affect non-live content.
 	 *
-	 * @param {shaka.media.PresentationTimeline} timeline
+	 * @param {PresentationTimeline} timeline
 	 * @param {number} playRangeStart
 	 * @param {number} playRangeEnd
 	 *
@@ -4547,10 +4546,10 @@ shaka.Player = class extends FakeEventTarget {
 				missingKeys: missingKeys,
 				restrictedKeyStatuses: badKeyStatuses
 			};
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.RESTRICTIONS_CANNOT_BE_MET,
+			throw new Error(
+				Error.Severity.CRITICAL,
+				Error.Category.MANIFEST,
+				Error.Code.RESTRICTIONS_CANNOT_BE_MET,
 				data
 			);
 		}
@@ -4560,7 +4559,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * Fire an event, but wait a little bit so that the immediate execution can
 	 * complete before the event is handled.
 	 *
-	 * @param {!shaka.util.FakeEvent} event
+	 * @param {!FakeEvent} event
 	 * @private
 	 */
 	async delayDispatchEvent_(event) {
@@ -4585,7 +4584,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		for (const track of tracks) {
 			if (track.language) {
-				languages.add(shaka.util.LanguageUtils.normalize(track.language));
+				languages.add(LanguageUtils.normalize(track.language));
 			} else {
 				languages.add('und');
 			}
@@ -4611,7 +4610,7 @@ shaka.Player = class extends FakeEventTarget {
 			let roles = [];
 
 			if (track.language) {
-				language = shaka.util.LanguageUtils.normalize(track.language);
+				language = LanguageUtils.normalize(track.language);
 			}
 
 			if (track.type == 'variant') {
@@ -4670,7 +4669,7 @@ shaka.Player = class extends FakeEventTarget {
 		this.assertCorrectActiveStreams_();
 
 		return currentPeriod.variants.filter(variant => {
-			return shaka.util.StreamUtils.isPlayable(variant);
+			return StreamUtils.isPlayable(variant);
 		});
 	}
 
@@ -4765,7 +4764,7 @@ shaka.Player = class extends FakeEventTarget {
 		// text tracks. If no text track is currently active, pick the one that's
 		// going to be streamed when captions are enabled and mark it as active.
 		if (!this.activeStreams_.getText(currentPeriod)) {
-			const textStreams = shaka.util.StreamUtils.filterStreamsByLanguageAndRole(
+			const textStreams = StreamUtils.filterStreamsByLanguageAndRole(
 				currentPeriod.textStreams,
 				this.currentTextLanguage_,
 				this.currentTextRole_
@@ -4808,7 +4807,7 @@ shaka.Player = class extends FakeEventTarget {
 		// live edge or beyond (into the region covered by the presentation delay).
 		if (this.manifest_.presentationTimeline.isLive()) {
 			const liveEdge = this.manifest_.presentationTimeline.getSegmentAvailabilityEnd();
-			const bufferEnd = shaka.media.TimeRangesUtils.bufferEnd(this.video_.buffered);
+			const bufferEnd = TimeRangesUtils.bufferEnd(this.video_.buffered);
 
 			if (bufferEnd >= liveEdge) {
 				return true;
@@ -4836,7 +4835,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		// If we have buffered to the duration of the content, it means we will have
 		// enough content to buffer to the end of the presentation.
-		const bufferEnd = shaka.media.TimeRangesUtils.bufferEnd(this.video_.buffered);
+		const bufferEnd = TimeRangesUtils.bufferEnd(this.video_.buffered);
 
 		// Because Safari's native HLS reports slightly inaccurate values for
 		// bufferEnd here, we use a fudge factor.  Without this, we can end up in a
@@ -4868,15 +4867,11 @@ shaka.Player = class extends FakeEventTarget {
 	/**
 	 * Create an error for when we purposely interrupt a load operation.
 	 *
-	 * @return {!shaka.util.Error}
+	 * @return {!Error}
 	 * @private
 	 */
 	createAbortLoadError_() {
-		return new shaka.util.Error(
-			shaka.util.Error.Severity.CRITICAL,
-			shaka.util.Error.Category.PLAYER,
-			shaka.util.Error.Code.LOAD_INTERRUPTED
-		);
+		return new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.LOAD_INTERRUPTED);
 	}
 
 	/**
@@ -4915,11 +4910,11 @@ shaka.Player = class extends FakeEventTarget {
 	 *         v        |
 	 *        [L]-------+
 	 *
-	 * @param {!shaka.routing.Node} currentlyAt
-	 * @param {shaka.routing.Payload} currentlyWith
-	 * @param {!shaka.routing.Node} wantsToBeAt
-	 * @param {shaka.routing.Payload} wantsToHave
-	 * @return {?shaka.routing.Node}
+	 * @param {!Node} currentlyAt
+	 * @param {Payload} currentlyWith
+	 * @param {!Node} wantsToBeAt
+	 * @param {Payload} wantsToHave
+	 * @return {?Node}
 	 * @private
 	 */
 	getNextStep_(currentlyAt, currentlyWith, wantsToBeAt, wantsToHave) {
@@ -5001,10 +4996,10 @@ shaka.Player = class extends FakeEventTarget {
 	}
 
 	/**
-	 * @param {!shaka.routing.Node} goingTo
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
-	 * @return {?shaka.routing.Node}
+	 * @param {!Node} goingTo
+	 * @param {Payload} has
+	 * @param {Payload} wants
+	 * @return {?Node}
 	 * @private
 	 */
 	getNextAfterAttach_(goingTo, has, wants) {
@@ -5045,10 +5040,10 @@ shaka.Player = class extends FakeEventTarget {
 	}
 
 	/**
-	 * @param {!shaka.routing.Node} goingTo
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
-	 * @return {?shaka.routing.Node}
+	 * @param {!Node} goingTo
+	 * @param {Payload} has
+	 * @param {Payload} wants
+	 * @return {?Node}
 	 * @private
 	 */
 	getNextAfterMediaSource_(goingTo, has, wants) {
@@ -5076,10 +5071,10 @@ shaka.Player = class extends FakeEventTarget {
 	 * element, then we go to attach. If we don't have a media element, we go to
 	 * detach.
 	 *
-	 * @param {!shaka.routing.Node} goingTo
-	 * @param {shaka.routing.Payload} has
-	 * @param {shaka.routing.Payload} wants
-	 * @return {?shaka.routing.Node}
+	 * @param {!Node} goingTo
+	 * @param {Payload} has
+	 * @param {Payload} wants
+	 * @return {?Node}
 	 * @private
 	 */
 	getNextAfterUnload_(goingTo, has, wants) {
@@ -5095,22 +5090,22 @@ shaka.Player = class extends FakeEventTarget {
 	 * toward our destination (while all our dependencies match) or go to a node
 	 * that will reset us so we can try again.
 	 *
-	 * @param {!shaka.routing.Node} destinationNode
+	 * @param {!Node} destinationNode
 	 *   What |goingTo| must be for us to step toward |nextNode|. Otherwise we
 	 *   will go to |resetNode|.
-	 * @param {!shaka.routing.Node} nextNode
+	 * @param {!Node} nextNode
 	 *   The node we will go to next if |goingTo == destinationNode| and all
 	 *   dependencies match.
-	 * @param {!shaka.routing.Node} resetNode
+	 * @param {!Node} resetNode
 	 *   The node we will go to next if |goingTo != destinationNode| or any
 	 *   dependency does not match.
-	 * @param {!shaka.routing.Node} goingTo
+	 * @param {!Node} goingTo
 	 *   The node that the walker is trying to go to.
-	 * @param {shaka.routing.Payload} has
+	 * @param {Payload} has
 	 *   The payload that the walker currently has.
-	 * @param {shaka.routing.Payload} wants
+	 * @param {Payload} wants
 	 *   The payload that the walker wants to have when iy gets to |goingTo|.
-	 * @return {shaka.routing.Node}
+	 * @return {Node}
 	 * @private
 	 */
 	getNextMatchingAllDependencies_(destinationNode, nextNode, resetNode, goingTo, has, wants) {
@@ -5128,7 +5123,7 @@ shaka.Player = class extends FakeEventTarget {
 	}
 
 	/**
-	 * @return {shaka.routing.Payload}
+	 * @return {Payload}
 	 * @private
 	 */
 	static createEmptyPayload_() {
@@ -5150,7 +5145,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * This will connect |onCancel|, |onEnd|, |onError|, and |onSkip| with
 	 * |resolve| and |reject| but will leave |onStart| unset.
 	 *
-	 * @param {shaka.routing.Walker.Listeners} listeners
+	 * @param {Walker.Listeners} listeners
 	 * @return {!Promise}
 	 * @private
 	 */

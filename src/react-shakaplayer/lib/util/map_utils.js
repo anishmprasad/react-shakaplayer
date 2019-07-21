@@ -22,7 +22,7 @@ var goog = window.goog;
 /**
  * @summary A set of map/object utility functions.
  */
-shaka.util.MapUtils = class {
+export default class MapUtils {
 	/**
 	 * @param {!Object.<KEY, VALUE>} object
 	 * @return {!Map.<KEY, VALUE>}
@@ -50,4 +50,4 @@ shaka.util.MapUtils = class {
 
 		return obj;
 	}
-};
+}

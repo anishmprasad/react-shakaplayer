@@ -21,6 +21,7 @@
 // goog.require('shaka.polyfill');
 
 import polyfill from './all';
+import Platform from '../util/platform';
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -37,7 +38,7 @@ export default class InputEvent {
 		// IE11 doesn't treat the 'input' event correctly.
 		// https://bit.ly/2loLsuX
 
-		if (!shaka.util.Platform.isIE()) {
+		if (!Platform.isIE()) {
 			// Not IE, so don't patch anything.
 			return;
 		}

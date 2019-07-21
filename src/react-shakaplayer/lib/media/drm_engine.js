@@ -34,11 +34,26 @@
 // goog.require('shaka.util.Timer');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import NetworkingEngine from '../net/networking_engine'
+import Destroyer from '../util/destroyer'
+import Error from '../util/error'
+import EventManager from '../util/event_manager'
+import FakeEvent from '../util/fake_event'
+import IDestroyable from '../util/i_destroyable'
+import Iterables from '../util/iterables'
+import MapUtils from '../util/map_utils'
+import MimeUtils from '../util/mime_utils'
+import Platform from '../util/platform'
+import  PublicPromise from '../util/public_promise'
+import StringUtils from '../util/string_utils'
+import Timer from '../util/timer'
+import Uint8ArrayUtils from '../util/uint8array_utils'
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 
-/** @implements {shaka.util.IDestroyable} */
+/** @implements {IDestroyable} */
 class DrmEngine {
   /** @param {shaka.media.DrmEngine.PlayerInterface} playerInterface */
   constructor(playerInterface) {
@@ -60,8 +75,8 @@ class DrmEngine {
     /** @private {?shaka.extern.DrmInfo} */
     this.currentDrmInfo_ = null;
 
-    /** @private {shaka.util.EventManager} */
-    this.eventManager_ = new shaka.util.EventManager();
+    /** @private {EventManager} */
+    this.eventManager_ = new EventManager();
 
     /**
      * @private {!Map.<MediaKeySession,
@@ -72,13 +87,13 @@ class DrmEngine {
     /** @private {!Array.<string>} */
     this.offlineSessionIds_ = [];
 
-    /** @private {!shaka.util.PublicPromise} */
-    this.allSessionsLoaded_ = new shaka.util.PublicPromise();
+    /** @private {!PublicPromise} */
+    this.allSessionsLoaded_ = new PublicPromise();
 
     /** @private {?shaka.extern.DrmConfiguration} */
     this.config_ = null;
 
-    /** @private {function(!shaka.util.Error)} */
+    /** @private {function(!Error)} */
     this.onError_ = (err) => {
       this.allSessionsLoaded_.reject(err);
       playerInterface.onError(err);
@@ -101,9 +116,9 @@ class DrmEngine {
      */
     this.announcedKeyStatusByKeyId_ = new Map();
 
-    /** @private {shaka.util.Timer} */
+    /** @private {Timer} */
     this.keyStatusTimer_ =
-        new shaka.util.Timer(() => this.processKeyStatusChanges_());
+        new Timer(() => this.processKeyStatusChanges_());
 
     /** @private {boolean} */
     this.usePersistentLicenses_ = false;
@@ -114,8 +129,8 @@ class DrmEngine {
     /** @private {boolean} */
     this.initialRequestsSent_ = false;
 
-    /** @private {?shaka.util.Timer} */
-    this.expirationTimer_ = new shaka.util.Timer(() => {
+    /** @private {?Timer} */
+    this.expirationTimer_ = new Timer(() => {
       this.pollExpiration_();
     }).tickEvery(/* seconds= */ 1);
 
@@ -123,8 +138,8 @@ class DrmEngine {
     const noop = () => {};
     this.allSessionsLoaded_.catch(noop);
 
-    /** @const {!shaka.util.Destroyer} */
-    this.destroyer_ = new shaka.util.Destroyer(() => this.destroyNow_());
+    /** @const {!Destroyer} */
+    this.destroyer_ = new Destroyer(() => this.destroyNow_());
   }
 
   /** @override */
@@ -313,7 +328,7 @@ class DrmEngine {
     // To avoid this, we will set the drm engine up to work with as many key
     // systems as possible so that we will be ready.
     if (!hadDrmInfo) {
-      const servers = shaka.util.MapUtils.asMap(this.config_.servers);
+      const servers = MapUtils.asMap(this.config_.servers);
       shaka.media.DrmEngine.replaceDrmInfo_(variants, servers);
     }
 
@@ -332,8 +347,8 @@ class DrmEngine {
       for (const info of variant.drmInfos) {
         shaka.media.DrmEngine.fillInDrmInfoDefaults_(
             info,
-            shaka.util.MapUtils.asMap(this.config_.servers),
-            shaka.util.MapUtils.asMap(this.config_.advanced || {}));
+            MapUtils.asMap(this.config_.servers),
+            MapUtils.asMap(this.config_.advanced || {}));
       }
     }
 
@@ -382,10 +397,10 @@ class DrmEngine {
       // instance attached, you'll never see the 'encrypted' event on those
       // platforms (IE 11 & Safari).
       this.eventManager_.listenOnce(video, 'encrypted', (event) => {
-        this.onError_(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
+        this.onError_(new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.DRM,
+            Error.Code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
       });
       return;
     }
@@ -396,10 +411,10 @@ class DrmEngine {
 
     let setMediaKeys = this.video_.setMediaKeys(this.mediaKeys_);
     setMediaKeys = setMediaKeys.catch((exception) => {
-      return Promise.reject(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.FAILED_TO_ATTACH_TO_VIDEO,
+      return Promise.reject(new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.FAILED_TO_ATTACH_TO_VIDEO,
           exception.message));
     });
 
@@ -440,10 +455,10 @@ class DrmEngine {
                             'ignored.');
         }
       } catch (exception) {
-        throw new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.INVALID_SERVER_CERTIFICATE,
+        throw new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.DRM,
+            Error.Code.INVALID_SERVER_CERTIFICATE,
             exception.message);
       }
     }
@@ -479,7 +494,7 @@ class DrmEngine {
     if (found) {
       // This will force us to wait until the 'license-release' message has been
       // handled.
-      found.updatePromise = new shaka.util.PublicPromise();
+      found.updatePromise = new PublicPromise();
       tasks.push(found.updatePromise);
     }
 
@@ -526,7 +541,7 @@ class DrmEngine {
    */
   newInitData(initDataType, initData) {
     // Aliases:
-    const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    const Uint8ArrayUtils = Uint8ArrayUtils;
 
     // Suppress duplicate init data.
     // Note that some init data are extremely large and can't portably be used
@@ -565,7 +580,7 @@ class DrmEngine {
     // we say that Edge supports everything.
     //
     // See: https://bit.ly/2IcEgv0 and Issue #1495
-    if (shaka.util.Platform.isEdge()) {
+    if (Platform.isEdge()) {
       return true;
     }
 
@@ -579,7 +594,7 @@ class DrmEngine {
    */
   getSessionIds() {
     const sessions = this.activeSessions_.keys();
-    const ids = shaka.util.Iterables.map(sessions, (s) => s.sessionId);
+    const ids = Iterables.map(sessions, (s) => s.sessionId);
 
     // TODO: Make |getSessionIds| return |Iterable| instead of |Array|.
     return Array.from(ids);
@@ -618,7 +633,7 @@ class DrmEngine {
    * @return {!Object.<string, string>}
    */
   getKeyStatuses() {
-    return shaka.util.MapUtils.asObject(this.announcedKeyStatusByKeyId_);
+    return MapUtils.asObject(this.announcedKeyStatusByKeyId_);
   }
 
   /**
@@ -641,8 +656,8 @@ class DrmEngine {
     for (const info of allDrmInfo) {
       shaka.media.DrmEngine.fillInDrmInfoDefaults_(
           info,
-          shaka.util.MapUtils.asMap(this.config_.servers),
-          shaka.util.MapUtils.asMap(this.config_.advanced || {}));
+          MapUtils.asMap(this.config_.servers),
+          MapUtils.asMap(this.config_.advanced || {}));
     }
 
     const persistentState =
@@ -680,12 +695,12 @@ class DrmEngine {
       /** @type {string} */
       const audioMimeType =
           audio ?
-          shaka.util.MimeUtils.getFullType(audio.mimeType, audio.codecs) :
+          MimeUtils.getFullType(audio.mimeType, audio.codecs) :
           '';
       /** @type {string} */
       const videoMimeType =
           video ?
-          shaka.util.MimeUtils.getFullType(video.mimeType, video.codecs) :
+          MimeUtils.getFullType(video.mimeType, video.codecs) :
           '';
 
       // Add the last bit of information to each config;
@@ -739,10 +754,10 @@ class DrmEngine {
    */
   async queryMediaKeys_(configsByKeySystem) {
     if (configsByKeySystem.size == 1 && configsByKeySystem.has('')) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.NO_RECOGNIZED_KEY_SYSTEMS);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.NO_RECOGNIZED_KEY_SYSTEMS);
     }
 
     // If there are no tracks of a type, these should be not present.
@@ -786,10 +801,10 @@ class DrmEngine {
     }
 
     if (!mediaKeySystemAccess) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE);
     }
     this.destroyer_.ensureNotDestroyed();
 
@@ -820,10 +835,10 @@ class DrmEngine {
           configsByKeySystem.get(mediaKeySystemAccess.keySystem));
 
       if (!this.currentDrmInfo_.licenseServerUri) {
-        throw new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.NO_LICENSE_SERVER_GIVEN,
+        throw new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.DRM,
+            Error.Code.NO_LICENSE_SERVER_GIVEN,
             this.currentDrmInfo_.keySystem);
       }
 
@@ -837,18 +852,18 @@ class DrmEngine {
     } catch (exception) {
       this.destroyer_.ensureNotDestroyed(exception);
 
-      // Don't rewrap a shaka.util.Error from earlier in the chain:
+      // Don't rewrap a Error from earlier in the chain:
       this.currentDrmInfo_ = null;
       this.supportedTypes_.clear();
-      if (exception instanceof shaka.util.Error) {
+      if (exception instanceof Error) {
         throw exception;
       }
 
       // We failed to create MediaKeys.  This generally shouldn't happen.
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.FAILED_TO_CREATE_CDM,
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.FAILED_TO_CREATE_CDM,
           exception.message);
     }
   }
@@ -861,13 +876,13 @@ class DrmEngine {
    * @see https://bit.ly/2K8gOnv for the spec on the clearkey license format.
    */
   configureClearKey_() {
-    const clearKeys = shaka.util.MapUtils.asMap(this.config_.clearKeys);
+    const clearKeys = MapUtils.asMap(this.config_.clearKeys);
     if (clearKeys.size == 0) {
       return null;
     }
 
-    const StringUtils = shaka.util.StringUtils;
-    const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+    const StringUtils = StringUtils;
+    const Uint8ArrayUtils = Uint8ArrayUtils;
     const keys = [];
     const keyIds = [];
 
@@ -918,17 +933,17 @@ class DrmEngine {
       shaka.log.v1('Attempting to load an offline session', sessionId);
       session = this.mediaKeys_.createSession('persistent-license');
     } catch (exception) {
-      const error = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
+      const error = new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.FAILED_TO_CREATE_SESSION,
           exception.message);
       this.onError_(error);
       return Promise.reject(error);
     }
 
     this.eventManager_.listen(session, 'message',
-        /** @type {shaka.util.EventManager.ListenerType} */(
+        /** @type {EventManager.ListenerType} */(
           (event) => this.onSessionMessage_(event)));
     this.eventManager_.listen(session, 'keystatuseschange',
         (event) => this.onKeyStatusesChange_(event));
@@ -949,10 +964,10 @@ class DrmEngine {
       if (!present) {
         this.activeSessions_.delete(session);
 
-        this.onError_(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.DRM,
-            shaka.util.Error.Code.OFFLINE_SESSION_REMOVED));
+        this.onError_(new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.DRM,
+            Error.Code.OFFLINE_SESSION_REMOVED));
         return Promise.resolve();
       }
 
@@ -969,10 +984,10 @@ class DrmEngine {
 
       this.activeSessions_.delete(session);
 
-      this.onError_(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
+      this.onError_(new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.FAILED_TO_CREATE_SESSION,
           error.message));
     }
     return Promise.resolve();
@@ -994,16 +1009,16 @@ class DrmEngine {
         session = this.mediaKeys_.createSession();
       }
     } catch (exception) {
-      this.onError_(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.FAILED_TO_CREATE_SESSION,
+      this.onError_(new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.FAILED_TO_CREATE_SESSION,
           exception.message));
       return;
     }
 
     this.eventManager_.listen(session, 'message',
-    /** @type {shaka.util.EventManager.ListenerType} */(
+    /** @type {EventManager.ListenerType} */(
           (event) => this.onSessionMessage_(event)));
     this.eventManager_.listen(session, 'keystatuseschange',
         (event) => this.onKeyStatusesChange_(event));
@@ -1032,10 +1047,10 @@ class DrmEngine {
         extended = '0x' + extended.toString(16);
       }
 
-      this.onError_(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
+      this.onError_(new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
           error.message, error, extended));
     });
   }
@@ -1081,8 +1096,8 @@ class DrmEngine {
       url = advancedConfig.individualizationServer;
     }
 
-    const requestType = shaka.net.NetworkingEngine.RequestType.LICENSE;
-    const request = shaka.net.NetworkingEngine.makeRequest(
+    const requestType = NetworkingEngine.RequestType.LICENSE;
+    const request = NetworkingEngine.makeRequest(
         [url], this.config_.retryParameters);
     request.body = event.message;
     request.method = 'POST';
@@ -1103,12 +1118,12 @@ class DrmEngine {
       response = await req.promise;
     } catch (error) {
       // Request failed!
-      goog.asserts.assert(error instanceof shaka.util.Error,
+      goog.asserts.assert(error instanceof Error,
           'Wrong NetworkingEngine error type!');
-      const shakaErr = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.LICENSE_REQUEST_FAILED,
+      const shakaErr = new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.LICENSE_REQUEST_FAILED,
           error);
       this.onError_(shakaErr);
       if (metadata && metadata.updatePromise) {
@@ -1129,10 +1144,10 @@ class DrmEngine {
       await session.update(response.data);
     } catch (error) {
       // Session update failed!
-      const shakaErr = new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.LICENSE_RESPONSE_REJECTED,
+      const shakaErr = new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.LICENSE_RESPONSE_REJECTED,
           error.message);
       this.onError_(shakaErr);
       if (metadata && metadata.updatePromise) {
@@ -1141,7 +1156,7 @@ class DrmEngine {
       return;
     }
 
-    const updateEvent = new shaka.util.FakeEvent('drmsessionupdate');
+    const updateEvent = new FakeEvent('drmsessionupdate');
     this.playerInterface_.onEvent(updateEvent);
 
     if (metadata) {
@@ -1151,7 +1166,7 @@ class DrmEngine {
       // In case there are no key statuses, consider this session loaded
       // after a reasonable timeout.  It should definitely not take 5
       // seconds to process a license.
-      const timer = new shaka.util.Timer(() => {
+      const timer = new Timer(() => {
         metadata.loaded = true;
         if (this.areAllSessionsLoaded_()) {
           this.allSessionsLoaded_.resolve();
@@ -1192,7 +1207,7 @@ class DrmEngine {
     //   </LicenseAcquisition>
     // </PlayReadyKeyMessage>
 
-    const xml = shaka.util.StringUtils.fromUTF16(
+    const xml = StringUtils.fromUTF16(
         request.body, true /* littleEndian */, true /* noThrow */);
     if (!xml.includes('PlayReadyKeyMessage')) {
       // This does not appear to be a wrapped message as on IE and Edge.  Some
@@ -1221,7 +1236,7 @@ class DrmEngine {
     goog.asserts.assert(challenge.getAttribute('encoding') == 'base64encoded',
         'Unexpected PlayReady challenge encoding!');
     request.body =
-        shaka.util.Uint8ArrayUtils.fromBase64(challenge.textContent).buffer;
+        Uint8ArrayUtils.fromBase64(challenge.textContent).buffer;
   }
 
   /**
@@ -1234,11 +1249,11 @@ class DrmEngine {
     // The standard format for FairPlay seems to be to place the request into a
     // POST parameter (spc=).
     const originalPayload = new Uint8Array(request.body);
-    const base64Payload = shaka.util.Uint8ArrayUtils.toStandardBase64(
+    const base64Payload = Uint8ArrayUtils.toStandardBase64(
         originalPayload);
     const params = 'spc=' + base64Payload;
     request.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    request.body = shaka.util.StringUtils.toUTF8(encodeURIComponent(params));
+    request.body = StringUtils.toUTF8(encodeURIComponent(params));
   }
 
   /**
@@ -1261,7 +1276,7 @@ class DrmEngine {
     let responseText;
     try {
       // Convert it to text for further processing.
-      responseText = shaka.util.StringUtils.fromUTF8(response.data);
+      responseText = StringUtils.fromUTF8(response.data);
     } catch (error) {
       // Assume it's not a text format of any kind and leave it alone.
       return;
@@ -1287,7 +1302,7 @@ class DrmEngine {
     // Decode the base64-encoded data into the format the browser expects.
     // It's not clear why FairPlay license servers don't just serve this
     // directly.
-    response.data = shaka.util.Uint8ArrayUtils.fromBase64(responseText).buffer;
+    response.data = Uint8ArrayUtils.fromBase64(responseText).buffer;
   }
 
   /**
@@ -1326,9 +1341,9 @@ class DrmEngine {
       // However, unlike Edge and Chromecast, Tizen doesn't have this problem.
       if (this.currentDrmInfo_.keySystem == 'com.microsoft.playready' &&
           keyId.byteLength == 16 &&
-          !shaka.util.Platform.isTizen()) {
+          !Platform.isTizen()) {
         // Read out some fields in little-endian:
-        const dataView = shaka.util.Uint8ArrayUtils.toDataView(keyId);
+        const dataView = Uint8ArrayUtils.toDataView(keyId);
         const part0 = dataView.getUint32(0, true /* LE */);
         const part1 = dataView.getUint16(4, true /* LE */);
         const part2 = dataView.getUint16(6, true /* LE */);
@@ -1364,7 +1379,7 @@ class DrmEngine {
         hasExpiredKeys = true;
       }
 
-      const keyIdHex = shaka.util.Uint8ArrayUtils.toHex(new Uint8Array(keyId));
+      const keyIdHex = Uint8ArrayUtils.toHex(new Uint8Array(keyId));
 
       this.keyStatusByKeyId_.set(keyIdHex, status);
     });
@@ -1416,13 +1431,13 @@ class DrmEngine {
                        statuses.every((status) => status == 'expired');
 
     if (allExpired) {
-      this.onError_(new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.DRM,
-          shaka.util.Error.Code.EXPIRED));
+      this.onError_(new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.DRM,
+          Error.Code.EXPIRED));
     }
 
-    this.playerInterface_.onKeyStatus(shaka.util.MapUtils.asObject(publicMap));
+    this.playerInterface_.onKeyStatus(MapUtils.asObject(publicMap));
   }
 
   /**
@@ -1500,7 +1515,7 @@ class DrmEngine {
         // does.  It doesn't fail until you call update() with a license
         // response, which is way too late.
         // This is a work-around for #894.
-        if (shaka.util.Platform.isTizen3()) {
+        if (Platform.isTizen3()) {
           persistentState = false;
         }
 
@@ -1516,7 +1531,7 @@ class DrmEngine {
     // Test each key system.
     const tests = testKeySystems.map((keySystem) => testSystem(keySystem));
     await Promise.all(tests);
-    return shaka.util.MapUtils.asObject(support);
+    return MapUtils.asObject(support);
   }
 
   /** @private */
@@ -1544,7 +1559,7 @@ class DrmEngine {
     const video = variant.video;
 
     if (audio && audio.encrypted) {
-      const audioContentType = shaka.util.MimeUtils.getFullType(
+      const audioContentType = MimeUtils.getFullType(
           audio.mimeType, audio.codecs);
 
       if (!this.willSupport(audioContentType)) {
@@ -1553,7 +1568,7 @@ class DrmEngine {
     }
 
     if (video && video.encrypted) {
-      const videoContentType = shaka.util.MimeUtils.getFullType(
+      const videoContentType = MimeUtils.getFullType(
           video.mimeType, video.codecs);
 
       if (!this.willSupport(videoContentType)) {
@@ -1663,7 +1678,7 @@ class DrmEngine {
    */
   areAllSessionsLoaded_() {
     const metadatas = this.activeSessions_.values();
-    return shaka.util.Iterables.every(metadatas, (data) => data.loaded);
+    return Iterables.every(metadatas, (data) => data.loaded);
   }
 
   /**
@@ -1774,12 +1789,12 @@ class DrmEngine {
         return true;
       }
       return a.initDataType == b.initDataType &&
-         shaka.util.Uint8ArrayUtils.equal(a.initData, b.initData);
+         Uint8ArrayUtils.equal(a.initData, b.initData);
     };
 
     for (const drmInfo of drmInfos) {
       // Aliases:
-      const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+      const Uint8ArrayUtils = Uint8ArrayUtils;
 
       // Build an array of unique license servers.
       if (!licenseServers.includes(drmInfo.licenseServerUri)) {
@@ -1923,7 +1938,7 @@ class DrmEngine {
     const DrmEngine = shaka.media.DrmEngine;
 
     const timeout = new Promise((resolve) => {
-      const timer = new shaka.util.Timer(resolve);
+      const timer = new Timer(resolve);
       timer.tickAfter(DrmEngine.CLOSE_TIMEOUT_);
     });
 
@@ -1945,7 +1960,7 @@ class DrmEngine {
  *   loaded: boolean,
  *   initData: Uint8Array,
  *   oldExpiration: number,
- *   updatePromise: shaka.util.PublicPromise
+ *   updatePromise: PublicPromise
  * }}
  *
  * @description A record to track sessions and suppress duplicate init data.
@@ -1959,7 +1974,7 @@ class DrmEngine {
  * @property {number} oldExpiration
  *   The expiration of the session on the last check.  This is used to fire
  *   an event when it changes.
- * @property {shaka.util.PublicPromise} updatePromise
+ * @property {PublicPromise} updatePromise
  *   An optional Promise that will be resolved/rejected on the next update()
  *   call.  This is used to track the 'license-release' message when calling
  *   remove().
@@ -1969,18 +1984,18 @@ DrmEngine.SessionMetaData = {}
 
 /**
  * @typedef {{
- *   netEngine: !shaka.net.NetworkingEngine,
- *   onError: function(!shaka.util.Error),
+ *   netEngine: !NetworkingEngine,
+ *   onError: function(!Error),
  *   onKeyStatus: function(!Object.<string,string>),
  *   onExpirationUpdated: function(string,number),
  *   onEvent: function(!Event)
  * }}
  *
- * @property {shaka.net.NetworkingEngine} netEngine
+ * @property {NetworkingEngine} netEngine
  *   The NetworkingEngine instance to use.  The caller retains ownership.
- * @property {function(!shaka.util.Error)} onError
+ * @property {function(!Error)} onError
  *   Called when an error occurs.  If the error is recoverable (see
- *   {@link shaka.util.Error}) then the caller may invoke either
+ *   {@link Error}) then the caller may invoke either
  *   StreamingEngine.switch*() or StreamingEngine.seeked() to attempt recovery.
  * @property {function(!Object.<string,string>)} onKeyStatus
  *   Called when key status changes.  The argument is a map of hex key IDs to

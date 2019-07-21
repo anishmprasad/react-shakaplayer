@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+/*eslint-disable*/
+
 // goog.provide('shaka.media.RegionObserver');
 
 // goog.require('shaka.media.RegionTimeline');

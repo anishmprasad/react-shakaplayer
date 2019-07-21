@@ -55,7 +55,7 @@ class PatchedMediaKeysWebkit {
    */
   static install() {
     // Alias.
-    const PatchedMediaKeysWebkit = shaka.polyfill.PatchedMediaKeysWebkit;
+    // const PatchedMediaKeysWebkit = shaka.polyfill.PatchedMediaKeysWebkit;
     const prefixApi = PatchedMediaKeysWebkit.prefixApi_;
 
     if (!window.HTMLVideoElement ||

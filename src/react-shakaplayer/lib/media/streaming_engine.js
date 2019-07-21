@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ /*eslint-disable*/
 // goog.provide('shaka.media.StreamingEngine');
 
 // goog.require('goog.asserts');

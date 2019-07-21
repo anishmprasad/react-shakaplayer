@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+ /*eslint-disable*/
+
 // goog.provide('shaka.media.MediaSourceEngine');
 
 // goog.require('goog.asserts');

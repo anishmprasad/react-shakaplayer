@@ -46,7 +46,7 @@ class VideoPlaybackQuality {
 		}
 
 		if ('webkitDroppedFrameCount' in proto) {
-			proto.getVideoPlaybackQuality = shaka.polyfill.VideoPlaybackQuality.webkit_;
+			proto.getVideoPlaybackQuality = VideoPlaybackQuality.webkit_;
 		}
 	}
 

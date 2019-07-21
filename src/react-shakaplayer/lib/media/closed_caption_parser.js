@@ -19,7 +19,7 @@
 // goog.provide('shaka.media.MuxJSClosedCaptionParser');
 // goog.provide('shaka.media.NoopCaptionParser');
 
-import muxjs from 'muxjs';
+import muxjs from 'mux.js';
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -59,7 +59,7 @@ shaka.media.IClosedCaptionParser = class {
  * @implements {shaka.media.IClosedCaptionParser}
  * @final
  */
-shaka.media.MuxJSClosedCaptionParser = class {
+class MuxJSClosedCaptionParser {
 	constructor() {
 		/** @private {muxjs.mp4.CaptionParser} */
 		this.muxCaptionParser_ = new muxjs.mp4.CaptionParser();
@@ -116,7 +116,7 @@ shaka.media.MuxJSClosedCaptionParser = class {
 	static isSupported() {
 		return !!window.muxjs;
 	}
-};
+}
 
 /**
  * Noop Caption Parser creates an empty caption parser object when mux.js is not
@@ -125,7 +125,7 @@ shaka.media.MuxJSClosedCaptionParser = class {
  * @implements {shaka.media.IClosedCaptionParser}
  * @final
  */
-shaka.media.NoopCaptionParser = class {
+class NoopCaptionParser {
 	/**
 	 * @override
 	 */
@@ -140,4 +140,6 @@ shaka.media.NoopCaptionParser = class {
 	 * @override
 	 */
 	reset() {}
-};
+}
+
+export { MuxJSClosedCaptionParser, NoopCaptionParser };

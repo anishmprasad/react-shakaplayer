@@ -18,6 +18,7 @@
 // goog.provide('shaka.util.Platform');
 
 // goog.require('shaka.util.Timer');
+import Timer from '../util/timer';
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -170,7 +171,7 @@ class Platform {
 	 * @return {!HTMLMediaElement}
 	 */
 	static anyMediaElement_() {
-		const Platform = Platform;
+		// const Platform = Platform;
 		if (Platform.cachedMediaElement_) {
 			return Platform.cachedMediaElement_;
 		}
