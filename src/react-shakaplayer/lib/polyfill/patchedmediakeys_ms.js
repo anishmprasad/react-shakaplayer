@@ -29,6 +29,14 @@
 // goog.require('shaka.util.PublicPromise');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import polyfill from './all';
+import EventManager from '../util/event_manager';
+import FakeEvent from '../util/fake_event';
+import FakeEventTarget from '../util/fake_event_target';
+import Pssh from '../util/pssh';
+import PublicPromise from '../util/public_promise';
+import Uint8ArrayUtils from '../util/uint8array_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -38,7 +46,7 @@ var goog = window.goog;
  * on top of ms-prefixed
  * {@link https://www.w3.org/TR/2014/WD-encrypted-media-20140218/ EME v20140218}
  */
-shaka.polyfill.PatchedMediaKeysMs = class {
+export default class PatchedMediaKeysMs {
 	/**
 	 * Installs the polyfill if needed.
 	 */
@@ -55,7 +63,7 @@ shaka.polyfill.PatchedMediaKeysMs = class {
 		shaka.log.info('Using ms-prefixed EME v20140218');
 
 		// Alias
-		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
+		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
 
 		// Construct a fake key ID.  This is not done at load-time to avoid
 		// exceptions on unsupported browsers.  This particular fake key ID was
@@ -91,7 +99,7 @@ shaka.polyfill.PatchedMediaKeysMs = class {
 		goog.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
 
 		// Alias.
-		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
+		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
 		try {
 			const access = new PatchedMediaKeysMs.MediaKeySystemAccess(keySystem, supportedConfigurations);
 			return Promise.resolve(/** @type {!MediaKeySystemAccess} */ (access));
@@ -114,7 +122,7 @@ shaka.polyfill.PatchedMediaKeysMs = class {
 		}
 
 		// Alias
-		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
+		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
 
 		// NOTE: Because "this" is a real EventTarget, on IE, the event we dispatch
 		// here must also be a real Event.
@@ -141,7 +149,7 @@ shaka.polyfill.PatchedMediaKeysMs = class {
 			return initData;
 		}
 
-		const pssh = new shaka.util.Pssh(initData);
+		const pssh = new Pssh(initData);
 
 		// If there is only a single pssh, return the original array.
 		if (pssh.dataBoundaries.length <= 1) {
@@ -159,7 +167,7 @@ shaka.polyfill.PatchedMediaKeysMs = class {
 		const dedupedInitDatas = [];
 		for (const initData of unfilteredInitDatas) {
 			const found = dedupedInitDatas.some(x => {
-				return shaka.util.Uint8ArrayUtils.equal(x, initData);
+				return Uint8ArrayUtils.equal(x, initData);
 			});
 
 			if (!found) {
@@ -182,7 +190,7 @@ shaka.polyfill.PatchedMediaKeysMs = class {
 
 		return normalisedInitData;
 	}
-};
+}
 
 /**
  * An implementation of MediaKeySystemAccess.
@@ -287,7 +295,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySystemAccess = class {
 		shaka.log.debug('PatchedMediaKeysMs.MediaKeySystemAccess.createMediaKeys');
 
 		// Alias
-		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
+		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
 
 		const mediaKeys = new PatchedMediaKeysMs.MediaKeys(this.keySystem);
 		return Promise.resolve(/** @type {!MediaKeys} */ (mediaKeys));
@@ -346,7 +354,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySystemAccess = class {
  *
  * @implements {MediaKeys}
  */
-shaka.polyfill.PatchedMediaKeysMs.MediaKeys = class {
+PatchedMediaKeysMs.MediaKeys = class {
 	/** @param {string} keySystem */
 	constructor(keySystem) {
 		shaka.log.debug('PatchedMediaKeysMs.MediaKeys');
@@ -355,7 +363,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeys = class {
 		this.nativeMediaKeys_ = new MSMediaKeys(keySystem);
 
 		/** @private {!shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		this.eventManager_ = new EventManager();
 	}
 
 	/** @override */
@@ -369,7 +377,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeys = class {
 		}
 
 		// Alias
-		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
+		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
 
 		return new PatchedMediaKeysMs.MediaKeySession(this.nativeMediaKeys_, sessionType);
 	}
@@ -389,7 +397,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeys = class {
 	 */
 	setMedia(media) {
 		// Alias
-		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
+		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
 
 		// Remove any old listeners.
 		this.eventManager_.removeAll();
@@ -437,7 +445,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeys = class {
  *
  * @implements {MediaKeySession}
  */
-shaka.polyfill.PatchedMediaKeysMs.MediaKeySession = class extends shaka.util.FakeEventTarget {
+PatchedMediaKeysMs.MediaKeySession = class extends FakeEventTarget {
 	/**
 	 * @param {MSMediaKeys} nativeMediaKeys
 	 * @param {string} sessionType
@@ -462,7 +470,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySession = class extends shaka.util.Fak
 		this.updatePromise_ = null;
 
 		/** @private {!shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		this.eventManager_ = new EventManager();
 
 		/** @type {string} */
 		this.sessionId = '';
@@ -534,7 +542,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySession = class extends shaka.util.Fak
 	update(response) {
 		shaka.log.debug('PatchedMediaKeysMs.MediaKeySession.update');
 
-		this.updatePromise_ = new shaka.util.PublicPromise();
+		this.updatePromise_ = new PublicPromise();
 
 		try {
 			// Pass through to the native session.
@@ -601,7 +609,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySession = class extends shaka.util.Fak
 
 		const isNew = this.keyStatuses.getStatus() == undefined;
 
-		const event2 = new shaka.util.FakeEvent('message', {
+		const event2 = new FakeEvent('message', {
 			messageType: isNew ? 'license-request' : 'license-renewal',
 			message: event.message.buffer
 		});
@@ -692,7 +700,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySession = class extends shaka.util.Fak
 	 */
 	updateKeyStatus_(status) {
 		this.keyStatuses.setStatus(status);
-		const event = new shaka.util.FakeEvent('keystatuseschange');
+		const event = new FakeEvent('keystatuseschange');
 		this.dispatchEvent(event);
 	}
 };
@@ -704,7 +712,7 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeySession = class extends shaka.util.Fak
  * @todo Consolidate the MediaKeyStatusMap types in these polyfills.
  * @implements {MediaKeyStatusMap}
  */
-shaka.polyfill.PatchedMediaKeysMs.MediaKeyStatusMap = class {
+PatchedMediaKeysMs.MediaKeyStatusMap = class {
 	constructor() {
 		/**
 		 * @type {number}
@@ -752,8 +760,8 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeyStatusMap = class {
 
 	/** @override */
 	has(keyId) {
-		const fakeKeyId = shaka.polyfill.PatchedMediaKeysMs.MediaKeyStatusMap.KEY_ID_;
-		if (this.status_ && shaka.util.Uint8ArrayUtils.equal(new Uint8Array(keyId), new Uint8Array(fakeKeyId))) {
+		const fakeKeyId = PatchedMediaKeysMs.MediaKeyStatusMap.KEY_ID_;
+		if (this.status_ && Uint8ArrayUtils.equal(new Uint8Array(keyId), new Uint8Array(fakeKeyId))) {
 			return true;
 		}
 		return false;
@@ -788,6 +796,6 @@ shaka.polyfill.PatchedMediaKeysMs.MediaKeyStatusMap = class {
  * @const {!ArrayBuffer}
  * @private
  */
-shaka.polyfill.PatchedMediaKeysMs.MediaKeyStatusMap.KEY_ID_;
+PatchedMediaKeysMs.MediaKeyStatusMap.KEY_ID_;
 
-shaka.polyfill.register(shaka.polyfill.PatchedMediaKeysMs.install);
+polyfill.register(PatchedMediaKeysMs.install);

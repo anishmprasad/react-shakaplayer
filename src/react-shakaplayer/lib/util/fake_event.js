@@ -26,7 +26,7 @@ var goog = window.goog;
  *
  * @extends {Event}
  */
-shaka.util.FakeEvent = class {
+export default class FakeEvent {
 	/**
 	 * @param {string} type
 	 * @param {Object=} dict
@@ -108,4 +108,4 @@ shaka.util.FakeEvent = class {
 	 * @override
 	 */
 	stopPropagation() {}
-};
+}

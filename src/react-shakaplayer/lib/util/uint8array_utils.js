@@ -19,6 +19,8 @@
 
 // goog.require('shaka.util.StringUtils');
 
+import StringUtils from '../util/string_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -26,7 +28,7 @@ var goog = window.goog;
  * @summary A set of Uint8Array utility functions.
  * @exportDoc
  */
-shaka.util.Uint8ArrayUtils = class {
+export default class Uint8ArrayUtils {
 	/**
 	 * Convert a Uint8Array to a base64 string. The output will be standard
 	 * alphabet as opposed to base64url safe alphabet.
@@ -35,7 +37,7 @@ shaka.util.Uint8ArrayUtils = class {
 	 * @export
 	 */
 	static toStandardBase64(u8Arr) {
-		const bytes = shaka.util.StringUtils.fromCharCode(u8Arr);
+		const bytes = StringUtils.fromCharCode(u8Arr);
 		return btoa(bytes);
 	}
 
@@ -50,7 +52,7 @@ shaka.util.Uint8ArrayUtils = class {
 	 */
 	static toBase64(arr, padding) {
 		padding = padding == undefined ? true : padding;
-		const base64 = shaka.util.Uint8ArrayUtils.toStandardBase64(arr)
+		const base64 = Uint8ArrayUtils.toStandardBase64(arr)
 			.replace(/\+/g, '-')
 			.replace(/\//g, '_');
 		return padding ? base64 : base64.replace(/[=]*$/, '');
@@ -167,4 +169,4 @@ shaka.util.Uint8ArrayUtils = class {
 			return new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
 		}
 	}
-};
+}

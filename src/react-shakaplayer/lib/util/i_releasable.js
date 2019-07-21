@@ -26,11 +26,11 @@ var goog = window.goog;
  *
  * @interface
  */
-shaka.util.IReleasable = class {
+export default class IReleasable {
 	/**
 	 * Request that this object release all internal references.
 	 *
 	 * @exportInterface
 	 */
 	release() {}
-};
+}
