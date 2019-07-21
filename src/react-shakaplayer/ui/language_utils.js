@@ -23,6 +23,7 @@
 // goog.require('shaka.util.Dom');
 
 import Dom from '../lib/util/dom_utils';
+import Utils from '../ui/ui_utils';
 
 export default class LanguageUtils {
 	/**
@@ -54,7 +55,7 @@ export default class LanguageUtils {
 
 		// Remove old languages
 		// 1. Save the back to menu button
-		const backButton = shaka.ui.Utils.getFirstDescendantWithClassName(langMenu, 'shaka-back-to-overflow-button');
+		const backButton = Utils.getFirstDescendantWithClassName(langMenu, 'shaka-back-to-overflow-button');
 
 		// 2. Remove everything
 		Dom.removeAllChildren(langMenu);

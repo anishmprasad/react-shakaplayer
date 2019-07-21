@@ -25,6 +25,7 @@
 // goog.require('shaka.ui.OverflowMenu');
 // goog.require('shaka.util.Dom');
 
+import Locales from '../dist/locales';
 import Localization from './localization';
 import Dom from '../lib/util/dom_utils';
 import Element from './element';
@@ -32,6 +33,9 @@ import { Controls } from './controls';
 import Enums from './enums';
 import OverflowMenu from './overflow_menu';
 import LanguageUtils from '../ui/language_utils';
+import Utils from '../ui/ui_utils';
+import FakeEvent from '../lib/util/fake_event';
+import Constants from '../ui/constants';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

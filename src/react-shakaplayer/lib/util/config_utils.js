@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable */
 // goog.provide('shaka.util.ConfigUtils');
 
 // goog.require('goog.asserts');
@@ -65,7 +66,7 @@ export default class ConfigUtils {
 					delete destination[k];
 				} else {
 					// There is something in the template, so go back to that.
-					destination[k] = shaka.util.ObjectUtils.cloneObject(subTemplate);
+					destination[k] = ObjectUtils.cloneObject(subTemplate);
 				}
 			} else if (subTemplate.constructor == Object && source[k] && source[k].constructor == Object) {
 				// These are plain Objects with no other constructor.
@@ -73,10 +74,10 @@ export default class ConfigUtils {
 				if (!destination[k]) {
 					// Initialize the destination with the template so that normal
 					// merging and type-checking can happen.
-					destination[k] = shaka.util.ObjectUtils.cloneObject(subTemplate);
+					destination[k] = ObjectUtils.cloneObject(subTemplate);
 				}
 
-				const subMergeValid = shaka.util.ConfigUtils.mergeConfigObjects(
+				const subMergeValid = ConfigUtils.mergeConfigObjects(
 					destination[k],
 					source[k],
 					subTemplate,

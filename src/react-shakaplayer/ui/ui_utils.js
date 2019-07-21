@@ -18,6 +18,8 @@
 // goog.provide('shaka.ui.Utils');
 
 // goog.require('goog.asserts');
+import Dom from '../lib/util/dom_utils';
+import Enums from '../ui/enums';
 
 /*eslint-disable */
 
@@ -30,7 +32,7 @@ export default class Utils {
 	// TODO: This can be replaced by shaka.util.Dom.getElementByClassName
 	static getFirstDescendantWithClassName(element, className) {
 		const descendant = Utils.getDescendantIfExists(element, className);
-		goog.asserts.assert(descendant != null, 'Should not be null!');
+		// goog.asserts.assert(descendant != null, 'Should not be null!');
 
 		return descendant;
 	}
@@ -93,7 +95,7 @@ export default class Utils {
 		// You can't use setDisplay with SVG on IE, because classList isn't on SVG
 		// elements on that browser.  It's better to find out on Chrome through an
 		// assertion, rather than wait for a failed test pass later on IE.
-		goog.asserts.assert(!(element instanceof SVGElement), 'Do not use setDisplay with SVG elements!');
+		// goog.asserts.assert(!(element instanceof SVGElement), 'Do not use setDisplay with SVG elements!');
 
 		if (display) {
 			element.classList.add('shaka-displayed');
