@@ -130,7 +130,7 @@ export default class Localization {
 	 * @export
 	 */
 	changeLocale(locales) {
-		const Class = shaka.ui.Localization;
+		const Class = Localization;
 
 		// Normalize the locale so that matching will be easier. We need to reset
 		// our internal set of locales so that we have the same order as the new
@@ -150,7 +150,7 @@ export default class Localization {
 		const missing = Iterables.filter(this.currentLocales_, locale => !this.localizations_.has(locale));
 
 		if (missing.length) {
-			/** @type {shaka.ui.Localization.UnknownLocalesEvent} */
+			/** @type {Localization.UnknownLocalesEvent} */
 			const e = {
 				locales: missing
 			};
@@ -168,18 +168,18 @@ export default class Localization {
 	 * @param {!Map.<string, string>} localizations
 	 *   A mapping of id to localized text that should used to modify the internal
 	 *   collection of localizations.
-	 * @param {shaka.ui.Localization.ConflictResolution=} conflictResolution
+	 * @param {Localization.ConflictResolution=} conflictResolution
 	 *   The strategy used to resolve conflicts when the id of an existing entry
 	 *   matches the id of a new entry. Default to |USE_NEW|, where the new
 	 *   entry will replace the old entry.
-	 * @return {!shaka.ui.Localization}
+	 * @return {!Localization}
 	 *   Returns |this| so that calls can be chained.
 	 * @export
 	 */
 	insert(locale, localizations, conflictResolution) {
-		const Class = shaka.ui.Localization;
-		const ConflictResolution = shaka.ui.Localization.ConflictResolution;
-		const FakeEvent = FakeEvent;
+		const Class = Localization;
+		const ConflictResolution = Localization.ConflictResolution;
+		// const FakeEvent = FakeEvent;
 
 		// Normalize the locale so that matching will be easier.
 		locale = LanguageUtils.normalize(locale);
@@ -242,8 +242,8 @@ export default class Localization {
 	 * @export
 	 */
 	resolve(id) {
-		const Class = shaka.ui.Localization;
-		const FakeEvent = FakeEvent;
+		const Class = Localization;
+		// const FakeEvent = FakeEvent;
 
 		/** @type {string} */
 		const result = this.currentMap_.get(id);
@@ -258,7 +258,7 @@ export default class Localization {
 		// number of locales. Since we don't know which ones we actually checked,
 		// just tell them the preferred locale.
 
-		/** @type {shaka.ui.Localization.UnknownLocalizationEvent} */
+		/** @type {Localization.UnknownLocalizationEvent} */
 		const e = {
 			// Make a copy to avoid leaking references.
 			locales: Array.from(this.currentLocales_),
@@ -274,7 +274,7 @@ export default class Localization {
 	 * @private
 	 */
 	updateCurrentMap_() {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		/** @type {!Map.<string, !Map.<string, string>>} */
 		const localizations = this.localizations_;
@@ -378,11 +378,11 @@ export default class Localization {
 		for (const locale of this.currentLocales_) {
 			// Make sure we have a non-null map. The diff will be easier that way.
 			const map = this.localizations_.get(locale) || new Map();
-			shaka.ui.Localization.findMissingKeys_(map, allKeys, missing);
+			Localization.findMissingKeys_(map, allKeys, missing);
 		}
 
 		if (missing.size > 0) {
-			/** @type {shaka.ui.Localization.MissingLocalizationsEvent} */
+			/** @type {Localization.MissingLocalizationsEvent} */
 			const e = {
 				// Make a copy of the preferred locales to avoid leaking references.
 				locales: Array.from(preferredLocales),
@@ -391,7 +391,7 @@ export default class Localization {
 				missing: Array.from(missing)
 			};
 
-			this.events_.dispatchEvent(new FakeEvent(shaka.ui.Localization.MISSING_LOCALIZATIONS, e));
+			this.events_.dispatchEvent(new FakeEvent(Localization.MISSING_LOCALIZATIONS, e));
 		}
 	}
 

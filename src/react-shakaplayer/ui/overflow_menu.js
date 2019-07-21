@@ -32,7 +32,7 @@ import Constants from '../ui/constants';
 import { Controls } from '../ui/controls';
 import Element from '../ui/element';
 import Enums from '../ui/enums';
-// import Locales from '../ui/locales';
+import Locales from '../dist/locales';
 import Localization from '../ui/localization';
 import Utils from '../ui/ui_utils';
 import Dom from '../lib/util/dom_utils';
@@ -151,7 +151,7 @@ class OverflowMenu extends Element {
 	 */
 	addOverflowMenu_() {
 		/** @private {!HTMLElement} */
-		this.overflowMenu_ = shaka.util.Dom.createHTMLElement('div');
+		this.overflowMenu_ = Dom.createHTMLElement('div');
 		this.overflowMenu_.classList.add('shaka-overflow-menu');
 		this.overflowMenu_.classList.add('shaka-no-propagation');
 		this.overflowMenu_.classList.add('shaka-show-controls-on-mouse-over');
@@ -164,7 +164,7 @@ class OverflowMenu extends Element {
 	 */
 	addOverflowMenuButton_() {
 		/** @private {!HTMLElement} */
-		this.overflowMenuButton_ = shaka.util.Dom.createHTMLElement('button');
+		this.overflowMenuButton_ = Dom.createHTMLElement('button');
 		this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
 		this.overflowMenuButton_.classList.add('shaka-no-propagation');
 		this.overflowMenuButton_.classList.add('material-icons');
@@ -199,7 +199,7 @@ class OverflowMenu extends Element {
 			// first one, when the menu opens.
 			const isDisplayed = element => element.classList.contains('shaka-hidden') == false;
 
-			const Iterables = shaka.util.Iterables;
+			const Iterables = Iterables;
 			if (Iterables.some(this.overflowMenu_.childNodes, isDisplayed)) {
 				// Focus on the first visible child of the overflow menu
 				const visibleElements = Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);

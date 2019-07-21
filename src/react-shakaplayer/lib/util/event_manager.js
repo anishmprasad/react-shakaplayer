@@ -32,13 +32,13 @@ var goog = window.goog;
  * An EventManager maintains a collection of "event
  * bindings" between event targets and event listeners.
  *
- * @implements {shaka.util.IReleasable}
+ * @implements {IReleasable}
  */
 class EventManager {
 	constructor() {
 		/**
 		 * Maps an event type to an array of event bindings.
-		 * @private {shaka.util.MultiMap.<!shaka.util.EventManager.Binding_>}
+		 * @private {MultiMap.<!EventManager.Binding_>}
 		 */
 		this.bindingMap_ = new MultiMap();
 	}
@@ -56,7 +56,7 @@ class EventManager {
 	 * Attaches an event listener to an event target.
 	 * @param {EventTarget} target The event target.
 	 * @param {string} type The event type.
-	 * @param {shaka.util.EventManager.ListenerType} listener The event listener.
+	 * @param {EventManager.ListenerType} listener The event listener.
 	 * @param {(boolean|!AddEventListenerOptions)=} options An object that
 	 *    specifies characteristics about the event listener.
 	 *    The passive option, if true, indicates that this function will never
@@ -76,7 +76,7 @@ class EventManager {
 	 * removed when the first instance of the event is fired.
 	 * @param {EventTarget} target The event target.
 	 * @param {string} type The event type.
-	 * @param {shaka.util.EventManager.ListenerType} listener The event listener.
+	 * @param {EventManager.ListenerType} listener The event listener.
 	 * @param {(boolean|!AddEventListenerOptions)=} options An object that
 	 *    specifies characteristics about the event listener.
 	 *    The passive option, if true, indicates that this function will never
@@ -97,7 +97,7 @@ class EventManager {
 	 * Detaches an event listener from an event target.
 	 * @param {EventTarget} target The event target.
 	 * @param {string} type The event type.
-	 * @param {shaka.util.EventManager.ListenerType=} listener The event listener.
+	 * @param {EventManager.ListenerType=} listener The event listener.
 	 */
 	unlisten(target, type, listener) {
 		if (!this.bindingMap_) {
@@ -148,7 +148,7 @@ EventManager.Binding_ = class {
 	/**
 	 * @param {EventTarget} target The event target.
 	 * @param {string} type The event type.
-	 * @param {shaka.util.EventManager.ListenerType} listener The event listener.
+	 * @param {EventManager.ListenerType} listener The event listener.
 	 * @param {(boolean|!AddEventListenerOptions)=} options An object that
 	 *    specifies characteristics about the event listener.
 	 *    The passive option, if true, indicates that this function will never
@@ -161,7 +161,7 @@ EventManager.Binding_ = class {
 		/** @type {string} */
 		this.type = type;
 
-		/** @type {?shaka.util.EventManager.ListenerType} */
+		/** @type {?EventManager.ListenerType} */
 		this.listener = listener;
 
 		/** @type {(boolean|!AddEventListenerOptions)} */
@@ -207,7 +207,7 @@ EventManager.Binding_ = class {
 			const keys = Object.keys(value).filter(k => !ignored.has(k));
 			goog.asserts.assert(keys.length == 0, 'Unsupported flag(s) to addEventListener: ' + keys.join(','));
 
-			const supports = shaka.util.EventManager.Binding_.doesSupportObject_(target);
+			const supports = EventManager.Binding_.doesSupportObject_(target);
 			if (supports) {
 				return value;
 			} else {
@@ -227,7 +227,7 @@ EventManager.Binding_ = class {
 	 */
 	static doesSupportObject_(target) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Safely_detecting_option_support
-		let supports = shaka.util.EventManager.Binding_.supportsObject_;
+		let supports = EventManager.Binding_.supportsObject_;
 		if (supports == undefined) {
 			supports = false;
 			try {
@@ -250,7 +250,7 @@ EventManager.Binding_ = class {
 			} catch (e) {
 				supports = false;
 			}
-			shaka.util.EventManager.Binding_.supportsObject_ = supports;
+			EventManager.Binding_.supportsObject_ = supports;
 		}
 		return supports || false; // "false" fallback needed for compiler.
 	}

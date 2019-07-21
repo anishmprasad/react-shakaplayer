@@ -28,6 +28,8 @@ import Dom from '../lib/util/dom_utils';
 import Element from './element';
 import { Controls } from './controls';
 import Enums from './enums';
+import Locales from '../dist/locales';
+import Constants from '../ui/constants';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};
@@ -77,12 +79,11 @@ class MuteButton extends Element {
 	/**
 	 * @private
 	 */
-	updateAriaLabel_() {
+	updateAriaLabel_ = () => {
 		const LocIds = Locales.Ids;
 		const label = this.video.muted ? LocIds.UNMUTE : LocIds.MUTE;
-
 		this.button_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(label));
-	}
+	};
 
 	/**
 	 * @private

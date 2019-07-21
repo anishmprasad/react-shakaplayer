@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+/* eslint-disable */
+
 // goog.provide('shaka.cast.CastSender');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.cast.CastUtils');
 // goog.require('shaka.log');
 // goog.require('shaka.util.Error');
@@ -30,7 +32,7 @@ var shaka = window.shaka;
 /**
  * @implements {shaka.util.IDestroyable}
  */
-window.shaka.cast.CastSender = class {
+export default class CastSender {
 	/**
 	 * @param {string} receiverAppId The ID of the cast receiver application.
 	 * @param {function()} onStatusChanged A callback invoked when the cast status
@@ -106,15 +108,15 @@ window.shaka.cast.CastSender = class {
 		/** @private {shaka.util.PublicPromise} */
 		this.castPromise_ = null;
 
-		shaka.cast.CastSender.instances_.add(this);
+		CastSender.instances_.add(this);
 	}
 
 	/** @override */
 	destroy() {
-		shaka.cast.CastSender.instances_.delete(this);
+		CastSender.instances_.delete(this);
 
 		this.rejectAllPromises_();
-		if (shaka.cast.CastSender.session_) {
+		if (CastSender.session_) {
 			this.removeListeners_();
 			// Don't leave the session, so that this session can be re-used later if
 			// necessary.
@@ -150,7 +152,7 @@ window.shaka.cast.CastSender = class {
 	 * @return {boolean} True if there are receivers.
 	 */
 	hasReceivers() {
-		return shaka.cast.CastSender.hasReceivers_;
+		return CastSender.hasReceivers_;
 	}
 
 	/**
@@ -207,22 +209,22 @@ window.shaka.cast.CastSender = class {
 				shaka.log.error('CastSender: init error', error);
 			}
 		);
-		if (shaka.cast.CastSender.hasReceivers_) {
+		if (CastSender.hasReceivers_) {
 			// Fire a fake cast status change, to simulate the update that
 			// would be fired normally.
 			// This is after a brief delay, to give users a chance to add event
 			// listeners.
-			this.statusChangeTimer_.tickAfter(shaka.cast.CastSender.STATUS_DELAY);
+			this.statusChangeTimer_.tickAfter(CastSender.STATUS_DELAY);
 		}
 
-		const oldSession = shaka.cast.CastSender.session_;
+		const oldSession = CastSender.session_;
 		if (oldSession && oldSession.status != chrome.cast.SessionStatus.STOPPED) {
 			// The old session still exists, so re-use it.
 			shaka.log.debug('CastSender: re-using existing connection');
 			this.onExistingSessionJoined_(oldSession);
 		} else {
 			// The session has been canceled in the meantime, so ignore it.
-			shaka.cast.CastSender.session_ = null;
+			CastSender.session_ = null;
 		}
 	}
 
@@ -242,7 +244,7 @@ window.shaka.cast.CastSender = class {
 	}
 
 	/**
-	 * @param {shaka.cast.CastUtils.InitStateType} initState Video and player
+	 * @param {CastUtils.InitStateType} initState Video and player
 	 *   state to be sent to the receiver.
 	 * @return {!Promise} Resolved when connected to a receiver.  Rejected if the
 	 *   connection fails or is canceled by the user.
@@ -255,7 +257,7 @@ window.shaka.cast.CastSender = class {
 				shaka.util.Error.Code.CAST_API_UNAVAILABLE
 			);
 		}
-		if (!shaka.cast.CastSender.hasReceivers_) {
+		if (!CastSender.hasReceivers_) {
 			throw new shaka.util.Error(
 				shaka.util.Error.Severity.RECOVERABLE,
 				shaka.util.Error.Category.CAST,
@@ -305,10 +307,10 @@ window.shaka.cast.CastSender = class {
 		}
 
 		this.rejectAllPromises_();
-		if (shaka.cast.CastSender.session_) {
+		if (CastSender.session_) {
 			this.removeListeners_();
-			shaka.cast.CastSender.session_.stop(() => {}, () => {});
-			shaka.cast.CastSender.session_ = null;
+			CastSender.session_.stop(() => {}, () => {});
+			CastSender.session_ = null;
 		}
 	}
 
@@ -320,7 +322,7 @@ window.shaka.cast.CastSender = class {
 	 */
 	get(targetName, property) {
 		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
-		const CastUtils = shaka.cast.CastUtils;
+		const CastUtils = CastUtils;
 		if (targetName == 'video') {
 			if (CastUtils.VideoVoidMethods.includes(property)) {
 				return (...args) => this.remoteCall_(targetName, property, ...args);
@@ -368,7 +370,7 @@ window.shaka.cast.CastSender = class {
 	}
 
 	/**
-	 * @param {shaka.cast.CastUtils.InitStateType} initState
+	 * @param {CastUtils.InitStateType} initState
 	 * @param {chrome.cast.Session} session
 	 * @private
 	 */
@@ -485,7 +487,7 @@ window.shaka.cast.CastSender = class {
 		// The cast API is telling us whether there are any cast receiver devices
 		// available.
 		shaka.log.debug('CastSender: receiver status', availability);
-		shaka.cast.CastSender.hasReceivers_ = availability == 'available';
+		CastSender.hasReceivers_ = availability == 'available';
 		this.statusChangeTimer_.tickNow();
 	}
 
@@ -494,9 +496,9 @@ window.shaka.cast.CastSender = class {
 	 * @private
 	 */
 	onSessionCreated_(session) {
-		shaka.cast.CastSender.session_ = session;
+		CastSender.session_ = session;
 		session.addUpdateListener(this.onConnectionStatusChangedBound_);
-		session.addMessageListener(shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE, this.onMessageReceivedBound_);
+		session.addMessageListener(CastUtils.SHAKA_MESSAGE_NAMESPACE, this.onMessageReceivedBound_);
 		this.onConnectionStatusChanged_();
 	}
 
@@ -504,16 +506,16 @@ window.shaka.cast.CastSender = class {
 	 * @private
 	 */
 	removeListeners_() {
-		const session = shaka.cast.CastSender.session_;
+		const session = CastSender.session_;
 		session.removeUpdateListener(this.onConnectionStatusChangedBound_);
-		session.removeMessageListener(shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE, this.onMessageReceivedBound_);
+		session.removeMessageListener(CastUtils.SHAKA_MESSAGE_NAMESPACE, this.onMessageReceivedBound_);
 	}
 
 	/**
 	 * @private
 	 */
 	onConnectionStatusChanged_() {
-		const connected = shaka.cast.CastSender.session_ ? shaka.cast.CastSender.session_.status == 'connected' : false;
+		const connected = CastSender.session_ ? CastSender.session_.status == 'connected' : false;
 		shaka.log.debug('CastSender: connection status', connected);
 		if (this.isCasting_ && !connected) {
 			// Tell CastProxy to transfer state back to local player.
@@ -528,7 +530,7 @@ window.shaka.cast.CastSender = class {
 		}
 
 		this.isCasting_ = connected;
-		this.receiverName_ = connected ? shaka.cast.CastSender.session_.receiver.friendlyName : '';
+		this.receiverName_ = connected ? CastSender.session_.receiver.friendlyName : '';
 		this.statusChangeTimer_.tickNow();
 	}
 
@@ -562,7 +564,7 @@ window.shaka.cast.CastSender = class {
 		// Since this method is in the compiled library, make sure all messages
 		// passed in here were created with quoted property names.
 
-		const message = shaka.cast.CastUtils.deserialize(serialized);
+		const message = CastUtils.deserialize(serialized);
 		shaka.log.v2('CastSender: message', message);
 
 		switch (message['type']) {
@@ -621,26 +623,26 @@ window.shaka.cast.CastSender = class {
 		// Since this method is in the compiled library, make sure all messages
 		// passed in here were created with quoted property names.
 
-		const serialized = shaka.cast.CastUtils.serialize(message);
+		const serialized = CastUtils.serialize(message);
 		// TODO: have never seen this fail.  When would it and how should we react?
-		const session = shaka.cast.CastSender.session_;
+		const session = CastSender.session_;
 		session.sendMessage(
-			shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE,
+			CastUtils.SHAKA_MESSAGE_NAMESPACE,
 			serialized,
 			() => {}, // success callback
 			shaka.log.error
 		); // error callback
 	}
-};
+}
 
 /** @type {number} */
-shaka.cast.CastSender.STATUS_DELAY = 0.02;
+CastSender.STATUS_DELAY = 0.02;
 
 /** @private {boolean} */
-shaka.cast.CastSender.hasReceivers_ = false;
+CastSender.hasReceivers_ = false;
 
 /** @private {chrome.cast.Session} */
-shaka.cast.CastSender.session_ = null;
+CastSender.session_ = null;
 
 /**
  * A set of all living CastSender instances.  The constructor and destroy
@@ -649,9 +651,9 @@ shaka.cast.CastSender.session_ = null;
  * This is used to deal with delayed initialization of the Cast SDK.  When the
  * SDK becomes available, instances will be reinitialized.
  *
- * @private {!Set.<shaka.cast.CastSender>}
+ * @private {!Set.<CastSender>}
  */
-shaka.cast.CastSender.instances_ = new Set();
+CastSender.instances_ = new Set();
 
 /**
  * If the cast SDK is not available yet, it will invoke this callback once it
@@ -660,11 +662,11 @@ shaka.cast.CastSender.instances_ = new Set();
  * @param {boolean} loaded
  * @private
  */
-shaka.cast.CastSender.onSdkLoaded_ = loaded => {
+CastSender.onSdkLoaded_ = loaded => {
 	if (loaded) {
 		// Any living instances of CastSender should have their init methods called
 		// again now that the API is available.
-		for (const sender of shaka.cast.CastSender.instances_) {
+		for (const sender of CastSender.instances_) {
 			sender.init();
 		}
 	}
@@ -676,4 +678,4 @@ shaka.cast.CastSender.onSdkLoaded_ = loaded => {
 // versions will each have their own instances_ map.
 // Therefore we gave the callback a name that the CastSender tests could invoke
 // instead of using a global that could be overwritten.
-window.__onGCastApiAvailable = shaka.cast.CastSender.onSdkLoaded_;
+window.__onGCastApiAvailable = CastSender.onSdkLoaded_;

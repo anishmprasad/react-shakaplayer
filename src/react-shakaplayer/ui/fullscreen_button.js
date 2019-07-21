@@ -23,11 +23,13 @@
 // goog.require('shaka.ui.Localization');
 // goog.require('shaka.util.Dom');
 
+import Locales from '../dist/locales';
 import Localization from './localization';
 import Dom from '../lib/util/dom_utils';
 import Element from './element';
 import { Controls } from './controls';
 import Enums from './enums';
+import Constants from '../ui/constants';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

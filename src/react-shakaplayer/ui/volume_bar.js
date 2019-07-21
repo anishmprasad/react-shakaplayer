@@ -28,6 +28,8 @@ import { Controls } from './controls';
 import Enums from './enums';
 import OverflowMenu from './overflow_menu';
 import LanguageUtils from '../ui/language_utils';
+import Constants from '../ui/constants';
+import Locales from '../dist/locales';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

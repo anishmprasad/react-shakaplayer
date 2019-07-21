@@ -22,9 +22,9 @@
  * @param {!shaka.ui.Localization} localization
  */
 
-let shaka = {};
+let Locales = {};
 
-shaka.ui.Locales.addTo = function(localization) {
+Locales.addTo = function(localization) {
 	localization.insert(
 		'ar',
 		new Map([
@@ -616,7 +616,7 @@ shaka.ui.Locales.addTo = function(localization) {
  * @enum {string}
  * @const
  */
-shaka.ui.Locales.Ids = {
+Locales.Ids = {
 	ENTER_PICTURE_IN_PICTURE: 'ENTER_PICTURE_IN_PICTURE',
 	MULTIPLE_LANGUAGES: 'MULTIPLE_LANGUAGES',
 	BACK: 'BACK',
@@ -647,6 +647,6 @@ shaka.ui.Locales.Ids = {
 	REWIND: 'REWIND'
 };
 
-console.log({ shaka });
+console.log({ Locales });
 
-export default shaka;
+export default Locales;

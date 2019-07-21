@@ -34,7 +34,7 @@
 
 import Constants from '../ui/constants'
 import Enums from '../ui/enums'
-// import Locales from '../ui/'
+import Locales from '../dist/locales'
 import Localization from '../ui/localization'
 import Utils from '../ui/ui_utils'
 import Dom from '../lib/util/dom_utils'
@@ -53,7 +53,7 @@ var goog = window.goog
 
 /**
  * A container for custom video controls.
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @export
  */
 class Controls extends FakeEventTarget {
@@ -104,7 +104,7 @@ class Controls extends FakeEventTarget {
      * This timer is used to introduce a delay between the user scrubbing across
      * the seek bar and the seek being sent to the player.
      *
-     * @private {shaka.util.Timer}
+     * @private {Timer}
      */
     this.seekTimer_ = new Timer(() => {
       goog.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
@@ -115,7 +115,7 @@ class Controls extends FakeEventTarget {
      * This timer is used to detect when the user has stopped moving the mouse
      * and we should fade out the ui.
      *
-     * @private {shaka.util.Timer}
+     * @private {Timer}
      */
     this.mouseStillTimer_ = new Timer(() => {
       this.onMouseStill_();
@@ -128,7 +128,7 @@ class Controls extends FakeEventTarget {
      * Rather than calling the callback directly, |Controls| will always call it
      * through the timer to avoid conflicts.
      *
-     * @private {shaka.util.Timer}
+     * @private {Timer}
      */
     this.hideSettingsMenusTimer_ = new Timer(() => {
       /** @type {function(!HTMLElement)} */
@@ -148,7 +148,7 @@ class Controls extends FakeEventTarget {
      * Unlike the other timers, this timer does not "own" the callback because
      * this timer is acting like a heartbeat.
      *
-     * @private {shaka.util.Timer}
+     * @private {Timer}
      */
     this.timeAndSeekRangeTimer_ = new Timer(() => {
       this.updateTimeAndSeekRange_();
@@ -163,7 +163,7 @@ class Controls extends FakeEventTarget {
     /** @private {Localization} */
     this.localization_ = Controls.createLocalization_();
 
-    /** @private {shaka.util.EventManager} */
+    /** @private {EventManager} */
     this.eventManager_ = new EventManager();
 
     // Configure and create the layout of the controls
@@ -298,7 +298,7 @@ class Controls extends FakeEventTarget {
    * @description Fired when something went wrong with the controls.
    * @property {string} type
    *   'error'
-   * @property {!shaka.util.Error} detail
+   * @property {!Error} detail
    *   An object which contains details on the error.  The error's 'category'
    *   and 'code' properties will identify the specific error that occurred.
    *   In an uncompiled build, you can also use the 'message' and 'stack'
@@ -657,7 +657,7 @@ class Controls extends FakeEventTarget {
    */
   addControlsContainer_() {
     /** @private {!HTMLElement} */
-    this.controlsContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.controlsContainer_ = Dom.createHTMLElement('div');
     this.controlsContainer_.classList.add('shaka-controls-container');
     this.videoContainer_.appendChild(this.controlsContainer_);
 
@@ -676,12 +676,12 @@ class Controls extends FakeEventTarget {
    */
   addPlayButton_() {
     /** @private {!HTMLElement} */
-    this.playButtonContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.playButtonContainer_ = Dom.createHTMLElement('div');
     this.playButtonContainer_.classList.add('shaka-play-button-container');
     this.controlsContainer_.appendChild(this.playButtonContainer_);
 
     /** @private {!HTMLElement} */
-    this.playButton_ = shaka.util.Dom.createHTMLElement('button');
+    this.playButton_ = Dom.createHTMLElement('button');
     this.playButton_.classList.add('shaka-play-button');
     this.playButtonContainer_.appendChild(this.playButton_);
     this.onPlayStateChange_();
@@ -693,11 +693,11 @@ class Controls extends FakeEventTarget {
    */
   addBufferingSpinner_() {
     /** @private {!HTMLElement} */
-    this.spinnerContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.spinnerContainer_ = Dom.createHTMLElement('div');
     this.spinnerContainer_.classList.add('shaka-spinner-container');
     this.videoContainer_.appendChild(this.spinnerContainer_);
 
-    const spinner = shaka.util.Dom.createHTMLElement('div');
+    const spinner = Dom.createHTMLElement('div');
     spinner.classList.add('shaka-spinner');
     this.spinnerContainer_.appendChild(spinner);
 
@@ -732,12 +732,12 @@ class Controls extends FakeEventTarget {
    */
   addControlsButtonPanel_() {
     /** @private {!HTMLElement} */
-    this.bottomControls_ = shaka.util.Dom.createHTMLElement('div');
+    this.bottomControls_ = Dom.createHTMLElement('div');
     this.bottomControls_.classList.add('shaka-bottom-controls');
     this.controlsContainer_.appendChild(this.bottomControls_);
 
     /** @private {!HTMLElement} */
-    this.controlsButtonPanel_ = shaka.util.Dom.createHTMLElement('div');
+    this.controlsButtonPanel_ = Dom.createHTMLElement('div');
     this.controlsButtonPanel_.classList.add('shaka-controls-button-panel');
     this.controlsButtonPanel_.classList.add('shaka-no-propagation');
     this.controlsButtonPanel_.classList.add(
@@ -880,7 +880,7 @@ class Controls extends FakeEventTarget {
     // This container is to support IE 11.  See detailed notes in
     // less/range_elements.less for a complete explanation.
     // TODO: Factor this into a range-element component.
-    this.seekBarContainer_ = shaka.util.Dom.createHTMLElement('div');
+    this.seekBarContainer_ = Dom.createHTMLElement('div');
     this.seekBarContainer_.classList.add('shaka-seek-bar-container');
 
     this.seekBar_ =
@@ -1055,7 +1055,7 @@ class Controls extends FakeEventTarget {
    */
   onCastStatusChange_() {
     const isCasting = this.castProxy_.isCasting();
-    this.dispatchEvent(new shaka.util.FakeEvent('caststatuschanged', {
+    this.dispatchEvent(new FakeEvent('caststatuschanged', {
       newStatus: isCasting,
     }));
 

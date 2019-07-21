@@ -34,6 +34,7 @@ import FakeEvent from '../util/fake_event';
 import FakeEventTarget from '../util/fake_event_target';
 import EventManager from '../util/event_manager';
 import CastUtils from '../cast/cast_utils';
+import CastSender from '../cast/cast_sender';
 
 const shaka = window.shaka;
 var goog = window.goog;
@@ -101,7 +102,7 @@ export default class CastProxy extends FakeEventTarget {
 			// but it's hacky and must be changed to a permanent solution
 			// allowing to change Receiver App ID for reals.
 			/** @private {shaka.cast.CastSender} */
-			this.sender_ = new shaka.cast.CastSender(
+			this.sender_ = new CastSender(
 				receiverAppId,
 				() => this.onCastStatusChanged_(),
 				() => this.onFirstCastStateUpdate_(),

@@ -16,6 +16,7 @@
  */
 
 // goog.provide('shaka.util.LanguageUtils');
+import ManifestParserUtils from '../util/manifest_parser_utils';
 
 // goog.require('goog.asserts');
 
@@ -46,7 +47,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static areLocaleCompatible(locale1, locale2) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -76,7 +77,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static areLanguageCompatible(locale1, locale2) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -116,7 +117,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static isParentOf(possibleParent, possibleChild) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -160,7 +161,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static isSiblingOf(localeA, localeB) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -197,7 +198,7 @@ export default class LanguageUtils {
 	 * @return {string}
 	 */
 	static normalize(locale) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		const components = locale.split('-');
 
@@ -231,7 +232,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static areSiblings(a, b) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		const baseA = LanguageUtils.getBase(a);
 		const baseB = LanguageUtils.getBase(b);
@@ -246,7 +247,7 @@ export default class LanguageUtils {
 	 * @return {string}
 	 */
 	static getBase(lang) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		const splitAt = lang.indexOf('-');
 		let major;
@@ -275,9 +276,9 @@ export default class LanguageUtils {
 	 * @return {string}
 	 */
 	static getLocaleForText(stream) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 		goog.asserts.assert(stream.type == ContentType.TEXT, 'Can only get language from text streams');
 
 		const language = stream.language || 'und';
@@ -295,7 +296,7 @@ export default class LanguageUtils {
 	 * @return {string}
 	 */
 	static getLocaleForVariant(variant) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		// Our preference order is:
 		//  1. Variant
@@ -329,7 +330,7 @@ export default class LanguageUtils {
 	 * @return {?string}
 	 */
 	static findClosestLocale(target, searchSpace) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		/** @type {string} */
 		const safeTarget = LanguageUtils.normalize(target);
@@ -398,7 +399,7 @@ export default class LanguageUtils {
 
 		return components;
 	}
-};
+}
 
 /**
  * A map from 3-letter language codes (ISO 639-2) to 2-letter language codes

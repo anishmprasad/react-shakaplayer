@@ -19,6 +19,8 @@
 
 // goog.require('shaka.util.EventManager');
 
+import EventManager from '../lib/util/event_manager';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -42,8 +44,8 @@ export default class Element {
 		/** @protected {shaka.ui.Controls} */
 		this.controls = controls;
 
-		/** @protected {shaka.util.EventManager} */
-		this.eventManager = new shaka.util.EventManager();
+		/** @protected {EventManager} */
+		this.eventManager = new EventManager();
 
 		/** @protected {shaka.ui.Localization} */
 		this.localization = this.controls.getLocalization();
