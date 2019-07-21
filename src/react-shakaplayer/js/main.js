@@ -25,6 +25,12 @@
 
 import shakaAssets from './common/assets';
 import ShakaDemoCustom from './custom'
+import error from '../lib/util/error'
+
+
+const errorUtils = new error()
+
+console.log(errorUtils)
 
 const shaka  = window.shaka
 
@@ -1225,7 +1231,8 @@ class ShakaDemoMain {
     if (severity == null || error.severity == undefined) {
       // It's not a shaka.util.Error. Treat it as very severe, since those
       // should not be happening.
-      severity = shaka.util.Error.Severity.CRITICAL;
+      
+      severity = errorUtils.severity.CRITICAL;
     }
 
     const message = error.message || ('Error code ' + error.code);

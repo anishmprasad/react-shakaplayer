@@ -26,7 +26,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.SwitchHistory = class {
+export default class SwitchHistory {
 	constructor() {
 		/** @private {?shaka.extern.Variant} */
 		this.currentVariant_ = null;
@@ -122,4 +122,4 @@ shaka.util.SwitchHistory = class {
 			bandwidth: entry.bandwidth
 		};
 	}
-};
+}

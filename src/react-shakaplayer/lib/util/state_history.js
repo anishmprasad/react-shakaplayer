@@ -30,7 +30,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.StateHistory = class {
+export default class StateHistory {
 	constructor() {
 		/**
 		 * The state that we think is still the current change. It is "open" for
@@ -158,4 +158,4 @@ shaka.util.StateHistory = class {
 	getNowInSeconds_() {
 		return Date.now() / 1000;
 	}
-};
+}

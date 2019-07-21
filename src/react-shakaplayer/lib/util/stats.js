@@ -20,6 +20,9 @@
 // goog.require('shaka.util.StateHistory');
 // goog.require('shaka.util.SwitchHistory');
 
+import StateHistory from '../util/state_history';
+import SwitchHistory from '../util/switch_history';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -29,7 +32,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.util.Stats = class {
+export default class Stats {
 	constructor() {
 		/** @private {number} */
 		this.width_ = NaN;
@@ -49,11 +52,11 @@ shaka.util.Stats = class {
 		/** @private {number} */
 		this.bandwidthEstimate_ = NaN;
 
-		/** @private {!shaka.util.StateHistory} */
-		this.stateHistory_ = new shaka.util.StateHistory();
+		/** @private {!StateHistory} */
+		this.stateHistory_ = new StateHistory();
 
-		/** @private {!shaka.util.SwitchHistory} */
-		this.switchHistory_ = new shaka.util.SwitchHistory();
+		/** @private {!SwitchHistory} */
+		this.switchHistory_ = new SwitchHistory();
 	}
 
 	/**
@@ -104,14 +107,14 @@ shaka.util.Stats = class {
 	}
 
 	/**
-	 * @return {!shaka.util.StateHistory}
+	 * @return {!StateHistory}
 	 */
 	getStateHistory() {
 		return this.stateHistory_;
 	}
 
 	/**
-	 * @return {!shaka.util.SwitchHistory}
+	 * @return {!SwitchHistory}
 	 */
 	getSwitchHistory() {
 		return this.switchHistory_;
@@ -162,4 +165,4 @@ shaka.util.Stats = class {
 			stateHistory: []
 		};
 	}
-};
+}
