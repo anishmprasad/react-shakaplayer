@@ -20,13 +20,16 @@
 // goog.require('goog.asserts');
 // goog.require('shaka.log');
 // goog.require('shaka.util.DataViewReader');
+
+import DataViewReader from '../util/data_view_reader';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
  * @export
  */
-shaka.util.Mp4Parser = class {
+class Mp4Parser {
 	constructor() {
 		/** @private {!Object.<number, shaka.util.Mp4Parser.BoxType_>} */
 		this.headers_ = [];
@@ -89,9 +92,9 @@ shaka.util.Mp4Parser = class {
 	 */
 	parse(data, partialOkay) {
 		const wrapped = new Uint8Array(data);
-		const reader = new shaka.util.DataViewReader(
+		const reader = new DataViewReader(
 			new DataView(wrapped.buffer, wrapped.byteOffset, wrapped.byteLength),
-			shaka.util.DataViewReader.Endianness.BIG_ENDIAN
+			DataViewReader.Endianness.BIG_ENDIAN
 		);
 
 		this.done_ = false;
@@ -150,9 +153,9 @@ shaka.util.Mp4Parser = class {
 			const payloadSize = end - reader.getPosition();
 			const payload = payloadSize > 0 ? reader.readBytes(payloadSize) : new Uint8Array(0);
 
-			const payloadReader = new shaka.util.DataViewReader(
+			const payloadReader = new DataViewReader(
 				new DataView(payload.buffer, payload.byteOffset, payload.byteLength),
-				shaka.util.DataViewReader.Endianness.BIG_ENDIAN
+				DataViewReader.Endianness.BIG_ENDIAN
 			);
 
 			/** @type {shaka.extern.ParsedBox} */
@@ -250,13 +253,13 @@ shaka.util.Mp4Parser = class {
 		const name = String.fromCharCode((type >> 24) & 0xff, (type >> 16) & 0xff, (type >> 8) & 0xff, type & 0xff);
 		return name;
 	}
-};
+}
 
 /**
  * @typedef {function(!shaka.extern.ParsedBox)}
  * @exportInterface
  */
-shaka.util.Mp4Parser.CallbackType;
+shaka.util.Mp4Parser.CallbackType = {};
 
 /**
  * An enum used to track the type of box so that the correct values can be
@@ -269,3 +272,5 @@ shaka.util.Mp4Parser.BoxType_ = {
 	BASIC_BOX: 0,
 	FULL_BOX: 1
 };
+
+export default Mp4Parser;

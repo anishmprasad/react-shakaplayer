@@ -23,7 +23,7 @@ var goog = window.goog;
  * @summary A simple multimap template.
  * @template T
  */
-shaka.util.MultiMap = class {
+export default class MultiMap {
 	constructor() {
 		/** @private {!Object.<string, !Array.<T>>} */
 		this.map_ = {};
@@ -99,4 +99,4 @@ shaka.util.MultiMap = class {
 			callback(key, this.map_[key]);
 		}
 	}
-};
+}

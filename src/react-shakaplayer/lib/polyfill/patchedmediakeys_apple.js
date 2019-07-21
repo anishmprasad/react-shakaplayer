@@ -30,6 +30,14 @@
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import polyfill from './all';
+import EventManager from '../util/event_manager';
+import FakeEvent from '../util/fake_event';
+import FakeEventTarget from '../util/fake_event_target';
+import PublicPromise from '../util/public_promise';
+import StringUtils from '../util/string_utils';
+import Uint8ArrayUtils from '../util/uint8array_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -37,7 +45,7 @@ var goog = window.goog;
  * @summary A polyfill to implement modern, standardized EME on top of Apple's
  * prefixed EME in Safari.
  */
-shaka.polyfill.PatchedMediaKeysApple = class {
+class PatchedMediaKeysApple {
 	/**
 	 * Installs the polyfill if needed.
 	 */
@@ -170,7 +178,7 @@ shaka.polyfill.PatchedMediaKeysApple = class {
 		}
 
 		// The second part is a UTF-16 LE URI from the manifest.
-		const uriString = shaka.util.StringUtils.fromUTF16(initDataArray.slice(intLength), /* littleEndian= */ true);
+		const uriString = StringUtils.fromUTF16(initDataArray.slice(intLength), /* littleEndian= */ true);
 
 		// The domain of that URI is the content ID according to Apple's FPS
 		// sample.
@@ -181,7 +189,7 @@ shaka.polyfill.PatchedMediaKeysApple = class {
 		// composed of several parts.  First, the raw init data we already got.
 		// Second, a 4-byte LE length followed by the content ID in UTF-16-LE.
 		// Third, a 4-byte LE length followed by the certificate.
-		const contentIdArray = new Uint8Array(shaka.util.StringUtils.toUTF16(contentId, /* littleEndian= */ true));
+		const contentIdArray = new Uint8Array(StringUtils.toUTF16(contentId, /* littleEndian= */ true));
 
 		const rebuiltInitData = new Uint8Array(
 			initDataArray.byteLength + intLength + contentIdArray.byteLength + intLength + certificate.byteLength
@@ -240,14 +248,14 @@ shaka.polyfill.PatchedMediaKeysApple = class {
 
 		this.dispatchEvent(event2);
 	}
-};
+}
 
 /**
  * An implementation of MediaKeySystemAccess.
  *
  * @implements {MediaKeySystemAccess}
  */
-shaka.polyfill.PatchedMediaKeysApple.MediaKeySystemAccess = class {
+PatchedMediaKeysApple.MediaKeySystemAccess = class {
 	/**
 	 * @param {string} keySystem
 	 * @param {!Array.<!MediaKeySystemConfiguration>} supportedConfigurations
@@ -385,7 +393,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySystemAccess = class {
  *
  * @implements {MediaKeys}
  */
-shaka.polyfill.PatchedMediaKeysApple.MediaKeys = class {
+PatchedMediaKeysApple.MediaKeys = class {
 	/** @param {string} keySystem */
 	constructor(keySystem) {
 		shaka.log.debug('PatchedMediaKeysApple.MediaKeys');
@@ -394,7 +402,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeys = class {
 		this.nativeMediaKeys_ = new WebKitMediaKeys(keySystem);
 
 		/** @private {!shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		this.eventManager_ = new EventManager();
 
 		/** @type {Uint8Array} */
 		this.certificate = null;
@@ -476,7 +484,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeys = class {
  *
  * @implements {MediaKeySession}
  */
-shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.FakeEventTarget {
+PatchedMediaKeysApple.MediaKeySession = class extends FakeEventTarget {
 	/**
 	 * @param {WebKitMediaKeys} nativeMediaKeys
 	 * @param {string} sessionType
@@ -503,7 +511,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
 		this.updatePromise_ = null;
 
 		/** @private {!shaka.util.EventManager} */
-		this.eventManager_ = new shaka.util.EventManager();
+		this.eventManager_ = new EventManager();
 
 		/** @type {string} */
 		this.sessionId = '';
@@ -512,7 +520,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
 		this.expiration = NaN;
 
 		/** @type {!shaka.util.PublicPromise} */
-		this.closed = new shaka.util.PublicPromise();
+		this.closed = new PublicPromise();
 
 		/** @type {!shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap} */
 		this.keyStatuses = new shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap();
@@ -522,7 +530,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
 	generateRequest(initDataType, initData) {
 		shaka.log.debug('PatchedMediaKeysApple.MediaKeySession.generateRequest');
 
-		this.generateRequestPromise_ = new shaka.util.PublicPromise();
+		this.generateRequestPromise_ = new PublicPromise();
 
 		try {
 			// This EME spec version requires a MIME content type as the 1st
@@ -572,7 +580,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
 	update(response) {
 		shaka.log.debug('PatchedMediaKeysApple.MediaKeySession.update');
 
-		this.updatePromise_ = new shaka.util.PublicPromise();
+		this.updatePromise_ = new PublicPromise();
 
 		try {
 			// Pass through to the native session.
@@ -633,7 +641,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
 
 		const isNew = this.keyStatuses.getStatus() == undefined;
 
-		const event2 = new shaka.util.FakeEvent('message', {
+		const event2 = new FakeEvent('message', {
 			messageType: isNew ? 'license-request' : 'license-renewal',
 			message: event.message.buffer
 		});
@@ -711,7 +719,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
 	 */
 	updateKeyStatus_(status) {
 		this.keyStatuses.setStatus(status);
-		const event = new shaka.util.FakeEvent('keystatuseschange');
+		const event = new FakeEvent('keystatuseschange');
 		this.dispatchEvent(event);
 	}
 };
@@ -723,7 +731,7 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeySession = class extends shaka.util.
  * @todo Consolidate the MediaKeyStatusMap types in these polyfills.
  * @implements {MediaKeyStatusMap}
  */
-shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap = class {
+PatchedMediaKeysApple.MediaKeyStatusMap = class {
 	constructor() {
 		/**
 		 * @type {number}
@@ -771,8 +779,8 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap = class {
 
 	/** @override */
 	has(keyId) {
-		const fakeKeyId = shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap.KEY_ID_;
-		if (this.status_ && shaka.util.Uint8ArrayUtils.equal(new Uint8Array(keyId), new Uint8Array(fakeKeyId))) {
+		const fakeKeyId = PatchedMediaKeysApple.MediaKeyStatusMap.KEY_ID_;
+		if (this.status_ && Uint8ArrayUtils.equal(new Uint8Array(keyId), new Uint8Array(fakeKeyId))) {
 			return true;
 		}
 		return false;
@@ -807,6 +815,6 @@ shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap = class {
  * @const {!ArrayBuffer}
  * @private
  */
-shaka.polyfill.PatchedMediaKeysApple.MediaKeyStatusMap.KEY_ID_;
+PatchedMediaKeysApple.MediaKeyStatusMap.KEY_ID_;
 
-shaka.polyfill.register(shaka.polyfill.PatchedMediaKeysApple.install);
+polyfill.register(PatchedMediaKeysApple.install);

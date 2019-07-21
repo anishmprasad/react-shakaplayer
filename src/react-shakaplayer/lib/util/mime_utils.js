@@ -22,7 +22,7 @@ var goog = window.goog;
 /**
  * @summary A set of utility functions for dealing with MIME types.
  */
-shaka.util.MimeUtils = class {
+class MimeUtils {
 	/**
 	 * Takes a MIME type and optional codecs string and produces the full MIME
 	 * type.
@@ -49,7 +49,7 @@ shaka.util.MimeUtils = class {
 	static getExtendedType(stream) {
 		const components = [stream.mimeType];
 
-		const extendedMimeParams = shaka.util.MimeUtils.EXTENDED_MIME_PARAMETERS_;
+		const extendedMimeParams = MimeUtils.EXTENDED_MIME_PARAMETERS_;
 		extendedMimeParams.forEach((mimeKey, streamKey) => {
 			const value = stream[streamKey];
 			if (value) {
@@ -76,7 +76,7 @@ shaka.util.MimeUtils = class {
 	 * @return {string}
 	 */
 	static getCodecBase(codecString) {
-		const parts = shaka.util.MimeUtils.getCodecParts_(codecString);
+		const parts = MimeUtils.getCodecParts_(codecString);
 		return parts[0];
 	}
 
@@ -98,7 +98,7 @@ shaka.util.MimeUtils = class {
 		// Make sure that we always return a "base" and "profile".
 		return [base, profile];
 	}
-};
+}
 
 /**
  * A map from Stream object keys to MIME type parameters.  These should be
@@ -109,7 +109,7 @@ shaka.util.MimeUtils = class {
  * @const {!Map.<string, string>}
  * @private
  */
-shaka.util.MimeUtils.EXTENDED_MIME_PARAMETERS_ = new Map()
+MimeUtils.EXTENDED_MIME_PARAMETERS_ = new Map()
 	.set('codecs', 'codecs')
 	.set('frameRate', 'framerate') // Ours is camelCase, theirs is lowercase.
 	.set('bandwidth', 'bitrate') // They are in the same units: bits/sec.
@@ -121,4 +121,6 @@ shaka.util.MimeUtils.EXTENDED_MIME_PARAMETERS_ = new Map()
  * A mimetype created for CEA closed captions.
  * @const {string}
  */
-shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE = 'application/cea-608';
+MimeUtils.CLOSED_CAPTION_MIMETYPE = 'application/cea-608';
+
+export default MimeUtils;

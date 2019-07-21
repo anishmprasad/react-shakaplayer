@@ -24,13 +24,17 @@
 // goog.require('shaka.util.MimeUtils');
 // goog.require('shaka.util.Platform');
 
+import polyfill from './all';
+import MimeUtils from '../util/mime_utils';
+import Platform from '../util/platform';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
 /**
  * @summary A polyfill to patch MSE bugs.
  */
-shaka.polyfill.MediaSource = class {
+export default class MediaSource {
 	/**
 	 * Install the polyfill if needed.
 	 */
@@ -48,14 +52,14 @@ shaka.polyfill.MediaSource = class {
 		} else if (window.cast && cast.__platform__ && cast.__platform__.canDisplayType) {
 			shaka.log.info('Patching Chromecast MSE bugs.');
 			// Chromecast cannot make accurate determinations via isTypeSupported.
-			shaka.polyfill.MediaSource.patchCastIsTypeSupported_();
-		} else if (shaka.util.Platform.isApple()) {
+			MediaSource.patchCastIsTypeSupported_();
+		} else if (Platform.isApple()) {
 			const version = navigator.appVersion;
 
 			// TS content is broken on Safari in general.
 			// See https://github.com/google/shaka-player/issues/743
 			// and https://bugs.webkit.org/show_bug.cgi?id=165342
-			shaka.polyfill.MediaSource.rejectTsContent_();
+			polyfill.MediaSource.rejectTsContent_();
 
 			if (version.includes('Version/8')) {
 				// Safari 8 does not implement appendWindowEnd.  If we ignore the
@@ -63,43 +67,43 @@ shaka.polyfill.MediaSource = class {
 				// will fail to play correctly.  The best we can do is blacklist Safari
 				// 8.
 				shaka.log.info('Blacklisting Safari 8 MSE.');
-				shaka.polyfill.MediaSource.blacklist_();
+				polyfill.MediaSource.blacklist_();
 			} else if (version.includes('Version/9')) {
 				shaka.log.info('Patching Safari 9 MSE bugs.');
 				// Safari 9 does not correctly implement abort() on SourceBuffer.
 				// Calling abort() causes a decoder failure, rather than resetting the
 				// decode timestamp as called for by the spec.
 				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=160316
-				shaka.polyfill.MediaSource.stubAbort_();
+				polyfill.MediaSource.stubAbort_();
 			} else if (version.includes('Version/10')) {
 				shaka.log.info('Patching Safari 10 MSE bugs.');
 				// Safari 10 does not correctly implement abort() on SourceBuffer.
 				// Calling abort() before appending a segment causes that segment to be
 				// incomplete in buffer.
 				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165342
-				shaka.polyfill.MediaSource.stubAbort_();
+				polyfill.MediaSource.stubAbort_();
 				// Safari 10 fires spurious 'updateend' events after endOfStream().
 				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165336
-				shaka.polyfill.MediaSource.patchEndOfStreamEvents_();
+				polyfill.MediaSource.patchEndOfStreamEvents_();
 			} else if (version.includes('Version/11') || version.includes('Version/12')) {
 				shaka.log.info('Patching Safari 11/12 MSE bugs.');
 				// Safari 11 does not correctly implement abort() on SourceBuffer.
 				// Calling abort() before appending a segment causes that segment to be
 				// incomplete in the buffer.
 				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=165342
-				shaka.polyfill.MediaSource.stubAbort_();
+				polyfill.MediaSource.stubAbort_();
 				// If you remove up to a keyframe, Safari 11 incorrectly will also
 				// remove that keyframe and the content up to the next.
 				// Offsetting the end of the removal range seems to help.
 				// Bug filed: https://bugs.webkit.org/show_bug.cgi?id=177884
-				shaka.polyfill.MediaSource.patchRemovalRange_();
+				polyfill.MediaSource.patchRemovalRange_();
 			}
-		} else if (shaka.util.Platform.isTizen()) {
+		} else if (Platform.isTizen()) {
 			// Tizen's implementation of MSE does not work well with opus. To prevent
 			// the player from trying to play opus on Tizen, we will override media
 			// source to always reject opus content.
 
-			shaka.polyfill.MediaSource.rejectCodec_('opus');
+			polyfill.MediaSource.rejectCodec_('opus');
 		} else {
 			shaka.log.info('Using native MSE as-is.');
 		}
@@ -294,7 +298,7 @@ shaka.polyfill.MediaSource = class {
 		const isTypeSupported = MediaSource.isTypeSupported;
 
 		MediaSource.isTypeSupported = mimeType => {
-			const actualCodec = shaka.util.MimeUtils.getCodecBase(mimeType);
+			const actualCodec = MimeUtils.getCodecBase(mimeType);
 			return actualCodec != codec && isTypeSupported(mimeType);
 		};
 	}
@@ -373,6 +377,6 @@ shaka.polyfill.MediaSource = class {
 			return cast.__platform__.canDisplayType(extendedMimeType);
 		};
 	}
-};
+}
 
-shaka.polyfill.register(shaka.polyfill.MediaSource.install);
+polyfill.register(MediaSource.install);

@@ -19,7 +19,7 @@
 var shaka = window.shaka;
 var goog = window.goog;
 
-shaka.util.ObjectUtils = class {
+class ObjectUtils {
 	/**
 	 * Performs a deep clone of the given simple object.  This does not copy
 	 * prototypes, custom properties (e.g. read-only), or multiple references to
@@ -84,4 +84,6 @@ shaka.util.ObjectUtils = class {
 		};
 		return clone(arg);
 	}
-};
+}
+
+export default ObjectUtils;

@@ -20,6 +20,9 @@
 // goog.require('shaka.util.ArrayUtils');
 // goog.require('shaka.util.IDestroyable');
 
+import ArrayUtils from '../util/array_utils';
+import IDestroyable from '../util/i_destroyable';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -29,7 +32,7 @@ var goog = window.goog;
  *
  * @implements {shaka.util.IDestroyable}
  */
-shaka.util.OperationManager = class {
+class OperationManager {
 	constructor() {
 		/** @private {!Array.<!shaka.extern.IAbortableOperation>} */
 		this.operations_ = [];
@@ -44,7 +47,7 @@ shaka.util.OperationManager = class {
 	manage(operation) {
 		this.operations_.push(
 			operation.finally(() => {
-				shaka.util.ArrayUtils.remove(this.operations_, operation);
+				ArrayUtils.remove(this.operations_, operation);
 			})
 		);
 	}
@@ -64,4 +67,6 @@ shaka.util.OperationManager = class {
 		this.operations_ = [];
 		return Promise.all(cleanup);
 	}
-};
+}
+
+export default OperationManager;

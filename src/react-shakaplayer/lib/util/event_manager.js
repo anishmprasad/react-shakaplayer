@@ -21,6 +21,9 @@
 // goog.require('shaka.util.IReleasable');
 // goog.require('shaka.util.MultiMap');
 
+import MultiMap from '../util/multi_map';
+import IReleasable from '../util/i_releasable';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -31,13 +34,13 @@ var goog = window.goog;
  *
  * @implements {shaka.util.IReleasable}
  */
-shaka.util.EventManager = class {
+class EventManager {
 	constructor() {
 		/**
 		 * Maps an event type to an array of event bindings.
 		 * @private {shaka.util.MultiMap.<!shaka.util.EventManager.Binding_>}
 		 */
-		this.bindingMap_ = new shaka.util.MultiMap();
+		this.bindingMap_ = new MultiMap();
 	}
 
 	/**
@@ -129,19 +132,19 @@ shaka.util.EventManager = class {
 
 		this.bindingMap_.clear();
 	}
-};
+}
 
 /**
  * @typedef {function(!Event)}
  */
-shaka.util.EventManager.ListenerType;
+EventManager.ListenerType = {};
 
 /**
  * Creates a new Binding_ and attaches the event listener to the event target.
  *
  * @private
  */
-shaka.util.EventManager.Binding_ = class {
+EventManager.Binding_ = class {
 	/**
 	 * @param {EventTarget} target The event target.
 	 * @param {string} type The event type.
@@ -254,4 +257,6 @@ shaka.util.EventManager.Binding_ = class {
 };
 
 /** @private {(boolean|undefined)} */
-shaka.util.EventManager.Binding_.supportsObject_ = undefined;
+EventManager.Binding_.supportsObject_ = undefined;
+
+export default EventManager;
