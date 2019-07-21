@@ -25,7 +25,7 @@ var goog = window.goog;
 /**
  * @export
  */
-shaka.util.Dom = class {
+export default class Dom {
 	/**
 	 * Creates an element, and cast the type from Element to HTMLElement.
 	 *
@@ -97,4 +97,4 @@ shaka.util.Dom = class {
 			element.removeChild(element.firstChild);
 		}
 	}
-};
+}

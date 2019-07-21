@@ -24,7 +24,7 @@ var goog = window.goog;
  * type.
  * @final
  */
-shaka.util.Iterables = class {
+export default class Iterables {
 	/**
 	 * @param {!Iterable.<FROM>} iterable
 	 * @param {function(FROM):TO} mapping
@@ -87,4 +87,4 @@ shaka.util.Iterables = class {
 		}
 		return out;
 	}
-};
+}

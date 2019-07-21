@@ -25,7 +25,7 @@ var goog = window.goog;
 /**
  * Reads elements from strings.
  */
-shaka.util.TextParser = class {
+export default class TextParser {
 	/**
 	 * @param {string} data
 	 */
@@ -137,4 +137,4 @@ shaka.util.TextParser = class {
 			};
 		}
 	}
-};
+}

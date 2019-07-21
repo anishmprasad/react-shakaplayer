@@ -26,7 +26,7 @@ var goog = window.goog;
  * @summary A set of language utility functions.
  * @final
  */
-shaka.util.LanguageUtils = class {
+export default class LanguageUtils {
 	/**
 	 * Check if |locale1| and |locale2| are locale-compatible.
 	 *
@@ -407,7 +407,7 @@ shaka.util.LanguageUtils = class {
  * @const {!Map.<string, string>}
  * @private
  */
-shaka.util.LanguageUtils.isoMap_ = new Map([
+LanguageUtils.isoMap_ = new Map([
 	['aar', 'aa'],
 	['abk', 'ab'],
 	['afr', 'af'],

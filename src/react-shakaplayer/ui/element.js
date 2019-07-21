@@ -30,7 +30,7 @@ var goog = window.goog;
  * @abstract
  * @export
  */
-shaka.ui.Element = class {
+export default class Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -71,4 +71,4 @@ shaka.ui.Element = class {
 
 		return Promise.resolve();
 	}
-};
+}

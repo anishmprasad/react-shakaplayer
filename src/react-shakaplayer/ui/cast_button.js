@@ -24,6 +24,13 @@
 // goog.require('shaka.ui.Utils');
 // goog.require('shaka.util.Dom');
 
+import Element from './element';
+// import Locales from './locales/'
+import Localization from './localization';
+import OverflowMenu from './overflow_menu';
+import Utils from './ui_utils';
+import Dom from '../lib/util/dom_utils';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -35,7 +42,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.CastButton = class extends shaka.ui.Element {
+class CastButton extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -47,22 +54,22 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 		this.castProxy_ = this.controls.getCastProxy();
 
 		/** @private {!HTMLElement} */
-		this.castButton_ = shaka.util.Dom.createHTMLElement('button');
+		this.castButton_ = Dom.createHTMLElement('button');
 		this.castButton_.classList.add('shaka-cast-button');
 		this.castButton_.setAttribute('aria-pressed', 'false');
 
 		/** @private {!HTMLElement} */
-		this.castIcon_ = shaka.util.Dom.createHTMLElement('i');
+		this.castIcon_ = Dom.createHTMLElement('i');
 		this.castIcon_.classList.add('material-icons');
-		this.castIcon_.textContent = shaka.ui.Enums.MaterialDesignIcons.CAST;
+		this.castIcon_.textContent = Enums.MaterialDesignIcons.CAST;
 		this.castButton_.appendChild(this.castIcon_);
 
-		const label = shaka.util.Dom.createHTMLElement('label');
+		const label = Dom.createHTMLElement('label');
 		label.classList.add('shaka-overflow-button-label');
-		this.castNameSpan_ = shaka.util.Dom.createHTMLElement('span');
+		this.castNameSpan_ = Dom.createHTMLElement('span');
 		label.appendChild(this.castNameSpan_);
 
-		this.castCurrentSelectionSpan_ = shaka.util.Dom.createHTMLElement('span');
+		this.castCurrentSelectionSpan_ = Dom.createHTMLElement('span');
 		this.castCurrentSelectionSpan_.classList.add('shaka-current-selection-span');
 		label.appendChild(this.castCurrentSelectionSpan_);
 		this.castButton_.appendChild(label);
@@ -102,9 +109,9 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 				this.castButton_.disabled = false;
 			} catch (error) {
 				this.castButton_.disabled = false;
-				if (error.code != shaka.util.Error.Code.CAST_CANCELED_BY_USER) {
+				if (error.code != Error.Code.CAST_CANCELED_BY_USER) {
 					this.controls.dispatchEvent(
-						new shaka.util.FakeEvent('error', {
+						new FakeEvent('error', {
 							detail: error
 						})
 					);
@@ -159,17 +166,19 @@ shaka.ui.CastButton = class extends shaka.ui.Element {
 		// which needs localization.
 		this.setCurrentCastSelection_();
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.CastButton.Factory = class {
+CastButton.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
 		return new shaka.ui.CastButton(rootElement, controls);
 	}
 };
 
-shaka.ui.OverflowMenu.registerElement('cast', new shaka.ui.CastButton.Factory());
+OverflowMenu.registerElement('cast', new CastButton.Factory());
+
+export default CastButton;

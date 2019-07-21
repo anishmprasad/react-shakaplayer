@@ -26,13 +26,19 @@
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.TextParser');
 
+import { Cue, CueRegion } from '../text/cue';
+import TextEngine from '../text/text_engine';
+import error from '../util/error';
+import StringUtils from '../util/string_utils';
+import TextParser from '../util/text_parser';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
  * @implements {shaka.extern.TextParser}
  */
-shaka.text.VttTextParser = class {
+class VttTextParser {
 	/** @override */
 	parseInit(data) {
 		goog.asserts.assert(false, 'VTT does not have init segments');
@@ -43,18 +49,14 @@ shaka.text.VttTextParser = class {
 	 * @throws {shaka.util.Error}
 	 */
 	parseMedia(data, time) {
-		const VttTextParser = shaka.text.VttTextParser;
+		// const VttTextParser = shaka.text.VttTextParser;
 		// Get the input as a string.  Normalize newlines to \n.
-		let str = shaka.util.StringUtils.fromUTF8(data);
+		let str = StringUtils.fromUTF8(data);
 		str = str.replace(/\r\n|\r(?=[^\n]|$)/gm, '\n');
 		const blocks = str.split(/\n{2,}/m);
 
 		if (!/^WEBVTT($|[ \t\n])/m.test(blocks[0])) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_TEXT_HEADER
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_TEXT_HEADER);
 		}
 
 		let offset = time.segmentStart;
@@ -81,18 +83,14 @@ shaka.text.VttTextParser = class {
 
 				const mpegTimeMatch = blocks[0].match(/MPEGTS:(\d+)/m);
 				if (cueTimeMatch && mpegTimeMatch) {
-					const parser = new shaka.util.TextParser(cueTimeMatch[1]);
-					const cueTime = shaka.text.VttTextParser.parseTime_(parser);
+					const parser = new TextParser(cueTimeMatch[1]);
+					const cueTime = VttTextParser.parseTime_(parser);
 					if (cueTime == null) {
-						throw new shaka.util.Error(
-							shaka.util.Error.Severity.CRITICAL,
-							shaka.util.Error.Category.TEXT,
-							shaka.util.Error.Code.INVALID_TEXT_HEADER
-						);
+						throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_TEXT_HEADER);
 					}
 
 					const mpegTime = Number(mpegTimeMatch[1]);
-					const mpegTimescale = shaka.text.VttTextParser.MPEG_TIMESCALE_;
+					const mpegTimescale = VttTextParser.MPEG_TIMESCALE_;
 					// Apple-encoded HLS content uses absolute timestamps, so assume the
 					// presence of the map tag means the content uses absolute timestamps.
 					offset = time.periodStart + (mpegTime / mpegTimescale - cueTime);
@@ -132,12 +130,12 @@ shaka.text.VttTextParser = class {
 	 * @private
 	 */
 	static parseRegion_(text) {
-		const VttTextParser = shaka.text.VttTextParser;
-		const parser = new shaka.util.TextParser(text);
+		// const VttTextParser = shaka.text.VttTextParser;
+		const parser = new TextParser(text);
 		// The region string looks like this:
 		// Region: id=fred width=50% lines=3 regionanchor=0%,100%
 		//         viewportanchor=10%,90% scroll=up
-		const region = new shaka.text.CueRegion();
+		const region = new CueRegion();
 
 		// Skip 'Region:'
 		parser.readWord();
@@ -169,7 +167,7 @@ shaka.text.VttTextParser = class {
 	 * @private
 	 */
 	static parseCue_(text, timeOffset, regions) {
-		const VttTextParser = shaka.text.VttTextParser;
+		// const VttTextParser = shaka.text.VttTextParser;
 
 		// Skip empty blocks.
 		if (text.length == 1 && !text[0]) {
@@ -193,17 +191,13 @@ shaka.text.VttTextParser = class {
 		}
 
 		// Parse the times.
-		const parser = new shaka.util.TextParser(text[0]);
+		const parser = new TextParser(text[0]);
 		let start = VttTextParser.parseTime_(parser);
 		const expect = parser.readRegex(/[ \t]+-->[ \t]+/g);
 		let end = VttTextParser.parseTime_(parser);
 
 		if (start == null || expect == null || end == null) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.TEXT,
-				shaka.util.Error.Code.INVALID_TEXT_CUE
-			);
+			throw new error(error.Severity.CRITICAL, error.Category.TEXT, error.Code.INVALID_TEXT_CUE);
 		}
 
 		start += timeOffset;
@@ -215,7 +209,7 @@ shaka.text.VttTextParser = class {
 			.join('\n')
 			.trim();
 
-		const cue = new shaka.text.Cue(start, end, payload);
+		const cue = new Cue(start, end, payload);
 
 		// Parse optional settings.
 		parser.skipWhitespace();
@@ -247,7 +241,7 @@ shaka.text.VttTextParser = class {
 	 * @return {boolean} True on success.
 	 */
 	static parseCueSetting(cue, word, regions) {
-		const VttTextParser = shaka.text.VttTextParser;
+		// const VttTextParser = shaka.text.VttTextParser;
 		let results = null;
 		if ((results = /^align:(start|middle|center|end|left|right)$/.exec(word))) {
 			VttTextParser.setTextAlign_(cue, results[1]);
@@ -330,7 +324,7 @@ shaka.text.VttTextParser = class {
 	 * @private
 	 */
 	static setTextAlign_(cue, align) {
-		const Cue = shaka.text.Cue;
+		// const Cue = shaka.text.Cue;
 		if (align == 'middle') {
 			cue.textAlign = Cue.textAlign.CENTER;
 		} else {
@@ -365,7 +359,7 @@ shaka.text.VttTextParser = class {
 	 * @private
 	 */
 	static setVerticalWritingMode_(cue, value) {
-		const Cue = shaka.text.Cue;
+		// const Cue = shaka.text.Cue;
 		if (value == 'lr') {
 			cue.writingMode = Cue.writingMode.VERTICAL_LEFT_TO_RIGHT;
 		} else {
@@ -380,7 +374,7 @@ shaka.text.VttTextParser = class {
 	 * @private
 	 */
 	static parsedLineValueAndInterpretation_(cue, word) {
-		const Cue = shaka.text.Cue;
+		// const Cue = shaka.text.Cue;
 		let results = null;
 		if ((results = /^line:([\d.]+)%(?:,(start|end|center))?$/.exec(word))) {
 			cue.lineInterpretation = Cue.lineInterpretation.PERCENTAGE;
@@ -434,14 +428,16 @@ shaka.text.VttTextParser = class {
 
 		return miliseconds / 1000 + seconds + minutes * 60 + hours * 3600;
 	}
-};
+}
 
 /**
  * @const {number}
  * @private
  */
-shaka.text.VttTextParser.MPEG_TIMESCALE_ = 90000;
+VttTextParser.MPEG_TIMESCALE_ = 90000;
 
-shaka.text.TextEngine.registerParser('text/vtt', shaka.text.VttTextParser);
+TextEngine.registerParser('text/vtt', VttTextParser);
 
-shaka.text.TextEngine.registerParser('text/vtt; codecs="vtt"', shaka.text.VttTextParser);
+TextEngine.registerParser('text/vtt; codecs="vtt"', VttTextParser);
+
+export default VttTextParser;

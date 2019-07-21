@@ -31,7 +31,7 @@
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.TextParser');
 
-import Cue from '../text/cue';
+import {Cue} from '../text/cue';
 import TextEngine from '../text/text_engine';
 import VttTextParser from '../text/vtt_text_parser';
 import DataViewReader from '../util/data_view_reader';

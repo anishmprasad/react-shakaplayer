@@ -15,65 +15,60 @@
  * limitations under the License.
  */
 
+/*eslint-disable */
 
-goog.provide('shaka.ui.Constants');
+// goog.provide('shaka.ui.Constants');
 
-
-/**
- * @const {string}
- */
-shaka.ui.Constants.ARIA_LABEL = 'aria-label';
-
+let Constants = {};
 
 /**
  * @const {string}
  */
-shaka.ui.Constants.SEEK_BAR_BASE_COLOR = 'rgba(255, 255, 255, 0.3)';
-
-
-/**
- * @const {string}
- */
-shaka.ui.Constants.SEEK_BAR_PLAYED_COLOR = 'rgb(255, 255, 255)';
-
+Constants.ARIA_LABEL = 'aria-label';
 
 /**
  * @const {string}
  */
-shaka.ui.Constants.SEEK_BAR_BUFFERED_COLOR = 'rgba(255, 255, 255, 0.54)';
-
-
-/**
- * @const {string}
- */
-shaka.ui.Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR = 'rgb(255, 255, 255)';
-
+Constants.SEEK_BAR_BASE_COLOR = 'rgba(255, 255, 255, 0.3)';
 
 /**
  * @const {string}
  */
-shaka.ui.Constants.VOLUME_BAR_BASE_COLOR = 'rgba(255, 255, 255, 0.54)';
+Constants.SEEK_BAR_PLAYED_COLOR = 'rgb(255, 255, 255)';
 
+/**
+ * @const {string}
+ */
+Constants.SEEK_BAR_BUFFERED_COLOR = 'rgba(255, 255, 255, 0.54)';
+
+/**
+ * @const {string}
+ */
+Constants.VOLUME_BAR_VOLUME_LEVEL_COLOR = 'rgb(255, 255, 255)';
+
+/**
+ * @const {string}
+ */
+Constants.VOLUME_BAR_BASE_COLOR = 'rgba(255, 255, 255, 0.54)';
 
 /**
  * @const {number}
  */
-shaka.ui.Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR = 5; // seconds
-
-
-/**
- * @const {number}
- */
-shaka.ui.Constants.KEYCODE_TAB = 9;
-
+Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR = 5; // seconds
 
 /**
  * @const {number}
  */
-shaka.ui.Constants.KEYCODE_SHIFT = 16;
-
+Constants.KEYCODE_TAB = 9;
 
 /**
  * @const {number}
  */
-shaka.ui.Constants.KEYCODE_ESCAPE = 27;
+Constants.KEYCODE_SHIFT = 16;
+
+/**
+ * @const {number}
+ */
+Constants.KEYCODE_ESCAPE = 27;
+
+export default Constants;

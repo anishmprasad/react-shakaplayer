@@ -23,6 +23,11 @@
 // goog.require('shaka.util.Iterables');
 // goog.require('shaka.util.LanguageUtils');
 
+import FakeEvent from '../lib/util/fake_event';
+import FakeEventTarget from '../lib/util/fake_event_target';
+import Iterables from '../lib/util/iterables';
+import LanguageUtils from '../lib/util/language_utils';
+
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -42,7 +47,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.Localization = class {
+export default class Localization {
 	/**
 	 * @param {string} fallbackLocale
 	 *    The fallback locale that should be used. It will be assumed that this
@@ -50,7 +55,7 @@ shaka.ui.Localization = class {
 	 */
 	constructor(fallbackLocale) {
 		/** @private {string} */
-		this.fallbackLocale_ = shaka.util.LanguageUtils.normalize(fallbackLocale);
+		this.fallbackLocale_ = LanguageUtils.normalize(fallbackLocale);
 
 		/**
 		 * The current mappings that will be used when requests are made. Since
@@ -84,7 +89,7 @@ shaka.ui.Localization = class {
 		 *
 		 * @private {!EventTarget}
 		 */
-		this.events_ = new shaka.util.FakeEventTarget();
+		this.events_ = new FakeEventTarget();
 	}
 
 	/**
@@ -132,17 +137,17 @@ shaka.ui.Localization = class {
 		// set.
 		this.currentLocales_.clear();
 		for (const locale of locales) {
-			this.currentLocales_.add(shaka.util.LanguageUtils.normalize(locale));
+			this.currentLocales_.add(LanguageUtils.normalize(locale));
 		}
 
 		this.updateCurrentMap_();
 
-		this.events_.dispatchEvent(new shaka.util.FakeEvent(Class.LOCALE_CHANGED));
+		this.events_.dispatchEvent(new FakeEvent(Class.LOCALE_CHANGED));
 
 		// Check if we have support for the exact locale requested. Even through we
 		// will do our best to return the most relevant results, we need to tell
 		// app that some data may be missing.
-		const missing = shaka.util.Iterables.filter(this.currentLocales_, locale => !this.localizations_.has(locale));
+		const missing = Iterables.filter(this.currentLocales_, locale => !this.localizations_.has(locale));
 
 		if (missing.length) {
 			/** @type {shaka.ui.Localization.UnknownLocalesEvent} */
@@ -150,7 +155,7 @@ shaka.ui.Localization = class {
 				locales: missing
 			};
 
-			this.events_.dispatchEvent(new shaka.util.FakeEvent(Class.UNKNOWN_LOCALES, e));
+			this.events_.dispatchEvent(new FakeEvent(Class.UNKNOWN_LOCALES, e));
 		}
 	}
 
@@ -174,10 +179,10 @@ shaka.ui.Localization = class {
 	insert(locale, localizations, conflictResolution) {
 		const Class = shaka.ui.Localization;
 		const ConflictResolution = shaka.ui.Localization.ConflictResolution;
-		const FakeEvent = shaka.util.FakeEvent;
+		const FakeEvent = FakeEvent;
 
 		// Normalize the locale so that matching will be easier.
-		locale = shaka.util.LanguageUtils.normalize(locale);
+		locale = LanguageUtils.normalize(locale);
 
 		// Default |conflictResolution| to |USE_NEW| if it was not given. Doing it
 		// here because it would create too long of a parameter list.
@@ -238,7 +243,7 @@ shaka.ui.Localization = class {
 	 */
 	resolve(id) {
 		const Class = shaka.ui.Localization;
-		const FakeEvent = shaka.util.FakeEvent;
+		const FakeEvent = FakeEvent;
 
 		/** @type {string} */
 		const result = this.currentMap_.get(id);
@@ -269,7 +274,7 @@ shaka.ui.Localization = class {
 	 * @private
 	 */
 	updateCurrentMap_() {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const LanguageUtils = LanguageUtils;
 
 		/** @type {!Map.<string, !Map.<string, string>>} */
 		const localizations = this.localizations_;
@@ -313,9 +318,7 @@ shaka.ui.Localization = class {
 			localeOrder.add(locale);
 			localeOrder.add(LanguageUtils.getBase(locale));
 
-			const siblings = shaka.util.Iterables.filter(localizations.keys(), other =>
-				LanguageUtils.areSiblings(other, locale)
-			);
+			const siblings = Iterables.filter(localizations.keys(), other => LanguageUtils.areSiblings(other, locale));
 
 			// Sort the siblings so that they will always appear in the same order
 			// regardless of the order of |localizations|.
@@ -324,10 +327,7 @@ shaka.ui.Localization = class {
 				localeOrder.add(locale);
 			}
 
-			const children = shaka.util.Iterables.filter(
-				localizations.keys(),
-				other => LanguageUtils.getBase(other) == locale
-			);
+			const children = Iterables.filter(localizations.keys(), other => LanguageUtils.getBase(other) == locale);
 
 			// Sort the children so that they will always appear in the same order
 			// regardless of the order of |localizations|.
@@ -391,7 +391,7 @@ shaka.ui.Localization = class {
 				missing: Array.from(missing)
 			};
 
-			this.events_.dispatchEvent(new shaka.util.FakeEvent(shaka.ui.Localization.MISSING_LOCALIZATIONS, e));
+			this.events_.dispatchEvent(new FakeEvent(shaka.ui.Localization.MISSING_LOCALIZATIONS, e));
 		}
 	}
 
@@ -414,7 +414,7 @@ shaka.ui.Localization = class {
 			}
 		}
 	}
-};
+}
 
 /**
  * An enum for how the localization system should resolve conflicts between old
@@ -423,7 +423,7 @@ shaka.ui.Localization = class {
  * @enum {number}
  * @export
  */
-shaka.ui.Localization.ConflictResolution = {
+Localization.ConflictResolution = {
 	USE_OLD: 0,
 	USE_NEW: 1
 };
@@ -436,7 +436,7 @@ shaka.ui.Localization.ConflictResolution = {
  * @const {string}
  * @export
  */
-shaka.ui.Localization.UNKNOWN_LOCALES = 'unknown-locales';
+Localization.UNKNOWN_LOCALES = 'unknown-locales';
 
 /**
  * The event name for when an entry could not be found in the preferred locale,
@@ -445,7 +445,7 @@ shaka.ui.Localization.UNKNOWN_LOCALES = 'unknown-locales';
  * @const {string}
  * @export
  */
-shaka.ui.Localization.UNKNOWN_LOCALIZATION = 'unknown-localization';
+Localization.UNKNOWN_LOCALIZATION = 'unknown-localization';
 
 /**
  * The event name for when entries are missing from the user's preferred
@@ -455,7 +455,7 @@ shaka.ui.Localization.UNKNOWN_LOCALIZATION = 'unknown-localization';
  * @const {string}
  * @export
  */
-shaka.ui.Localization.MISSING_LOCALIZATIONS = 'missing-localizations';
+Localization.MISSING_LOCALIZATIONS = 'missing-localizations';
 
 /**
  * The event name for when a new locale has been requested and any previously
@@ -464,7 +464,7 @@ shaka.ui.Localization.MISSING_LOCALIZATIONS = 'missing-localizations';
  * @const {string}
  * @export
  */
-shaka.ui.Localization.LOCALE_CHANGED = 'locale-changed';
+Localization.LOCALE_CHANGED = 'locale-changed';
 
 /**
  * The event name for when |insert| was called and it changed entries that could
@@ -473,7 +473,7 @@ shaka.ui.Localization.LOCALE_CHANGED = 'locale-changed';
  * @const {string}
  * @export
  */
-shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
+Localization.LOCALE_UPDATED = 'locale-updated';
 
 /**
  * @typedef {{
@@ -484,7 +484,7 @@ shaka.ui.Localization.LOCALE_UPDATED = 'locale-updated';
  *    The locales that the user wanted but could not be found.
  * @exportDoc
  */
-shaka.ui.Localization.UnknownLocalesEvent;
+Localization.UnknownLocalesEvent;
 
 /**
  * @typedef {{
@@ -498,7 +498,7 @@ shaka.ui.Localization.UnknownLocalesEvent;
  *    The id of the unknown entry.
  * @exportDoc
  */
-shaka.ui.Localization.UnknownLocalizationEvent;
+Localization.UnknownLocalizationEvent;
 
 /**
  * @typedef {{
@@ -512,4 +512,4 @@ shaka.ui.Localization.UnknownLocalizationEvent;
  *    The ids of the missing entries.
  * @exportDoc
  */
-shaka.ui.Localization.MissingLocalizationsEvent;
+Localization.MissingLocalizationsEvent;

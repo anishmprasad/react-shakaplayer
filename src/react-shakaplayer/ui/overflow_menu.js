@@ -28,6 +28,14 @@
 // goog.require('shaka.ui.Utils');
 // goog.require('shaka.util.Dom');
 
+import Constants from '../ui/constants';
+import { Controls } from '../ui/controls';
+import Element from '../ui/element';
+import Enums from '../ui/enums';
+// import Locales from '../ui/locales';
+import Localization from '../ui/localization';
+import Utils from '../ui/ui_utils';
+import Dom from '../lib/util/dom_utils';
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -39,7 +47,7 @@ var goog = window.goog;
  * @final
  * @export
  */
-shaka.ui.OverflowMenu = class extends shaka.ui.Element {
+class OverflowMenu extends Element {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls
@@ -84,18 +92,18 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 			});
 		}
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_UPDATED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_UPDATED, () => {
 			this.updateAriaLabel_();
 		});
 
-		this.eventManager.listen(this.localization, shaka.ui.Localization.LOCALE_CHANGED, () => {
+		this.eventManager.listen(this.localization, Localization.LOCALE_CHANGED, () => {
 			this.updateAriaLabel_();
 		});
 
 		this.eventManager.listen(this.controls, 'submenuopen', () => {
 			// Hide the main overflow menu if one of the sub menus has
 			// been opened.
-			shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
+			Utils.setDisplay(this.overflowMenu_, false);
 		});
 
 		this.eventManager.listen(this.overflowMenu_, 'touchstart', event => {
@@ -110,7 +118,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 		this.eventManager.listen(this.controlsContainer_, 'touchstart', event => {
 			// If the overflow menu is showing, hide it on a touch event
 			if (this.overflowMenu_.classList.contains('shaka-displayed')) {
-				shaka.ui.Utils.setDisplay(this.overflowMenu_, false);
+				Utils.setDisplay(this.overflowMenu_, false);
 				// Stop this event from becoming a click event.
 				event.preventDefault();
 			}
@@ -135,7 +143,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 	 * @export
 	 */
 	static registerElement(name, factory) {
-		shaka.ui.OverflowMenu.elementNamesToFactories_.set(name, factory);
+		OverflowMenu.elementNamesToFactories_.set(name, factory);
 	}
 
 	/**
@@ -160,7 +168,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 		this.overflowMenuButton_.classList.add('shaka-overflow-menu-button');
 		this.overflowMenuButton_.classList.add('shaka-no-propagation');
 		this.overflowMenuButton_.classList.add('material-icons');
-		this.overflowMenuButton_.textContent = shaka.ui.Enums.MaterialDesignIcons.OPEN_OVERFLOW;
+		this.overflowMenuButton_.textContent = Enums.MaterialDesignIcons.OPEN_OVERFLOW;
 		this.parent.appendChild(this.overflowMenuButton_);
 	}
 
@@ -170,8 +178,8 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 	createChildren_() {
 		for (let i = 0; i < this.config_.overflowMenuButtons.length; i++) {
 			const name = this.config_.overflowMenuButtons[i];
-			if (shaka.ui.OverflowMenu.elementNamesToFactories_.get(name)) {
-				const factory = shaka.ui.OverflowMenu.elementNamesToFactories_.get(name);
+			if (OverflowMenu.elementNamesToFactories_.get(name)) {
+				const factory = OverflowMenu.elementNamesToFactories_.get(name);
 				goog.asserts.assert(this.controls, 'Controls should not be null!');
 				this.children_.push(factory.create(this.overflowMenu_, this.controls));
 			} else {
@@ -185,7 +193,7 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 		if (this.controls.anySettingsMenusAreOpen()) {
 			this.controls.hideSettingsMenus();
 		} else {
-			shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
+			Utils.setDisplay(this.overflowMenu_, true);
 			this.controls.overrideCssShowControls();
 			// If overflow menu has currently visible buttons, focus on the
 			// first one, when the menu opens.
@@ -204,26 +212,25 @@ shaka.ui.OverflowMenu = class extends shaka.ui.Element {
 	 * @private
 	 */
 	updateAriaLabel_() {
-		const LocIds = shaka.ui.Locales.Ids;
-		this.overflowMenuButton_.setAttribute(
-			shaka.ui.Constants.ARIA_LABEL,
-			this.localization.resolve(LocIds.MORE_SETTINGS)
-		);
+		const LocIds = Locales.Ids;
+		this.overflowMenuButton_.setAttribute(Constants.ARIA_LABEL, this.localization.resolve(LocIds.MORE_SETTINGS));
 	}
-};
+}
 
 /**
  * @implements {shaka.extern.IUIElement.Factory}
  * @final
  */
-shaka.ui.OverflowMenu.Factory = class {
+OverflowMenu.Factory = class {
 	/** @override */
 	create(rootElement, controls) {
-		return new shaka.ui.OverflowMenu(rootElement, controls);
+		return new OverflowMenu(rootElement, controls);
 	}
 };
 
-shaka.ui.Controls.registerElement('overflow_menu', new shaka.ui.OverflowMenu.Factory());
+Controls.registerElement('overflow_menu', new OverflowMenu.Factory());
 
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
-shaka.ui.OverflowMenu.elementNamesToFactories_ = new Map();
+OverflowMenu.elementNamesToFactories_ = new Map();
+
+export default OverflowMenu;

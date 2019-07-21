@@ -32,6 +32,17 @@
 // goog.require('shaka.util.FakeEventTarget');
 // goog.require('shaka.util.Timer');
 
+import Constants from '../ui/constants'
+import Enums from '../ui/enums'
+// import Locales from '../ui/'
+import Localization from '../ui/localization'
+import Utils from '../ui/ui_utils'
+import Dom from '../lib/util/dom_utils'
+import EventManager from '../lib/util/event_manager'
+import FakeEvent from '../lib/util/fake_event'
+import FakeEventTarget from '../lib/util/fake_event_target'
+import Timer from '../lib/util/timer'
+
 /*eslint-disable*/
 window.shaka = window.shaka || {}
 var shaka = window.shaka
@@ -44,7 +55,7 @@ var goog = window.goog
  * @implements {shaka.util.IDestroyable}
  * @export
  */
-shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+class Controls extends FakeEventTarget {
   /**
    * @param {!shaka.Player} player
    * @param {!HTMLElement} videoContainer
@@ -64,7 +75,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     this.config_ = config;
 
     /** @private {shaka.cast.CastProxy} */
-    this.castProxy_ = new shaka.cast.CastProxy(
+    this.castProxy_ = new CastProxy(
         video, player, this.config_.castReceiverAppId);
 
     /** @private {boolean} */
@@ -94,7 +105,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      *
      * @private {shaka.util.Timer}
      */
-    this.seekTimer_ = new shaka.util.Timer(() => {
+    this.seekTimer_ = new Timer(() => {
       goog.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
       this.video_.currentTime = parseFloat(this.seekBar_.value);
     });
@@ -105,7 +116,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      *
      * @private {shaka.util.Timer}
      */
-    this.mouseStillTimer_ = new shaka.util.Timer(() => {
+    this.mouseStillTimer_ = new Timer(() => {
       this.onMouseStill_();
     });
 
@@ -118,10 +129,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      *
      * @private {shaka.util.Timer}
      */
-    this.hideSettingsMenusTimer_ = new shaka.util.Timer(() => {
+    this.hideSettingsMenusTimer_ = new Timer(() => {
       /** @type {function(!HTMLElement)} */
       const hide = (control) => {
-        shaka.ui.Utils.setDisplay(control, /* visible= */ false);
+        Utils.setDisplay(control, /* visible= */ false);
       };
 
       for (const menu of this.settingsMenus_) {
@@ -138,7 +149,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
      *
      * @private {shaka.util.Timer}
      */
-    this.timeAndSeekRangeTimer_ = new shaka.util.Timer(() => {
+    this.timeAndSeekRangeTimer_ = new Timer(() => {
       this.updateTimeAndSeekRange_();
     });
 
@@ -148,11 +159,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     /** @private {!Array.<!shaka.extern.IUIElement>} */
     this.elements_ = [];
 
-    /** @private {shaka.ui.Localization} */
-    this.localization_ = shaka.ui.Controls.createLocalization_();
+    /** @private {Localization} */
+    this.localization_ = Controls.createLocalization_();
 
     /** @private {shaka.util.EventManager} */
-    this.eventManager_ = new shaka.util.EventManager();
+    this.eventManager_ = new EventManager();
 
     // Configure and create the layout of the controls
     this.configure(this.config_);
@@ -321,7 +332,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @export
    */
   static registerElement(name, factory) {
-    shaka.ui.ControlsPanel.elementNamesToFactories_.set(name, factory);
+    ControlsPanel.elementNamesToFactories_.set(name, factory);
   }
 
 
@@ -361,7 +372,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     if (this.controlsContainer_) {
       // Deconstruct the old layout if applicable
-      shaka.util.Dom.removeAllChildren(this.controlsContainer_);
+      Dom.removeAllChildren(this.controlsContainer_);
       this.videoContainer_.removeChild(this.spinnerContainer_);
     } else {
       this.addControlsContainer_();
@@ -385,10 +396,10 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
   setEnabledShakaControls(enabled) {
     this.enabled_ = enabled;
     if (enabled) {
-      shaka.ui.Utils.setDisplay(this.controlsContainer_, true);
+      Utils.setDisplay(this.controlsContainer_, true);
 
       // Spinner lives outside of the main controls div
-      shaka.ui.Utils.setDisplay(
+      Utils.setDisplay(
           this.spinnerContainer_, this.player_.isBuffering());
 
       // If we're hiding native controls, make sure the video element itself is
@@ -396,9 +407,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       this.video_.tabIndex = -1;
       this.video_.controls = false;
     } else {
-      shaka.ui.Utils.setDisplay(this.controlsContainer_, false);
+      Utils.setDisplay(this.controlsContainer_, false);
       // Spinner lives outside of the main controls div
-      shaka.ui.Utils.setDisplay(this.spinnerContainer_, false);
+      Utils.setDisplay(this.spinnerContainer_, false);
     }
 
     // The effects of play state changes are inhibited while showing native
@@ -438,7 +449,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @return {shaka.ui.Localization}
+   * @return {Localization}
    * @export
    */
   getLocalization() {
@@ -586,17 +597,17 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * @private
    */
   updateLocalizedStrings_() {
-    const LocIds = shaka.ui.Locales.Ids;
+    const LocIds = Locales.Ids;
 
     if (this.seekBar_) {
-      this.seekBar_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+      this.seekBar_.setAttribute(Constants.ARIA_LABEL,
           this.localization_.resolve(LocIds.SEEK));
     }
 
     // Localize state-dependant labels
     const makePlayNotPause = this.video_.paused && !this.isSeeking_;
     const playButtonAriaLabelId = makePlayNotPause ? LocIds.PLAY : LocIds.PAUSE;
-    this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
+    this.playButton_.setAttribute(Constants.ARIA_LABEL,
         this.localization_.resolve(playButtonAriaLabelId));
   }
 
@@ -735,9 +746,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Create the elements specified by controlPanelElements
     for (let i = 0; i < this.config_.controlPanelElements.length; i++) {
       const name = this.config_.controlPanelElements[i];
-      if (shaka.ui.ControlsPanel.elementNamesToFactories_.get(name)) {
+      if (ControlsPanel.elementNamesToFactories_.get(name)) {
         const factory =
-            shaka.ui.ControlsPanel.elementNamesToFactories_.get(name);
+            ControlsPanel.elementNamesToFactories_.get(name);
         this.elements_.push(factory.create(this.controlsButtonPanel_, this));
       } else {
         shaka.log.alwaysWarn('Unrecognized control panel element requested:',
@@ -852,11 +863,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     });
 
     this.eventManager_.listen(this.localization_,
-        shaka.ui.Localization.LOCALE_UPDATED,
+        Localization.LOCALE_UPDATED,
         (e) => this.updateLocalizedStrings_());
 
     this.eventManager_.listen(this.localization_,
-        shaka.ui.Localization.LOCALE_CHANGED,
+        Localization.LOCALE_CHANGED,
         (e) => this.updateLocalizedStrings_());
   }
 
@@ -924,7 +935,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Make sure we are not about to hide the settings menus and then force them
     // open.
     this.hideSettingsMenusTimer_.stop();
-    this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+    this.setControlsOpacity_(Enums.Opacity.OPAQUE);
     this.updateTimeAndSeekRange_();
 
     // Hide the cursor when the mouse stops moving.
@@ -971,9 +982,9 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // is hovered.
     if ((this.video_.paused && !this.isSeeking_) ||
          this.overrideCssShowControls_) {
-      this.setControlsOpacity_(shaka.ui.Enums.Opacity.OPAQUE);
+      this.setControlsOpacity_(Enums.Opacity.OPAQUE);
     } else {
-      this.setControlsOpacity_(shaka.ui.Enums.Opacity.TRANSPARENT);
+      this.setControlsOpacity_(Enums.Opacity.TRANSPARENT);
     }
   }
 
@@ -1067,12 +1078,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     // Video is paused during seek, so don't show the play arrow while seeking:
     if (this.enabled_ && this.video_.paused && !this.isSeeking_) {
       this.playButton_.setAttribute('icon', 'play');
-      this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization_.resolve(shaka.ui.Locales.Ids.PLAY));
+      this.playButton_.setAttribute(Constants.ARIA_LABEL,
+          this.localization_.resolve(Locales.Ids.PLAY));
     } else {
       this.playButton_.setAttribute('icon', 'pause');
-      this.playButton_.setAttribute(shaka.ui.Constants.ARIA_LABEL,
-          this.localization_.resolve(shaka.ui.Locales.Ids.PAUSE));
+      this.playButton_.setAttribute(Constants.ARIA_LABEL,
+          this.localization_.resolve(Locales.Ids.PAUSE));
     }
   }
 
@@ -1195,7 +1206,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    shaka.ui.Utils.setDisplay(
+    Utils.setDisplay(
         this.spinnerContainer_, this.player_.isBuffering());
   }
 
@@ -1241,7 +1252,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       return;
     }
 
-    const Constants = shaka.ui.Constants;
+    const Constants = Constants;
     let displayTime = this.isSeeking_ ?
         Number(this.seekBar_.value) :
         Number(this.video_.currentTime);
@@ -1276,12 +1287,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       const seekRange = this.player_.seekRange();
       const seekWindow = seekRange.end - seekRange.start;
       if (seekWindow < Constants.MIN_SEEK_WINDOW_TO_SHOW_SEEKBAR) {
-        shaka.ui.Utils.setDisplay(this.seekBarContainer_, false);
+        Utils.setDisplay(this.seekBarContainer_, false);
         for (const menu of this.settingsMenus_) {
           menu.classList.add('shaka-low-position');
         }
       } else {
-        shaka.ui.Utils.setDisplay(this.seekBarContainer_, true);
+        Utils.setDisplay(this.seekBarContainer_, true);
         for (const menu of this.settingsMenus_) {
           menu.classList.remove('shaka-low-position');
         }
@@ -1323,7 +1334,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       }
     }
 
-    this.dispatchEvent(new shaka.util.FakeEvent('timeandseekrangeupdated'));
+    this.dispatchEvent(new FakeEvent('timeandseekrangeupdated'));
   }
 
 
@@ -1343,7 +1354,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
     const anySettingsMenusAreOpen = this.anySettingsMenusAreOpen();
 
-    if (event.keyCode == shaka.ui.Constants.KEYCODE_TAB) {
+    if (event.keyCode == Constants.KEYCODE_TAB) {
       // Enable blue outline for focused elements for keyboard
       // navigation.
       this.controlsContainer_.classList.add('shaka-keyboard-navigation');
@@ -1351,12 +1362,12 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
     }
 
     // If escape key was pressed, close any open settings menus.
-    if (event.keyCode == shaka.ui.Constants.KEYCODE_ESCAPE) {
+    if (event.keyCode == Constants.KEYCODE_ESCAPE) {
       this.hideSettingsMenusTimer_.tickNow();
     }
 
     if (anySettingsMenusAreOpen &&
-          this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_TAB)) {
+          this.pressedKeys_.has(Constants.KEYCODE_TAB)) {
       // If Tab key or Shift+Tab keys are pressed when navigating through
       // an overflow settings menu, keep the focus to loop inside the
       // overflow menu.
@@ -1403,7 +1414,7 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
       // previous element. If it's currently focused on the first shown child
       // element of the overflow menu, let the focus move to the last child
       // element of the menu.
-      if (this.pressedKeys_.has(shaka.ui.Constants.KEYCODE_SHIFT)) {
+      if (this.pressedKeys_.has(Constants.KEYCODE_SHIFT)) {
         if (activeElement == firstShownChild) {
           event.preventDefault();
           lastShownChild.focus();
@@ -1431,11 +1442,11 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
 
 
   /**
-   * @param {!shaka.ui.Enums.Opacity} opacity
+   * @param {!Enums.Opacity} opacity
    * @private
    */
   setControlsOpacity_(opacity) {
-    if (opacity == shaka.ui.Enums.Opacity.OPAQUE) {
+    if (opacity == Enums.Opacity.OPAQUE) {
       this.controlsContainer_.setAttribute('shown', 'true');
     } else {
       this.controlsContainer_.removeAttribute('shown');
@@ -1452,21 +1463,25 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
    * Create a localization instance already pre-loaded with all the locales that
    * we support.
    *
-   * @return {!shaka.ui.Localization}
+   * @return {!Localization}
    * @private
    */
   static createLocalization_() {
     /** @type {string} */
     const fallbackLocale = 'en';
 
-    /** @type {!shaka.ui.Localization} */
-    const localization = new shaka.ui.Localization(fallbackLocale);
-    shaka.ui.Locales.addTo(localization);
+    /** @type {!Localization} */
+    const localization = new Localization(fallbackLocale);
+    Locales.addTo(localization);
     localization.changeLocale(navigator.languages || []);
 
     return localization;
   }
 };
 
+let ControlsPanel = {}
+
 /** @private {!Map.<string, !shaka.extern.IUIElement.Factory>} */
-shaka.ui.ControlsPanel.elementNamesToFactories_ = new Map();
+ControlsPanel.elementNamesToFactories_ = new Map();
+
+export { Controls, ControlsPanel}
