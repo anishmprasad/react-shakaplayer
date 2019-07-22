@@ -8,6 +8,6 @@ const ShakaAssetInfo = new ShakaDemoAssetInfo(
 	/* source= */ shakaAssets.Source.CUSTOM
 );
 
-console.log(ShakaAssetInfo);
+// console.log(ShakaAssetInfo);
 
 export { ShakaAssetInfo };

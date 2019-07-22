@@ -32,7 +32,7 @@ var util = shaka.util || {};
 window.goog = window.goog || {};
 var goog = window.goog;
 
-console.log(window.shaka);
+// console.log(window.shaka);
 
 /**
  * @summary A work-alike for EventTarget.  Only DOM elements may be true

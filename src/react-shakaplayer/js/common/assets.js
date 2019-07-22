@@ -1,7 +1,7 @@
 import ShakaDemoAssetInfo from './asset'
 import { Source, KeySystem, Feature } from './config'
 
-console.log({ShakaDemoAssetInfo})
+// console.log({ShakaDemoAssetInfo})
 
 window.shaka = window.shaka || {}
 const shaka = window.shaka
@@ -884,6 +884,6 @@ shakaAssets.testAssets = [
 
 
 
-console.log({shakaAssets})
+// console.log({shakaAssets})
 
 export default shakaAssets

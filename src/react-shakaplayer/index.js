@@ -1,7 +1,7 @@
 /*eslint-disable*/
 import React from 'react';
 
-console.log(window.goog);
+// console.log(window.goog);
 
 import './css/demo.css';
 import './css/controls.css';
@@ -55,7 +55,7 @@ import './js/search.js';
 import './js/custom.js';
 import './js/config.js';
 
-console.log(window.goog, window.shaka);
+// console.log(window.goog, window.shaka);
 export default function ReactShakaPlayer(props) {
 	return (
 		<div id='main-layout' className='mdl-layout mdl-js-layout mdl-layout--fixed-header'>

@@ -64,6 +64,6 @@ class polyfill {
  */
 polyfill.polyfills_ = [];
 
-console.log(polyfill);
+// console.log(polyfill.polyfills_);
 
 export default polyfill;

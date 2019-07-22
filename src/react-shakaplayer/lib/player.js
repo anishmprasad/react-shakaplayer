@@ -98,7 +98,7 @@ import AbortableOperation from '../lib/util/abortable_operation';
 
 import Deprecate from '../lib/deprecate/deprecate';
 
-console.log('Deprecate', Deprecate);
+// console.log('Deprecate', Deprecate);
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

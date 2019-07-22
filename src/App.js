@@ -7,9 +7,9 @@ window.shaka = {};
 // import './react-shakaplayer/js/load';
 
 import './react-shakaplayer/lib/util/fake_event_target.js';
-console.log(window.shaka);
+// console.log(window.shaka);
 import './react-shakaplayer/lib/deprecate/deprecate';
-console.log(window.shaka);
+// console.log(window.shaka);
 import './react-shakaplayer/lib/player';
 import './react-shakaplayer/lib/abr/simple_abr_manager';
 import './react-shakaplayer/lib/cast/cast_proxy';

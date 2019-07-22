@@ -36,12 +36,14 @@ import Storage from '../lib/offline/storage'
 import Player from '../lib/player'
 import localeJson from '../ui/locales/en-GB.json'
 
-console.log('shakaAssets', shakaAssets)
+// console.log({ localeJson})
+
+// console.log('shakaAssets', shakaAssets)
 
 
 const errorUtils = new error()
 
-console.log(errorUtils)
+// console.log(errorUtils)
 
 const shaka  = window.shaka
 

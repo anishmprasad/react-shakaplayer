@@ -18,7 +18,7 @@
 import shakaAssets from './assets';
 import { Source, KeySystem } from './config';
 
-console.log({ shakaAssets });
+// console.log({ shakaAssets });
 
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
