@@ -1,0 +1,19 @@
+{
+  "name": "react-shakaplayer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anishmprasad/react-shakaplayer.git"
+  },
+  "author": "anish.m.prasad",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anishmprasad/react-shakaplayer/issues"
+  },
+  "homepage": "https://github.com/anishmprasad/react-shakaplayer#readme"
+}
