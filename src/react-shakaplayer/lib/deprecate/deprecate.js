@@ -52,7 +52,7 @@ shaka.Deprecate = class {
 	 * @param {string} versionString
 	 */
 	static init(versionString) {
-		goog.asserts.assert(shaka.Deprecate.enforcer_ == null, 'Deprecate.init should only be called once.');
+		window.asserts.assert(shaka.Deprecate.enforcer_ == null, 'Deprecate.init should only be called once.');
 
 		shaka.Deprecate.enforcer_ = new Enforcer(
 			Version.parse(versionString),
@@ -72,7 +72,7 @@ shaka.Deprecate = class {
 	 */
 	static deprecateFeature(major, minor, name, description) {
 		const enforcer = shaka.Deprecate.enforcer_;
-		goog.asserts.assert(enforcer, 'Missing deprecation enforcer. Was |init| called?');
+		window.asserts.assert(enforcer, 'Missing deprecation enforcer. Was |init| called?');
 
 		const expiresAt = new shaka.deprecate.Version(major, minor);
 		enforcer.enforce(expiresAt, name, description);
@@ -124,7 +124,7 @@ shaka.Deprecate = class {
 		].join('');
 
 		shaka.log.alwaysError(errorMessage);
-		goog.asserts.assert(false, errorMessage);
+		window.asserts.assert(false, errorMessage);
 	}
 };
 

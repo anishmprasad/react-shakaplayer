@@ -178,7 +178,7 @@ export default class SimpleAbrManager {
 			'lastTimeChosenMs=' + this.lastTimeChosenMs_,
 			'enabled=' + this.enabled_
 		);
-		goog.asserts.assert(deltaTimeMs >= 0, 'expected a non-negative duration');
+		window.asserts.assert(deltaTimeMs >= 0, 'expected a non-negative duration');
 		this.bandwidthEstimator_.sample(deltaTimeMs, numBytes);
 
 		if (this.lastTimeChosenMs_ != null && this.enabled_) {
@@ -217,7 +217,7 @@ export default class SimpleAbrManager {
 	 */
 	suggestStreams_() {
 		shaka.log.v2('Suggesting Streams...');
-		goog.asserts.assert(this.lastTimeChosenMs_ != null, 'lastTimeChosenMs_ should not be null');
+		window.asserts.assert(this.lastTimeChosenMs_ != null, 'lastTimeChosenMs_ should not be null');
 
 		if (!this.startupComplete_) {
 			// Check if we've got enough data yet.
@@ -258,7 +258,7 @@ export default class SimpleAbrManager {
 			variants = variants.filter(variant => {
 				// This was already checked in another scope, but the compiler doesn't
 				// seem to understand that.
-				goog.asserts.assert(restrictions, 'Restrictions should exist!');
+				window.asserts.assert(restrictions, 'Restrictions should exist!');
 
 				return shaka.util.StreamUtils.meetsRestrictions(
 					variant,

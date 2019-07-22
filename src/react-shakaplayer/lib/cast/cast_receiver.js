@@ -324,7 +324,7 @@ class CastReceiver extends FakeEventTarget {
         await this.player_.load(initState['manifest'], initState['startTime']);
       } catch (error) {
         // Pass any errors through to the app.
-        goog.asserts.assert(error instanceof shaka.util.Error,
+        window.asserts.assert(error instanceof shaka.util.Error,
             'Wrong error type!');
         const event = new shaka.util.FakeEvent('error', {'detail': error});
         this.player_.dispatchEvent(event);
@@ -488,7 +488,7 @@ class CastReceiver extends FakeEventTarget {
     // Volume attributes are tied to the system volume.
     const manager = cast.receiver.CastReceiverManager.getInstance();
     const systemVolume = manager.getSystemVolume();
-    goog.asserts.assert(systemVolume, 'System volume should not be null!');
+    window.asserts.assert(systemVolume, 'System volume should not be null!');
 
     if (systemVolume) {
       // Send an update message with just the latest volume level and muted

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.OfflineUri');
+// goog.provide('OfflineUri');
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -98,7 +98,7 @@ export default class OfflineUri {
 
 	/**
 	 * @param {string} uri
-	 * @return {?shaka.offline.OfflineUri}
+	 * @return {?OfflineUri}
 	 */
 	static parse(uri) {
 		const parts = /^offline:([a-z]+)\/([^/]+)\/([^/]+)\/([0-9]+)$/.exec(uri);
@@ -133,7 +133,7 @@ export default class OfflineUri {
 	 * @param {string} mechanism
 	 * @param {string} cell
 	 * @param {number} key
-	 * @return {!shaka.offline.OfflineUri}
+	 * @return {!OfflineUri}
 	 */
 	static manifest(mechanism, cell, key) {
 		return new OfflineUri('manifest', mechanism, cell, key);
@@ -143,7 +143,7 @@ export default class OfflineUri {
 	 * @param {string} mechanism
 	 * @param {string} cell
 	 * @param {number} key
-	 * @return {!shaka.offline.OfflineUri}
+	 * @return {!OfflineUri}
 	 */
 	static segment(mechanism, cell, key) {
 		return new OfflineUri('segment', mechanism, cell, key);

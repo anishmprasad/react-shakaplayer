@@ -75,7 +75,7 @@ class PatchedMediaKeysWebkit {
       return;
     }
 
-    goog.asserts.assert(
+    window.asserts.assert(
         // eslint-disable-next-line no-restricted-syntax
         HTMLMediaElement.prototype[prefixApi('generateKeyRequest')],
         'PatchedMediaKeysWebkit APIs not available!');
@@ -128,7 +128,7 @@ class PatchedMediaKeysWebkit {
    */
   static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
     shaka.log.debug('PatchedMediaKeysWebkit.requestMediaKeySystemAccess');
-    goog.asserts.assert(this == navigator,
+    window.asserts.assert(this == navigator,
         'bad "this" for requestMediaKeySystemAccess');
 
     // Alias.
@@ -152,7 +152,7 @@ class PatchedMediaKeysWebkit {
    */
   static setMediaKeys(mediaKeys) {
     shaka.log.debug('PatchedMediaKeysWebkit.setMediaKeys');
-    goog.asserts.assert(this instanceof HTMLMediaElement,
+    window.asserts.assert(this instanceof HTMLMediaElement,
         'bad "this" for setMediaKeys');
 
     // Alias.
@@ -166,7 +166,7 @@ class PatchedMediaKeysWebkit {
         this.mediaKeys);
 
     if (oldMediaKeys && oldMediaKeys != newMediaKeys) {
-      goog.asserts.assert(
+      window.asserts.assert(
           oldMediaKeys instanceof PatchedMediaKeysWebkit.MediaKeys,
           'non-polyfill instance of oldMediaKeys');
       // Have the old MediaKeys stop listening to events on the video tag.
@@ -177,7 +177,7 @@ class PatchedMediaKeysWebkit {
     this['mediaKeys'] = mediaKeys;  // Work around the read-only declaration.
 
     if (newMediaKeys) {
-      goog.asserts.assert(
+      window.asserts.assert(
           newMediaKeys instanceof PatchedMediaKeysWebkit.MediaKeys,
           'non-polyfill instance of newMediaKeys');
       newMediaKeys.setMedia(this);
@@ -447,7 +447,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
    */
   onWebkitNeedKey_(event) {
     shaka.log.debug('PatchedMediaKeysWebkit.onWebkitNeedKey_', event);
-    goog.asserts.assert(this.media_, 'media_ not set in onWebkitNeedKey_');
+    window.asserts.assert(this.media_, 'media_ not set in onWebkitNeedKey_');
 
     const event2 =
     /** @type {!CustomEvent} */ (document.createEvent('CustomEvent'));
@@ -492,7 +492,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     shaka.log.debug('PatchedMediaKeysWebkit.onWebkitKeyAdded_', event);
 
     const session = this.findSession_(event.sessionId);
-    goog.asserts.assert(
+    window.asserts.assert(
         session, 'unable to find session in onWebkitKeyAdded_');
     if (session) {
       session.ready();
@@ -507,7 +507,7 @@ PatchedMediaKeysWebkit.MediaKeys = class {
     shaka.log.debug('PatchedMediaKeysWebkit.onWebkitKeyError_', event);
 
     const session = this.findSession_(event.sessionId);
-    goog.asserts.assert(
+    window.asserts.assert(
         session, 'unable to find session in onWebkitKeyError_');
     if (session) {
       session.handleError(event);
@@ -707,20 +707,20 @@ PatchedMediaKeysWebkit.MediaKeySession =
             }
           } else {
             // Streaming.
-            goog.asserts.assert(this.type_ == 'temporary',
+            window.asserts.assert(this.type_ == 'temporary',
                 'expected temporary session');
-            goog.asserts.assert(!offlineSessionId,
+            window.asserts.assert(!offlineSessionId,
                 'unexpected offline session ID');
             mangledInitData = new Uint8Array(initData);
           }
 
-          goog.asserts.assert(mangledInitData,
+          window.asserts.assert(mangledInitData,
               'init data not set!');
         } catch (exception) {
           return Promise.reject(exception);
         }
 
-        goog.asserts.assert(this.generatePromise_ == null,
+        window.asserts.assert(this.generatePromise_ == null,
             'generatePromise_ should be null');
         this.generatePromise_ = new PublicPromise();
 
@@ -849,7 +849,7 @@ PatchedMediaKeysWebkit.MediaKeySession =
       update(response) {
         shaka.log.debug(
             'PatchedMediaKeysWebkit.MediaKeySession.update', response);
-        goog.asserts.assert(this.sessionId, 'update without session ID');
+        window.asserts.assert(this.sessionId, 'update without session ID');
 
         const nextUpdatePromise = new PublicPromise();
         this.update_(nextUpdatePromise, response);
@@ -971,7 +971,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
    * @override
    */
   entries() {
-    goog.asserts.assert(false, 'Not used!  Provided only for compiler.');
+    window.asserts.assert(false, 'Not used!  Provided only for compiler.');
   }
 
   /**
@@ -979,7 +979,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
    * @override
    */
   keys() {
-    goog.asserts.assert(false, 'Not used!  Provided only for compiler.');
+    window.asserts.assert(false, 'Not used!  Provided only for compiler.');
   }
 
   /**
@@ -987,7 +987,7 @@ PatchedMediaKeysWebkit.MediaKeyStatusMap = class {
    * @override
    */
   values() {
-    goog.asserts.assert(false, 'Not used!  Provided only for compiler.');
+    window.asserts.assert(false, 'Not used!  Provided only for compiler.');
   }
 };
 

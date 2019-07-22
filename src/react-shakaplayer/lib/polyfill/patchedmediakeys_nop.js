@@ -76,7 +76,7 @@ class PatchedMediaKeysNop {
 	 */
 	static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
 		shaka.log.debug('PatchedMediaKeysNop.requestMediaKeySystemAccess');
-		goog.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
+		window.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
 
 		return Promise.reject(new Error('The key system specified is not supported.'));
 	}
@@ -91,7 +91,7 @@ class PatchedMediaKeysNop {
 	 */
 	static setMediaKeys(mediaKeys) {
 		shaka.log.debug('PatchedMediaKeysNop.setMediaKeys');
-		goog.asserts.assert(this instanceof HTMLMediaElement, 'bad "this" for setMediaKeys');
+		window.asserts.assert(this instanceof HTMLMediaElement, 'bad "this" for setMediaKeys');
 
 		if (mediaKeys == null) {
 			return Promise.resolve();

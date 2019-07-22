@@ -25,7 +25,7 @@ var goog = window.goog;
  *   the closure compiler will be able to use the conditions to assist type
  *   checking.
  */
-goog.asserts = class {
+window.asserts = class asserts {
 	/**
 	 * @param {*} val
 	 * @param {string} message
@@ -39,8 +39,11 @@ goog.asserts = class {
 // goog.define('goog.asserts.ENABLE_ASSERTS', goog.DEBUG);
 
 // Install assert functions.
-if (goog.asserts.ENABLE_ASSERTS) {
+if (window.asserts.ENABLE_ASSERTS) {
 	if (console.assert) {
-		goog.asserts.assert = (/** * */ val, /** string */ message) => console.assert(val, message);
+		window.asserts.assert = (/** * */ val, /** string */ message) => console.assert(val, message);
 	}
 }
+
+// console.log('asserts', new asserts());
+// window.asserts = new asserts();

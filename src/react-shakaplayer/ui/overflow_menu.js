@@ -180,7 +180,7 @@ class OverflowMenu extends Element {
 			const name = this.config_.overflowMenuButtons[i];
 			if (OverflowMenu.elementNamesToFactories_.get(name)) {
 				const factory = OverflowMenu.elementNamesToFactories_.get(name);
-				goog.asserts.assert(this.controls, 'Controls should not be null!');
+				window.asserts.assert(this.controls, 'Controls should not be null!');
 				this.children_.push(factory.create(this.overflowMenu_, this.controls));
 			} else {
 				shaka.log.alwaysWarn('Unrecognized overflow menu element requested:', name);

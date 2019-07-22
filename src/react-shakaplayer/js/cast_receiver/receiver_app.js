@@ -54,12 +54,12 @@ class ShakaReceiverApp {
 	init() {
 		/** @type {HTMLMediaElement} */
 		const video /** @type {HTMLMediaElement} */ = document.getElementById('video');
-		goog.asserts.assert(video, 'Video element should be available!');
+		window.asserts.assert(video, 'Video element should be available!');
 		this.video_ = video;
 
 		/** @type {!shaka.ui.Overlay} */
 		const ui = this.video_['ui'];
-		goog.asserts.assert(ui, 'UI should be available!');
+		window.asserts.assert(ui, 'UI should be available!');
 
 		// Make sure we don't show extra UI elements we don't need on the TV.
 		ui.configure({
@@ -74,7 +74,7 @@ class ShakaReceiverApp {
 		// environment on the receiver).  This local player (local to the receiver)
 		// will be remotely controlled by the proxy on the sender side.
 		this.player_ = ui.getControls().getLocalPlayer();
-		goog.asserts.assert(this.player_, 'Player should be available!');
+		window.asserts.assert(this.player_, 'Player should be available!');
 
 		this.controlsElement_ = document.querySelector('.shaka-controls-container');
 

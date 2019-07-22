@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.ManifestConverter');
+// goog.provide('ManifestConverter');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.media.InitSegmentReference');
 // goog.require('shaka.media.PresentationTimeline');
 // goog.require('shaka.media.SegmentIndex');
 // goog.require('shaka.media.SegmentReference');
-// goog.require('shaka.offline.OfflineUri');
+// goog.require('OfflineUri');
 // goog.require('shaka.util.ManifestParserUtils');
 
 import { InitSegmentReference } from '../media/segment_reference';
@@ -158,7 +158,7 @@ class ManifestConverter {
 			for (const variantId of audio.variantIds) {
 				const variant = variantMap.get(variantId);
 
-				goog.asserts.assert(!variant.audio, 'A variant should only have one audio stream');
+				window.asserts.assert(!variant.audio, 'A variant should only have one audio stream');
 
 				variant.language = stream.language;
 				variant.primary = variant.primary || stream.primary;
@@ -174,7 +174,7 @@ class ManifestConverter {
 			for (const variantId of video.variantIds) {
 				const variant = variantMap.get(variantId);
 
-				goog.asserts.assert(!variant.video, 'A variant should only have one video stream');
+				window.asserts.assert(!variant.video, 'A variant should only have one video stream');
 
 				variant.primary = variant.primary || stream.primary;
 				variant.video = stream;
@@ -239,7 +239,7 @@ class ManifestConverter {
 	 * @private
 	 */
 	fromSegmentDB_(index, segmentDB) {
-		/** @type {!shaka.offline.OfflineUri} */
+		/** @type {!OfflineUri} */
 		const uri = OfflineUri.segment(this.mechanism_, this.cell_, segmentDB.dataKey);
 
 		return new SegmentReference(
@@ -258,7 +258,7 @@ class ManifestConverter {
 	 * @private
 	 */
 	fromInitSegmentDB_(key) {
-		/** @type {!shaka.offline.OfflineUri} */
+		/** @type {!OfflineUri} */
 		const uri = OfflineUri.segment(this.mechanism_, this.cell_, key);
 
 		return new InitSegmentReference(() => [uri.toString()], 0 /* startBytes*/, null /* endBytes */);

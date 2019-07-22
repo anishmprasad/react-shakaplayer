@@ -94,7 +94,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 * @export
 	 */
 	static registerScheme(scheme, plugin, priority) {
-		goog.asserts.assert(priority == undefined || priority > 0, 'explicit priority must be > 0');
+		window.asserts.assert(priority == undefined || priority > 0, 'explicit priority must be > 0');
 		priority = priority || NetworkingEngine.PluginPriority.APPLICATION;
 		const existing = NetworkingEngine.schemes_[scheme];
 		if (!existing || priority >= existing.priority) {
@@ -244,7 +244,7 @@ class NetworkingEngine extends FakeEventTarget {
 			return new NetworkingEngine.PendingRequest(p, () => Promise.resolve(), numBytesRemainingObj);
 		}
 
-		goog.asserts.assert(request.uris && request.uris.length, 'Request without URIs!');
+		window.asserts.assert(request.uris && request.uris.length, 'Request without URIs!');
 
 		// If a request comes from outside the library, some parameters may be left
 		// undefined.  To make it easier for application developers, we will fill
@@ -307,7 +307,7 @@ class NetworkingEngine extends FakeEventTarget {
 				// here.  This is because by the time it gets here, we've exhausted
 				// retries.
 				if (e) {
-					goog.asserts.assert(e instanceof shaka.util.Error, 'Wrong error type');
+					window.asserts.assert(e instanceof shaka.util.Error, 'Wrong error type');
 					e.severity = shaka.util.Error.Severity.CRITICAL;
 				}
 
@@ -391,7 +391,7 @@ class NetworkingEngine extends FakeEventTarget {
 		if (!scheme) {
 			// If there is no scheme, infer one from the location.
 			scheme = NetworkingEngine.getLocationProtocol_();
-			goog.asserts.assert(scheme[scheme.length - 1] == ':', 'location.protocol expected to end with a colon!');
+			window.asserts.assert(scheme[scheme.length - 1] == ':', 'location.protocol expected to end with a colon!');
 			// Drop the colon.
 			scheme = scheme.slice(0, -1);
 
@@ -462,7 +462,7 @@ class NetworkingEngine extends FakeEventTarget {
 						// Don't change anything if the operation was aborted.
 						throw error;
 					} else if (error.code == shaka.util.Error.Code.ATTEMPTS_EXHAUSTED) {
-						goog.asserts.assert(lastError, 'Should have last error');
+						window.asserts.assert(lastError, 'Should have last error');
 						throw lastError;
 					}
 

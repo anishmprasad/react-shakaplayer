@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.indexeddb.V1StorageCell');
+// goog.provide('indexeddb.V1StorageCell');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.log');
-// goog.require('shaka.offline.indexeddb.DBConnection');
+// goog.require('indexeddb.DBConnection');
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.ManifestParserUtils');
 // goog.require('shaka.util.PublicPromise');
@@ -45,7 +45,7 @@ export default class V1StorageCell {
 	 * @param {string} manifestStore
 	 */
 	constructor(connection, segmentStore, manifestStore) {
-		/** @private {!shaka.offline.indexeddb.DBConnection} */
+		/** @private {!indexeddb.DBConnection} */
 		this.connection_ = new DBConnection(connection);
 
 		/** @private {string} */
@@ -87,7 +87,7 @@ export default class V1StorageCell {
 	 * @override
 	 */
 	async getSegments(keys) {
-		const convertSegmentData = shaka.offline.indexeddb.V1StorageCell.convertSegmentData_;
+		const convertSegmentData = V1StorageCell.convertSegmentData_;
 
 		const segments = await this.get_(this.segmentStore_, keys);
 		return segments.map(convertSegmentData);
@@ -123,7 +123,7 @@ export default class V1StorageCell {
 			if (manifest) {
 				// Since this store's scheme uses in-line keys, we don't need to specify
 				// the key with |put|.
-				goog.asserts.assert(manifest.key == key, 'With in-line keys, the keys should match');
+				window.asserts.assert(manifest.key == key, 'With in-line keys, the keys should match');
 
 				manifest.expiration = newExpiration;
 				store.put(manifest);
@@ -156,16 +156,16 @@ export default class V1StorageCell {
 	 */
 	async getManifests(keys) {
 		const manifests = await this.get_(this.manifestStore_, keys);
-		return manifests.map(shaka.offline.indexeddb.V1StorageCell.convertManifest_);
+		return manifests.map(V1StorageCell.convertManifest_);
 	}
 
 	/**
 	 * @override
 	 */
 	async getAllManifests() {
-		const V1StorageCell = shaka.offline.indexeddb.V1StorageCell;
+		// const V1StorageCell = V1StorageCell;
 
-		/** @type {!shaka.offline.indexeddb.DBOperation} */
+		/** @type {!indexeddb.DBOperation} */
 		const op = this.connection_.startReadOnlyOperation(this.manifestStore_);
 		/** @type {!Map.<number, shaka.extern.ManifestDB>} */
 		const values = new Map();
@@ -264,7 +264,7 @@ export default class V1StorageCell {
 	 * @private
 	 */
 	static convertManifest_(old) {
-		// const V1StorageCell = shaka.offline.indexeddb.V1StorageCell;
+		// const V1StorageCell = indexeddb.V1StorageCell;
 
 		// Old Manifest Format:
 		// {
@@ -279,15 +279,15 @@ export default class V1StorageCell {
 		//   appMetadata: Object
 		//  }
 
-		goog.asserts.assert(
+		window.asserts.assert(
 			old.originalManifestUri != null,
 			'Old manifest format should have an originalManifestUri field'
 		);
-		goog.asserts.assert(old.duration != null, 'Old manifest format should have a duration field');
-		goog.asserts.assert(old.size != null, 'Old manifest format should have a size field');
-		goog.asserts.assert(old.periods != null, 'Old manifest format should have a periods field');
-		goog.asserts.assert(old.sessionIds != null, 'Old manifest format should have a session ids field');
-		goog.asserts.assert(old.appMetadata != null, 'Old manifest format should have an app metadata field');
+		window.asserts.assert(old.duration != null, 'Old manifest format should have a duration field');
+		window.asserts.assert(old.size != null, 'Old manifest format should have a size field');
+		window.asserts.assert(old.periods != null, 'Old manifest format should have a periods field');
+		window.asserts.assert(old.sessionIds != null, 'Old manifest format should have a session ids field');
+		window.asserts.assert(old.appMetadata != null, 'Old manifest format should have an app metadata field');
 
 		return {
 			originalManifestUri: old.originalManifestUri,
@@ -307,7 +307,7 @@ export default class V1StorageCell {
 	 * @private
 	 */
 	static convertPeriod_(old) {
-		// const V1StorageCell = shaka.offline.indexeddb.V1StorageCell;
+		// const V1StorageCell = indexeddb.V1StorageCell;
 
 		// Old Period Format:
 		// {
@@ -315,8 +315,8 @@ export default class V1StorageCell {
 		//   streams: !Array.<shaka.extern.StreamDB>
 		// }
 
-		goog.asserts.assert(old.startTime != null, 'Old period format should have a start time field');
-		goog.asserts.assert(old.streams != null, 'Old period format should have a streams field');
+		window.asserts.assert(old.startTime != null, 'Old period format should have a start time field');
+		window.asserts.assert(old.streams != null, 'Old period format should have a streams field');
 
 		// In the case that this is really old (like really old, like dinosaurs
 		// roaming the Earth old) there may be no variants, so we need to add those.
@@ -324,7 +324,7 @@ export default class V1StorageCell {
 
 		for (const stream of old.streams) {
 			const message = 'After filling in missing variants, ' + 'each stream should have variant ids';
-			goog.asserts.assert(stream.variantIds, message);
+			window.asserts.assert(stream.variantIds, message);
 		}
 
 		return {
@@ -339,7 +339,7 @@ export default class V1StorageCell {
 	 * @private
 	 */
 	static convertStream_(old) {
-		// const V1StorageCell = shaka.offline.indexeddb.V1StorageCell;
+		// const V1StorageCell = indexeddb.V1StorageCell;
 
 		// Old Stream Format
 		// {
@@ -362,18 +362,18 @@ export default class V1StorageCell {
 		//   variantIds: ?Array.<number>
 		// }
 
-		goog.asserts.assert(old.id != null, 'Old stream format should have an id field');
-		goog.asserts.assert(old.primary != null, 'Old stream format should have a primary field');
-		goog.asserts.assert(
+		window.asserts.assert(old.id != null, 'Old stream format should have an id field');
+		window.asserts.assert(old.primary != null, 'Old stream format should have a primary field');
+		window.asserts.assert(
 			old.presentationTimeOffset != null,
 			'Old stream format should have a presentation time offset field'
 		);
-		goog.asserts.assert(old.contentType != null, 'Old stream format should have a content type field');
-		goog.asserts.assert(old.mimeType != null, 'Old stream format should have a mime type field');
-		goog.asserts.assert(old.codecs != null, 'Old stream format should have a codecs field');
-		goog.asserts.assert(old.language != null, 'Old stream format should have a language field');
-		goog.asserts.assert(old.encrypted != null, 'Old stream format should have an encrypted field');
-		goog.asserts.assert(old.segments != null, 'Old stream format should have a segments field');
+		window.asserts.assert(old.contentType != null, 'Old stream format should have a content type field');
+		window.asserts.assert(old.mimeType != null, 'Old stream format should have a mime type field');
+		window.asserts.assert(old.codecs != null, 'Old stream format should have a codecs field');
+		window.asserts.assert(old.language != null, 'Old stream format should have a language field');
+		window.asserts.assert(old.encrypted != null, 'Old stream format should have an encrypted field');
+		window.asserts.assert(old.segments != null, 'Old stream format should have a segments field');
 
 		const initSegmentKey = old.initSegmentUri ? V1StorageCell.getKeyFromSegmentUri_(old.initSegmentUri) : null;
 
@@ -405,7 +405,7 @@ export default class V1StorageCell {
 	 * @private
 	 */
 	static convertSegment_(old) {
-		// const V1StorageCell = shaka.offline.indexeddb.V1StorageCell;
+		// const V1StorageCell = indexeddb.V1StorageCell;
 
 		// Old Segment Format
 		// {
@@ -414,9 +414,9 @@ export default class V1StorageCell {
 		//   uri: string
 		// }
 
-		goog.asserts.assert(old.startTime != null, 'The old segment format should have a start time field');
-		goog.asserts.assert(old.endTime != null, 'The old segment format should have an end time field');
-		goog.asserts.assert(old.uri != null, 'The old segment format should have a uri field');
+		window.asserts.assert(old.startTime != null, 'The old segment format should have a start time field');
+		window.asserts.assert(old.endTime != null, 'The old segment format should have an end time field');
+		window.asserts.assert(old.uri != null, 'The old segment format should have a uri field');
 
 		// Since we don't want to use the uri anymore, we need to parse the key
 		// from it.
@@ -441,8 +441,8 @@ export default class V1StorageCell {
 		//   data: ArrayBuffer
 		// }
 
-		goog.asserts.assert(old.key != null, 'The old segment data format should have a key field');
-		goog.asserts.assert(old.data != null, 'The old segment data format should have a data field');
+		window.asserts.assert(old.key != null, 'The old segment data format should have a key field');
+		window.asserts.assert(old.data != null, 'The old segment data format should have a data field');
 
 		return { data: old.data };
 	}
@@ -506,8 +506,8 @@ export default class V1StorageCell {
 		}
 
 		// Case 3... We don't want to be in case three.
-		goog.asserts.assert(audio.every(s => !s.variantIds), 'Some audio streams have variant ids and some do not.');
-		goog.asserts.assert(video.every(s => !s.variantIds), 'Some video streams have variant ids and some do not.');
+		window.asserts.assert(audio.every(s => !s.variantIds), 'Some audio streams have variant ids and some do not.');
+		window.asserts.assert(video.every(s => !s.variantIds), 'Some video streams have variant ids and some do not.');
 
 		// Case 1 - Populate all the variant ids (putting us back to case 2).
 		// Since all the variant ids are null, we need to first make them into

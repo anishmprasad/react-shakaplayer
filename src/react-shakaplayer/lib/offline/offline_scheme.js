@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.OfflineScheme');
+// goog.provide('OfflineScheme');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.net.NetworkingEngine');
-// goog.require('shaka.offline.OfflineUri');
-// goog.require('shaka.offline.StorageMuxer');
+// goog.require('OfflineUri');
+// goog.require('StorageMuxer');
 // goog.require('shaka.util.AbortableOperation');
 // goog.require('shaka.util.Error');
 
@@ -85,14 +85,14 @@ class OfflineScheme {
 
 	/**
 	 * @param {number} id
-	 * @param {!shaka.offline.OfflineUri} uri
+	 * @param {!OfflineUri} uri
 	 * @return {!shaka.extern.IAbortableOperation.<shaka.extern.Response>}
 	 * @private
 	 */
 	static getSegment_(id, uri) {
-		goog.asserts.assert(uri.isSegment(), "Only segment uri's should be given to getSegment");
+		window.asserts.assert(uri.isSegment(), "Only segment uri's should be given to getSegment");
 
-		/** @type {!shaka.offline.StorageMuxer} */
+		/** @type {!StorageMuxer} */
 		const muxer = new StorageMuxer();
 
 		return AbortableOperation.completed(undefined)

@@ -79,7 +79,7 @@ shaka.dash.SegmentBase = class {
 	 * @return {shaka.dash.DashParser.StreamInfo}
 	 */
 	static createStream(context, requestInitSegment) {
-		goog.asserts.assert(context.representation.segmentBase, 'Should only be called with SegmentBase');
+		window.asserts.assert(context.representation.segmentBase, 'Should only be called with SegmentBase');
 		// Since SegmentBase does not need updates, simply treat any call as
 		// the initial parse.
 		const MpdUtils = shaka.dash.MpdUtils;
@@ -163,7 +163,7 @@ shaka.dash.SegmentBase = class {
 					scaledPresentationTimeOffset
 				);
 			} else {
-				goog.asserts.assert(initData, 'WebM requires init data');
+				window.asserts.assert(initData, 'WebM requires init data');
 				references = shaka.media.WebmSegmentIndexParser.parse(
 					indexData,
 					initData,
@@ -176,7 +176,7 @@ shaka.dash.SegmentBase = class {
 
 			// Since containers are never updated, we don't need to store the
 			// segmentIndex in the map.
-			goog.asserts.assert(!segmentIndex, 'Should not call createSegmentIndex twice');
+			window.asserts.assert(!segmentIndex, 'Should not call createSegmentIndex twice');
 
 			segmentIndex = new shaka.media.SegmentIndex(references);
 			if (fitLast) {
@@ -187,13 +187,13 @@ shaka.dash.SegmentBase = class {
 
 		/** @type {!shaka.extern.GetSegmentReferenceFunction} */
 		const get = i => {
-			goog.asserts.assert(segmentIndex, 'Must call createSegmentIndex first');
+			window.asserts.assert(segmentIndex, 'Must call createSegmentIndex first');
 			return segmentIndex.get(i);
 		};
 
 		/** @type {!shaka.extern.FindSegmentPositionFunction} */
 		const find = t => {
-			goog.asserts.assert(segmentIndex, 'Must call createSegmentIndex first');
+			window.asserts.assert(segmentIndex, 'Must call createSegmentIndex first');
 			return segmentIndex.find(t);
 		};
 

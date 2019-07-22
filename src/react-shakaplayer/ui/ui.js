@@ -121,14 +121,14 @@ class Overlay {
 	 * @export
 	 */
 	configure(config, value) {
-		goog.asserts.assert(typeof config == 'object' || arguments.length == 2, 'String configs should have values!');
+		window.asserts.assert(typeof config == 'object' || arguments.length == 2, 'String configs should have values!');
 
 		// ('fieldName', value) format
 		if (arguments.length == 2 && typeof config == 'string') {
 			config = ConfigUtils.convertToConfigObject(config, value);
 		}
 
-		goog.asserts.assert(typeof config == 'object', 'Should be an object!');
+		window.asserts.assert(typeof config == 'object', 'Should be an object!');
 
 		ConfigUtils.mergeConfigObjects(
 			this.config_,
@@ -143,7 +143,7 @@ class Overlay {
 			this.config_.overflowMenuButtons.push('cast');
 		}
 
-		goog.asserts.assert(this.player_ != null, 'Should have a player!');
+		window.asserts.assert(this.player_ != null, 'Should have a player!');
 
 		this.controls_.configure(this.config_);
 
@@ -232,7 +232,7 @@ class Overlay {
 		} else if (videos.length && !containers.length) {
 			// Just the video elements were provided.
 			for (const video of videos) {
-				goog.asserts.assert(video.tagName.toLowerCase() == 'video', 'Should be a video element!');
+				window.asserts.assert(video.tagName.toLowerCase() == 'video', 'Should be a video element!');
 
 				const container = document.createElement('div');
 				const videoParent = video.parentElement;
@@ -257,7 +257,7 @@ class Overlay {
 			}
 		} else {
 			for (const container of containers) {
-				goog.asserts.assert(container.tagName.toLowerCase() == 'div', 'Container should be a div!');
+				window.asserts.assert(container.tagName.toLowerCase() == 'div', 'Container should be a div!');
 
 				let castAppId = '';
 
@@ -270,7 +270,7 @@ class Overlay {
 
 				let currentVideo = null;
 				for (const video of videos) {
-					goog.asserts.assert(video.tagName.toLowerCase() == 'video', 'Should be a video element!');
+					window.asserts.assert(video.tagName.toLowerCase() == 'video', 'Should be a video element!');
 					if (video.parentElement == container) {
 						currentVideo = video;
 						break;

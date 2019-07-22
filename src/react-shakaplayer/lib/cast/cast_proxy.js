@@ -328,7 +328,7 @@ export default class CastProxy extends FakeEventTarget {
 
 		this.playerProxy_ = {};
 		this.iterateOverPlayerMethods_((name, method) => {
-			goog.asserts.assert(this.playerProxy_, 'Must have player proxy!');
+			window.asserts.assert(this.playerProxy_, 'Must have player proxy!');
 			Object.defineProperty(this.playerProxy_, name, {
 				configurable: false,
 				enumerable: true,
@@ -350,7 +350,7 @@ export default class CastProxy extends FakeEventTarget {
 	 * @private
 	 */
 	iterateOverPlayerMethods_(operation) {
-		goog.asserts.assert(this.localPlayer_, 'Must have player!');
+		window.asserts.assert(this.localPlayer_, 'Must have player!');
 		const player = /** @type {!Object} */ (this.localPlayer_);
 		// Avoid accessing any over-written methods in the prototype chain.
 		const seenNames = new Set();
@@ -464,7 +464,7 @@ export default class CastProxy extends FakeEventTarget {
 	 * @private
 	 */
 	onResumeLocal_() {
-		goog.asserts.assert(this.sender_, 'Cast sender should not be null!');
+		window.asserts.assert(this.sender_, 'Cast sender should not be null!');
 
 		// Transfer back the player state.
 		for (const pair of CastUtils.PlayerInitState) {
@@ -530,7 +530,7 @@ export default class CastProxy extends FakeEventTarget {
 			},
 			error => {
 				// Pass any errors through to the app.
-				goog.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
+				window.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
 				const event = new shaka.util.FakeEvent('error', { detail: error });
 				this.localPlayer_.dispatchEvent(event);
 			}
@@ -672,7 +672,7 @@ export default class CastProxy extends FakeEventTarget {
 		if (this.sender_ && this.sender_.isCasting() && !this.sender_.hasRemoteProperties()) {
 			if (CastUtils.PlayerGetterMethods[name]) {
 				const value = /** @type {Object} */ (this.localPlayer_)[name];
-				goog.asserts.assert(typeof value == 'function', 'only methods on Player');
+				window.asserts.assert(typeof value == 'function', 'only methods on Player');
 				// eslint-disable-next-line no-restricted-syntax
 				return value.bind(this.localPlayer_);
 			}
@@ -681,7 +681,7 @@ export default class CastProxy extends FakeEventTarget {
 		// Use local getters and methods if we are not casting.
 		if (!this.sender_ || !this.sender_.isCasting()) {
 			const value = /** @type {Object} */ (this.localPlayer_)[name];
-			goog.asserts.assert(typeof value == 'function', 'only methods on Player');
+			window.asserts.assert(typeof value == 'function', 'only methods on Player');
 			// eslint-disable-next-line no-restricted-syntax
 			return value.bind(this.localPlayer_);
 		}
@@ -708,7 +708,7 @@ export default class CastProxy extends FakeEventTarget {
 	 * @private
 	 */
 	onRemoteEvent_(targetName, event) {
-		goog.asserts.assert(
+		window.asserts.assert(
 			this.sender_ && this.sender_.isCasting(),
 			'Should only receive remote events while casting'
 		);

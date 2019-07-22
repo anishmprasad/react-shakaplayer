@@ -75,7 +75,7 @@ shaka.media.Mp4SegmentIndexParser = class {
 	 * @private
 	 */
 	static parseSIDX_(sidxOffset, scaledPresentationTimeOffset, uris, box) {
-		goog.asserts.assert(box.version != null, 'SIDX is a full box and should have a valid version.');
+		window.asserts.assert(box.version != null, 'SIDX is a full box and should have a valid version.');
 
 		const references = [];
 

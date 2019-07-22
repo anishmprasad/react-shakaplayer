@@ -603,7 +603,7 @@ class ShakaDemoConfig {
 	 * @private
 	 */
 	getLatestSection_() {
-		goog.asserts.assert(this.sections_.length > 0, 'Must have at least one section.');
+		window.asserts.assert(this.sections_.length > 0, 'Must have at least one section.');
 		return this.sections_[this.sections_.length - 1];
 	}
 }

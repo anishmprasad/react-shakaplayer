@@ -191,7 +191,7 @@ class DrmEngine {
 
     // |video_| will be |null| if we never attached to a video element.
     if (this.video_) {
-      goog.asserts.assert(!this.video_.src, 'video src must be removed first!');
+      window.asserts.assert(!this.video_.src, 'video src must be removed first!');
 
       try {
         await this.video_.setMediaKeys(null);
@@ -315,7 +315,7 @@ class DrmEngine {
    * @private
    */
   init_(variants) {
-    goog.asserts.assert(this.config_,
+    window.asserts.assert(this.config_,
         'DrmEngine configure() must be called before init()!');
 
     const hadDrmInfo = variants.some((v) => v.drmInfos.length > 0);
@@ -439,7 +439,7 @@ class DrmEngine {
    * @return {!Promise}
    */
   async setServerCertificate() {
-    goog.asserts.assert(this.initialized_,
+    window.asserts.assert(this.initialized_,
         'Must call init() before setServerCertificate');
 
     if (this.mediaKeys_ &&
@@ -474,7 +474,7 @@ class DrmEngine {
    * @return {!Promise}
    */
   async removeSession(sessionId) {
-    goog.asserts.assert(this.mediaKeys_,
+    window.asserts.assert(this.mediaKeys_,
         'Must call init() before removeSession');
 
     const session = await this.loadOfflineSession_(sessionId);
@@ -706,7 +706,7 @@ class DrmEngine {
       // Add the last bit of information to each config;
       for (const info of variant.drmInfos) {
         const config = configs.get(info.keySystem);
-        goog.asserts.assert(
+        window.asserts.assert(
             config,
             'Any missing configs should have be filled in before.');
 
@@ -827,7 +827,7 @@ class DrmEngine {
         this.supportedTypes_.add(cap.contentType);
       }
 
-      goog.asserts.assert(this.supportedTypes_.size,
+      window.asserts.assert(this.supportedTypes_.size,
           'We should get at least one supported MIME type');
 
       this.currentDrmInfo_ = shaka.media.DrmEngine.createDrmInfoFor_(
@@ -1118,7 +1118,7 @@ class DrmEngine {
       response = await req.promise;
     } catch (error) {
       // Request failed!
-      goog.asserts.assert(error instanceof Error,
+      window.asserts.assert(error instanceof Error,
           'Wrong NetworkingEngine error type!');
       const shakaErr = new Error(
           Error.Severity.CRITICAL,
@@ -1226,14 +1226,14 @@ class DrmEngine {
     for (const header of headers) {
       const name = header.querySelector('name');
       const value = header.querySelector('value');
-      goog.asserts.assert(name && value, 'Malformed PlayReady headers!');
+      window.asserts.assert(name && value, 'Malformed PlayReady headers!');
       request.headers[name.textContent] = value.textContent;
     }
 
     // Unpack the base64-encoded challenge.
     const challenge = dom.querySelector('Challenge');
-    goog.asserts.assert(challenge, 'Malformed PlayReady challenge!');
-    goog.asserts.assert(challenge.getAttribute('encoding') == 'base64encoded',
+    window.asserts.assert(challenge, 'Malformed PlayReady challenge!');
+    window.asserts.assert(challenge.getAttribute('encoding') == 'base64encoded',
         'Unexpected PlayReady challenge encoding!');
     request.body =
         Uint8ArrayUtils.fromBase64(challenge.textContent).buffer;
@@ -1371,7 +1371,7 @@ class DrmEngine {
         // We can get a key status changed for a closed session after it has
         // been removed from |activeSessions_|.  If it is closed, none of its
         // keys should be usable.
-        goog.asserts.assert(
+        window.asserts.assert(
             status != 'usable', 'Usable keys found in closed session');
       }
 
@@ -1463,7 +1463,7 @@ class DrmEngine {
    * @return {!Promise.<!Object.<string, ?shaka.extern.DrmSupportType>>}
    */
   static async probeSupport() {
-    goog.asserts.assert(DrmEngine.isBrowserSupported(),
+    window.asserts.assert(DrmEngine.isBrowserSupported(),
         'Must have basic EME support');
 
     const testKeySystems = [

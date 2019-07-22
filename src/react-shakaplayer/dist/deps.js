@@ -482,11 +482,11 @@ goog.addDependency(
 );
 goog.addDependency(
 	'../../../lib/offline/download_manager.js',
-	['shaka.offline.DownloadManager'],
+	['DownloadManager'],
 	[
 		'goog.asserts',
 		'shaka.net.NetworkingEngine',
-		'shaka.offline.DownloadProgressEstimator',
+		'DownloadProgressEstimator',
 		'shaka.util.Destroyer',
 		'shaka.util.Error',
 		'shaka.util.IDestroyable'
@@ -494,45 +494,45 @@ goog.addDependency(
 );
 goog.addDependency(
 	'../../../lib/offline/download_progress_estimator.js',
-	['shaka.offline.DownloadProgressEstimator'],
+	['DownloadProgressEstimator'],
 	[]
 );
 goog.addDependency(
 	'../../../lib/offline/indexeddb/db_connection.js',
-	['shaka.offline.indexeddb.DBConnection'],
-	['shaka.offline.indexeddb.DBOperation', 'shaka.util.ArrayUtils']
+	['indexeddb.DBConnection'],
+	['indexeddb.DBOperation', 'shaka.util.ArrayUtils']
 );
 goog.addDependency(
 	'../../../lib/offline/indexeddb/db_operation.js',
-	['shaka.offline.indexeddb.DBOperation'],
+	['indexeddb.DBOperation'],
 	['shaka.util.PublicPromise']
 );
 goog.addDependency(
 	'../../../lib/offline/indexeddb/eme_session_storage_cell.js',
-	['shaka.offline.indexeddb.EmeSessionStorageCell'],
-	['shaka.offline.indexeddb.DBConnection']
+	['indexeddb.EmeSessionStorageCell'],
+	['indexeddb.DBConnection']
 );
 goog.addDependency(
 	'../../../lib/offline/indexeddb/storage_mechanism.js',
-	['shaka.offline.indexeddb.StorageMechanism'],
+	['indexeddb.StorageMechanism'],
 	[
 		'goog.asserts',
 		'shaka.log',
-		'shaka.offline.StorageMuxer',
-		'shaka.offline.indexeddb.EmeSessionStorageCell',
-		'shaka.offline.indexeddb.V1StorageCell',
-		'shaka.offline.indexeddb.V2StorageCell',
+		'StorageMuxer',
+		'indexeddb.EmeSessionStorageCell',
+		'indexeddb.V1StorageCell',
+		'indexeddb.V2StorageCell',
 		'shaka.util.Error',
 		'shaka.util.PublicPromise'
 	]
 );
 goog.addDependency(
 	'../../../lib/offline/indexeddb/v1_storage_cell.js',
-	['shaka.offline.indexeddb.V1StorageCell'],
+	['indexeddb.V1StorageCell'],
 	[
 		'goog.asserts',
 		'shaka.log',
-		'shaka.offline.indexeddb.DBConnection',
+		'indexeddb.DBConnection',
 		'shaka.util.Error',
 		'shaka.util.ManifestParserUtils',
 		'shaka.util.PublicPromise'
@@ -540,56 +540,56 @@ goog.addDependency(
 );
 goog.addDependency(
 	'../../../lib/offline/indexeddb/v2_storage_cell.js',
-	['shaka.offline.indexeddb.V2StorageCell'],
-	['shaka.offline.indexeddb.DBConnection', 'shaka.util.Error']
+	['indexeddb.V2StorageCell'],
+	['indexeddb.DBConnection', 'shaka.util.Error']
 );
 goog.addDependency(
 	'../../../lib/offline/manifest_converter.js',
-	['shaka.offline.ManifestConverter'],
+	['ManifestConverter'],
 	[
 		'goog.asserts',
 		'shaka.media.InitSegmentReference',
 		'shaka.media.PresentationTimeline',
 		'shaka.media.SegmentIndex',
 		'shaka.media.SegmentReference',
-		'shaka.offline.OfflineUri',
+		'OfflineUri',
 		'shaka.util.ManifestParserUtils'
 	]
 );
 goog.addDependency(
 	'../../../lib/offline/offline_manifest_parser.js',
-	['shaka.offline.OfflineManifestParser'],
+	['OfflineManifestParser'],
 	[
 		'goog.asserts',
 		'shaka.log',
 		'shaka.media.ManifestParser',
-		'shaka.offline.ManifestConverter',
-		'shaka.offline.OfflineUri',
-		'shaka.offline.StorageMuxer',
+		'ManifestConverter',
+		'OfflineUri',
+		'StorageMuxer',
 		'shaka.util.Error'
 	]
 );
 goog.addDependency(
 	'../../../lib/offline/offline_scheme.js',
-	['shaka.offline.OfflineScheme'],
+	['OfflineScheme'],
 	[
 		'goog.asserts',
 		'shaka.net.NetworkingEngine',
-		'shaka.offline.OfflineUri',
-		'shaka.offline.StorageMuxer',
+		'OfflineUri',
+		'StorageMuxer',
 		'shaka.util.AbortableOperation',
 		'shaka.util.Error'
 	]
 );
-goog.addDependency('../../../lib/offline/offline_uri.js', ['shaka.offline.OfflineUri'], []);
+goog.addDependency('../../../lib/offline/offline_uri.js', ['OfflineUri'], []);
 goog.addDependency(
 	'../../../lib/offline/session_deleter.js',
-	['shaka.offline.SessionDeleter'],
+	['SessionDeleter'],
 	['shaka.log', 'shaka.util.ArrayUtils']
 );
 goog.addDependency(
 	'../../../lib/offline/storage.js',
-	['shaka.offline.Storage'],
+	['Storage'],
 	[
 		'goog.asserts',
 		'shaka.Deprecate',
@@ -598,12 +598,12 @@ goog.addDependency(
 		'shaka.media.DrmEngine',
 		'shaka.media.ManifestParser',
 		'shaka.net.NetworkingEngine',
-		'shaka.offline.DownloadManager',
-		'shaka.offline.OfflineUri',
-		'shaka.offline.SessionDeleter',
-		'shaka.offline.StorageMuxer',
-		'shaka.offline.StoredContentUtils',
-		'shaka.offline.StreamBandwidthEstimator',
+		'DownloadManager',
+		'OfflineUri',
+		'SessionDeleter',
+		'StorageMuxer',
+		'StoredContentUtils',
+		'StreamBandwidthEstimator',
 		'shaka.util.ArrayUtils',
 		'shaka.util.Destroyer',
 		'shaka.util.Error',
@@ -618,23 +618,23 @@ goog.addDependency(
 );
 goog.addDependency(
 	'../../../lib/offline/storage_muxer.js',
-	['shaka.offline.StorageCellHandle', 'shaka.offline.StorageCellPath', 'shaka.offline.StorageMuxer'],
+	['StorageCellHandle', 'StorageCellPath', 'StorageMuxer'],
 	['shaka.log', 'shaka.util.Error', 'shaka.util.IDestroyable']
 );
 goog.addDependency(
 	'../../../lib/offline/stored_content_utils.js',
-	['shaka.offline.StoredContentUtils'],
+	['StoredContentUtils'],
 	[
 		'goog.asserts',
 		'shaka.media.PresentationTimeline',
-		'shaka.offline.ManifestConverter',
-		'shaka.offline.OfflineUri',
+		'ManifestConverter',
+		'OfflineUri',
 		'shaka.util.StreamUtils'
 	]
 );
 goog.addDependency(
 	'../../../lib/offline/stream_bandwidth_estimator.js',
-	['shaka.offline.StreamBandwidthEstimator'],
+	['StreamBandwidthEstimator'],
 	['shaka.log']
 );
 goog.addDependency(

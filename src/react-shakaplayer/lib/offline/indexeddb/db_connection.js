@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.indexeddb.DBConnection');
+// goog.provide('indexeddb.DBConnection');
 
-// goog.require('shaka.offline.indexeddb.DBOperation');
+// goog.require('indexeddb.DBOperation');
 // goog.require('shaka.util.ArrayUtils');
 import DBOperation from '../indexeddb/db_operation';
 import ArrayUtils from '../../util/array_utils';
@@ -37,7 +37,7 @@ export default class DBConnection {
 	constructor(connection) {
 		/** @private {IDBDatabase} */
 		this.connection_ = connection;
-		/** @private {!Array.<shaka.offline.indexeddb.DBOperation>} */
+		/** @private {!Array.<indexeddb.DBOperation>} */
 		this.pending_ = [];
 	}
 
@@ -55,7 +55,7 @@ export default class DBConnection {
 	/**
 	 * @param {string} store The name of the store that the operation should
 	 *                       occur on.
-	 * @return {!shaka.offline.indexeddb.DBOperation}
+	 * @return {!indexeddb.DBOperation}
 	 */
 	startReadOnlyOperation(store) {
 		return this.startOperation_(store, 'readonly');
@@ -64,7 +64,7 @@ export default class DBConnection {
 	/**
 	 * @param {string} store The name of the store that the operation should
 	 *                       occur on.
-	 * @return {!shaka.offline.indexeddb.DBOperation}
+	 * @return {!indexeddb.DBOperation}
 	 */
 	startReadWriteOperation(store) {
 		return this.startOperation_(store, 'readwrite');
@@ -76,7 +76,7 @@ export default class DBConnection {
 	 * @param {string} type The type of operation being performed on the store.
 	 *                      This determines what commands may be performed. This
 	 *                      can either be "readonly" or "readwrite".
-	 * @return {!shaka.offline.indexeddb.DBOperation}
+	 * @return {!indexeddb.DBOperation}
 	 * @private
 	 */
 	startOperation_(store, type) {
@@ -92,7 +92,7 @@ export default class DBConnection {
 	}
 
 	/**
-	 * @param {!shaka.offline.indexeddb.DBOperation} operation
+	 * @param {!indexeddb.DBOperation} operation
 	 * @private
 	 */
 	stopTracking_(operation) {

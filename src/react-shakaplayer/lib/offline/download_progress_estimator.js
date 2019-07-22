@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.DownloadProgressEstimator');
+// goog.provide('DownloadProgressEstimator');
 
 var shaka = window.shaka;
 // var goog = window.goog;

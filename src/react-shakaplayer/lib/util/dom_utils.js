@@ -82,7 +82,7 @@ export default class Dom {
 	 */
 	static getElementByClassName(className, parent) {
 		const elements = parent.getElementsByClassName(className);
-		goog.asserts.assert(elements.length == 1, 'Should only be one element with class name ' + className);
+		window.asserts.assert(elements.length == 1, 'Should only be one element with class name ' + className);
 
 		return shaka.util.Dom.asHTMLElement(elements[0]);
 	}

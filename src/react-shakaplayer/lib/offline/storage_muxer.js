@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.StorageCellHandle');
-// goog.provide('shaka.offline.StorageCellPath');
-// goog.provide('shaka.offline.StorageMuxer');
+// goog.provide('StorageCellHandle');
+// goog.provide('StorageCellPath');
+// goog.provide('StorageMuxer');
 
 // goog.require('shaka.log');
 // goog.require('shaka.util.Error');
@@ -41,11 +41,11 @@ let StorageCellPath = {};
 
 /**
  * @typedef {{
- *   path: shaka.offline.StorageCellPath,
+ *   path: StorageCellPath,
  *   cell: !shaka.extern.StorageCell
  * }}
  *
- * @property {shaka.offline.StorageCellPath} path
+ * @property {StorageCellPath} path
  *   The path that maps to the cell.
  * @property {shaka.extern.StorageCell} cell
  *   The storage cell that the path points to within the storage muxer.
@@ -106,7 +106,7 @@ class StorageMuxer {
 	 */
 	init() {
 		// Add the new instance of each mechanism to the muxer.
-		const registry = shaka.offline.StorageMuxer.getRegistry_();
+		const registry = StorageMuxer.getRegistry_();
 		registry.forEach((factory, name) => {
 			const mech = factory();
 			if (mech) {
@@ -129,10 +129,10 @@ class StorageMuxer {
 	 * Get a promise that will resolve with a storage cell that supports
 	 * add-operations. If no cell can be found, the promise will be rejected.
 	 *
-	 * @return {shaka.offline.StorageCellHandle}
+	 * @return {StorageCellHandle}
 	 */
 	getActive() {
-		/** @type {?shaka.offline.StorageCellHandle} */
+		/** @type {?StorageCellHandle} */
 		let handle = null;
 
 		this.mechanisms_.forEach((mechanism, mechanismName) => {
@@ -156,7 +156,7 @@ class StorageMuxer {
 		});
 
 		if (handle) {
-			return /** @type {shaka.offline.StorageCellHandle} */ (handle);
+			return /** @type {StorageCellHandle} */ (handle);
 		}
 
 		throw new shaka.util.Error(
@@ -168,7 +168,7 @@ class StorageMuxer {
 	}
 
 	/**
-	 * @param {function(!shaka.offline.StorageCellPath,
+	 * @param {function(!StorageCellPath,
 	 *                  !shaka.extern.StorageCell)} callback
 	 */
 	forEachCell(callback) {
@@ -251,7 +251,7 @@ class StorageMuxer {
 	 * and a cell id. If a cell can be found, the cell will be returned. If no
 	 * cell is found, null will be returned.
 	 *
-	 * @param {shaka.offline.StorageCellPath} path
+	 * @param {StorageCellPath} path
 	 * @return {shaka.extern.StorageCell}
 	 */
 	resolvePath(path) {
@@ -281,7 +281,7 @@ class StorageMuxer {
 		// critical to our ability to wipe the DB in case of a version mismatch.
 		// If there are no instances, create temporary ones and destroy them later.
 		if (!alreadyInitialized) {
-			const registry = shaka.offline.StorageMuxer.getRegistry_();
+			const registry = StorageMuxer.getRegistry_();
 			registry.forEach((factory, name) => {
 				const mech = factory();
 				if (mech) {

@@ -187,7 +187,7 @@ class HlsParser {
    * @exportInterface
    */
   async start(uri, playerInterface) {
-    goog.asserts.assert(this.config_, 'Must call configure() before start()!');
+    window.asserts.assert(this.config_, 'Must call configure() before start()!');
     this.playerInterface_ = playerInterface;
 
     const response = await this.requestManifest_(uri);
@@ -195,7 +195,7 @@ class HlsParser {
     // Record the master playlist URI after redirects.
     this.masterPlaylistUri_ = response.uri;
 
-    goog.asserts.assert(response.data, 'Response data should be non-null!');
+    window.asserts.assert(response.data, 'Response data should be non-null!');
     await this.parseManifest_(response.data);
 
     // Start the update timer if we want updates.
@@ -204,7 +204,7 @@ class HlsParser {
       this.updatePlaylistTimer_.tickAfter(/* seconds = */ delay);
     }
 
-    goog.asserts.assert(this.manifest_, 'Manifest should be non-null');
+    window.asserts.assert(this.manifest_, 'Manifest should be non-null');
     return this.manifest_;
   }
 
@@ -298,7 +298,7 @@ class HlsParser {
     streamInfo.segmentIndex.replace(segments);
 
     const newestSegment = segments[segments.length - 1];
-    goog.asserts.assert(newestSegment, 'Should have segments!');
+    window.asserts.assert(newestSegment, 'Should have segments!');
 
     // Once the last segment has been added to the playlist,
     // #EXT-X-ENDLIST tag will be appended.
@@ -332,7 +332,7 @@ class HlsParser {
    * @private
    */
   async parseManifest_(data) {
-    goog.asserts.assert(this.masterPlaylistUri_,
+    window.asserts.assert(this.masterPlaylistUri_,
         'Master playlist URI must be set before calling parseManifest_!');
 
     const playlist = this.manifestTextParser_.parsePlaylist(
@@ -392,13 +392,13 @@ class HlsParser {
     }
 
     // This assert is our own sanity check.
-    goog.asserts.assert(this.presentationTimeline_ == null,
+    window.asserts.assert(this.presentationTimeline_ == null,
         'Presentation timeline created early!');
     this.createPresentationTimeline_(maxLastTimestamp);
 
     // This assert satisfies the compiler that it is not null for the rest of
     // the method.
-    goog.asserts.assert(this.presentationTimeline_,
+    window.asserts.assert(this.presentationTimeline_,
         'Presentation timeline not created!');
 
     if (this.isLive_()) {
@@ -538,7 +538,7 @@ class HlsParser {
    * @private
    */
   async createVariantsForTag_(tag, playlist) {
-    goog.asserts.assert(tag.name == 'EXT-X-STREAM-INF',
+    window.asserts.assert(tag.name == 'EXT-X-STREAM-INF',
         'Should only be called on variant tags!');
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
 
@@ -592,7 +592,7 @@ class HlsParser {
 
     const audioGroupId = tag.getAttributeValue('AUDIO');
     const videoGroupId = tag.getAttributeValue('VIDEO');
-    goog.asserts.assert(audioGroupId == null || videoGroupId == null,
+    window.asserts.assert(audioGroupId == null || videoGroupId == null,
         'Unexpected: both video and audio described by media tags!');
 
     // Find any associated audio or video groups and create streams for them.
@@ -615,7 +615,7 @@ class HlsParser {
       if (subGroupId) {
         const textTags =
             shaka.hls.Utils.findMediaTags(mediaTags, 'SUBTITLES', subGroupId);
-        goog.asserts.assert(textTags.length == 1,
+        window.asserts.assert(textTags.length == 1,
             'Exactly one text tag expected!');
         if (textTags.length) {
           // We found a text codec and text stream, so make sure the codec is
@@ -699,13 +699,13 @@ class HlsParser {
       }
     } else {
       // There are associated video streams.  Assume this is audio.
-      goog.asserts.assert(videoStreamInfos.length,
+      window.asserts.assert(videoStreamInfos.length,
           'No video streams!  This should have been handled already!');
       shaka.log.debug('Guessing audio.');
       type = ContentType.AUDIO;
     }
 
-    goog.asserts.assert(type, 'Type should have been set by now!');
+    window.asserts.assert(type, 'Type should have been set by now!');
     if (!ignoreStream) {
       streamInfo =
       await this.createStreamInfoFromVariantTag_(tag, codecs, type);
@@ -725,7 +725,7 @@ class HlsParser {
       return [];
     }
 
-    goog.asserts.assert(videoStreamInfos.length || audioStreamInfos.length,
+    window.asserts.assert(videoStreamInfos.length || audioStreamInfos.length,
         'We should have created a stream!');
 
     if (videoStreamInfos) {
@@ -849,9 +849,9 @@ class HlsParser {
 
     // Since both audio and video are of the same type, this assertion will
     // catch certain mistakes at runtime that the compiler would miss.
-    goog.asserts.assert(!audio || audio.type == ContentType.AUDIO,
+    window.asserts.assert(!audio || audio.type == ContentType.AUDIO,
         'Audio parameter mismatch!');
-    goog.asserts.assert(!video || video.type == ContentType.VIDEO,
+    window.asserts.assert(!video || video.type == ContentType.VIDEO,
         'Video parameter mismatch!');
 
     return {
@@ -876,15 +876,15 @@ class HlsParser {
    * @private
    */
   async createTextStream_(tag, playlist) {
-    goog.asserts.assert(tag.name == 'EXT-X-MEDIA',
+    window.asserts.assert(tag.name == 'EXT-X-MEDIA',
         'Should only be called on media tags!');
 
     const type = shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
-    goog.asserts.assert(type == 'SUBTITLES',
+    window.asserts.assert(type == 'SUBTITLES',
         'Should only be called on tags with TYPE="SUBTITLES"!');
 
     const streamInfo = await this.createStreamInfoFromMediaTag_(tag, []);
-    goog.asserts.assert(
+    window.asserts.assert(
         streamInfo, 'Should always have a streamInfo for text');
     return streamInfo.stream;
   }
@@ -899,10 +899,10 @@ class HlsParser {
    */
   parseClosedCaptions_(tags) {
     for (const tag of tags) {
-      goog.asserts.assert(tag.name == 'EXT-X-MEDIA',
+      window.asserts.assert(tag.name == 'EXT-X-MEDIA',
           'Should only be called on media tags!');
       const type = shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
-      goog.asserts.assert(type == 'CLOSED-CAPTIONS',
+      window.asserts.assert(type == 'CLOSED-CAPTIONS',
           'Should only be called on tags with TYPE="CLOSED-CAPTIONS"!');
 
       const LanguageUtils = shaka.util.LanguageUtils;
@@ -935,7 +935,7 @@ class HlsParser {
    * @private
    */
   async createStreamInfoFromMediaTag_(tag, allCodecs) {
-    goog.asserts.assert(tag.name == 'EXT-X-MEDIA',
+    window.asserts.assert(tag.name == 'EXT-X-MEDIA',
         'Should only be called on media tags!');
 
     const HlsParser = shaka.hls.HlsParser;
@@ -1019,7 +1019,7 @@ class HlsParser {
    * @private
    */
   async createStreamInfoFromVariantTag_(tag, allCodecs, type) {
-    goog.asserts.assert(tag.name == 'EXT-X-STREAM-INF',
+    window.asserts.assert(tag.name == 'EXT-X-STREAM-INF',
         'Should only be called on media tags!');
     const ContentType = shaka.util.ManifestParserUtils.ContentType;
     const HlsParser = shaka.hls.HlsParser;
@@ -1157,7 +1157,7 @@ class HlsParser {
     }
 
 
-    goog.asserts.assert(playlist.segments != null,
+    window.asserts.assert(playlist.segments != null,
         'Media playlist should have segments!');
 
     this.determinePresentationType_(playlist);
@@ -1316,7 +1316,7 @@ class HlsParser {
 
     // This asserts that the live edge is being calculated from segment times.
     // For VOD and event streams, this check should still pass.
-    goog.asserts.assert(
+    window.asserts.assert(
         !this.presentationTimeline_.usingPresentationStartTime(),
         'We should not be using the presentation start time in HLS!');
   }
@@ -1403,7 +1403,7 @@ class HlsParser {
       if (blocks[1]) {
         startByte = Number(blocks[1]);
       } else {
-        goog.asserts.assert(previousReference,
+        window.asserts.assert(previousReference,
             'Cannot refer back to previous HLS segment!');
         startByte = previousReference.endByte + 1;
       }
@@ -1451,7 +1451,7 @@ class HlsParser {
     /** @type {!Array.<!shaka.media.SegmentReference>} */
     const references = [];
 
-    goog.asserts.assert(hlsSegments.length, 'Playlist should have segments!');
+    window.asserts.assert(hlsSegments.length, 'Playlist should have segments!');
     // We may need to look at the media itself to determine a segment start
     // time.
     const firstSegmentUri = hlsSegments[0].absoluteUri;
@@ -1629,13 +1629,13 @@ class HlsParser {
 
     if (mimeType == 'video/mp2t') {
       const response = await this.fetchPartialSegment_(segmentRef);
-      goog.asserts.assert(response.data, 'Should have a response body!');
+      window.asserts.assert(response.data, 'Should have a response body!');
       return this.getStartTimeFromTsSegment_(response.data);
     }
 
     if (mimeType == 'application/mp4' || mimeType.startsWith('text/')) {
       const response = await this.fetchPartialSegment_(segmentRef);
-      goog.asserts.assert(response.data, 'Should have a response body!');
+      window.asserts.assert(response.data, 'Should have a response body!');
       return this.getStartTimeFromTextSegment_(mimeType, codecs, response.data);
     }
 
@@ -1673,7 +1673,7 @@ class HlsParser {
         .box('trak', Mp4Parser.children)
         .box('mdia', Mp4Parser.children)
         .fullBox('mdhd', (box) => {
-          goog.asserts.assert(
+          window.asserts.assert(
               box.version == 0 || box.version == 1,
               'MDHD version can only be 0 or 1');
 
@@ -1700,7 +1700,7 @@ class HlsParser {
         .box('moof', Mp4Parser.children)
         .box('traf', Mp4Parser.children)
         .fullBox('tfdt', (box) => {
-          goog.asserts.assert(
+          window.asserts.assert(
               box.version == 0 || box.version == 1,
               'TFDT version can only be 0 or 1');
           const baseTime = (box.version == 0) ?
@@ -1820,9 +1820,9 @@ class HlsParser {
       }
 
       if (ptsDtsIndicator == 2 /* PTS only */) {
-        goog.asserts.assert(pesHeaderLengthRemaining == 5, 'Bad PES header?');
+        window.asserts.assert(pesHeaderLengthRemaining == 5, 'Bad PES header?');
       } else if (ptsDtsIndicator == 3 /* PTS and DTS */) {
-        goog.asserts.assert(pesHeaderLengthRemaining == 10, 'Bad PES header?');
+        window.asserts.assert(pesHeaderLengthRemaining == 10, 'Bad PES header?');
       }
 
       const pts0 = reader.readUint8();
@@ -1964,7 +1964,7 @@ class HlsParser {
     const HlsParser = shaka.hls.HlsParser;
     const RequestType = shaka.net.NetworkingEngine.RequestType;
 
-    goog.asserts.assert(playlist.segments.length,
+    window.asserts.assert(playlist.segments.length,
         'Playlist should have segments!');
     const firstSegmentUri = playlist.segments[0].absoluteUri;
 
@@ -2101,7 +2101,7 @@ class HlsParser {
   async onUpdate_() {
     shaka.log.info('Updating manifest...');
 
-    goog.asserts.assert(
+    window.asserts.assert(
         this.updatePlaylistDelay_ > 0,
         'We should only call |onUpdate_| when we are suppose to be updating.');
 
@@ -2116,7 +2116,7 @@ class HlsParser {
       const delay = this.updatePlaylistDelay_;
       this.updatePlaylistTimer_.tickAfter(/* seconds= */ delay);
     } catch (error) {
-      goog.asserts.assert(error instanceof shaka.util.Error,
+      window.asserts.assert(error instanceof shaka.util.Error,
           'Should only receive a Shaka error');
 
       // We will retry updating, so override the severity of the error.
@@ -2214,7 +2214,7 @@ class HlsParser {
     const keyId = drmTag.getAttributeValue('KEYID');
     if (keyId) {
       // This value should begin with '0x':
-      goog.asserts.assert(keyId.startsWith('0x'), 'Incorrect KEYID format!');
+      window.asserts.assert(keyId.startsWith('0x'), 'Incorrect KEYID format!');
       // But the output should not contain the '0x':
       drmInfo.keyIds = [keyId.substr(2).toLowerCase()];
     }

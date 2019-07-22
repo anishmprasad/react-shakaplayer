@@ -372,7 +372,7 @@ class MediaSourcePlayhead {
 	clampSeekToDuration_(time) {
 		const duration = this.timeline_.getDuration();
 		if (time >= duration) {
-			goog.asserts.assert(this.config_.durationBackoff >= 0, 'Duration backoff must be non-negative!');
+			window.asserts.assert(this.config_.durationBackoff >= 0, 'Duration backoff must be non-negative!');
 			return duration - this.config_.durationBackoff;
 		}
 		return time;
@@ -386,7 +386,7 @@ class MediaSourcePlayhead {
 	 * @private
 	 */
 	reposition_(currentTime) {
-		goog.asserts.assert(this.config_, 'Cannot reposition playhead when it has beeen destroyed');
+		window.asserts.assert(this.config_, 'Cannot reposition playhead when it has beeen destroyed');
 
 		/** @type {function(number)} */
 		const isBuffered = playheadTime => TimeRangesUtils.isBuffered(this.mediaElement_.buffered, playheadTime);

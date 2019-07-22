@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.OfflineManifestParser');
+// goog.provide('OfflineManifestParser');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.log');
 // goog.require('shaka.media.ManifestParser');
-// goog.require('shaka.offline.ManifestConverter');
-// goog.require('shaka.offline.OfflineUri');
-// goog.require('shaka.offline.StorageMuxer');
+// goog.require('ManifestConverter');
+// goog.require('OfflineUri');
+// goog.require('StorageMuxer');
 // goog.require('shaka.util.Error');
 
 import ManifestParser from '../media/manifest_parser';
@@ -39,7 +39,7 @@ var goog = window.goog;
  */
 class OfflineManifestParser {
 	constructor() {
-		/** @private {shaka.offline.OfflineUri} */
+		/** @private {OfflineUri} */
 		this.uri_ = null;
 	}
 
@@ -50,7 +50,7 @@ class OfflineManifestParser {
 
 	/** @override */
 	async start(uriString, playerInterface) {
-		/** @type {shaka.offline.OfflineUri} */
+		/** @type {OfflineUri} */
 		const uri = OfflineUri.parse(uriString);
 		this.uri_ = uri;
 
@@ -63,7 +63,7 @@ class OfflineManifestParser {
 			);
 		}
 
-		/** @type {!shaka.offline.StorageMuxer} */
+		/** @type {!StorageMuxer} */
 		const muxer = new StorageMuxer();
 
 		try {
@@ -94,12 +94,12 @@ class OfflineManifestParser {
 
 	/** @override */
 	async onExpirationUpdated(sessionId, expiration) {
-		goog.asserts.assert(this.uri_, 'Should not get update event before start has been called');
+		window.asserts.assert(this.uri_, 'Should not get update event before start has been called');
 
-		/** @type {!shaka.offline.OfflineUri} */
+		/** @type {!OfflineUri} */
 		const uri = this.uri_;
 
-		/** @type {!shaka.offline.StorageMuxer} */
+		/** @type {!StorageMuxer} */
 		const muxer = new StorageMuxer();
 
 		try {

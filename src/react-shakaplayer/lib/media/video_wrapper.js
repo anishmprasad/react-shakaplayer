@@ -176,7 +176,7 @@ class VideoWrapper {
 	 * @private
 	 */
 	startListeningToSeeks_() {
-		goog.asserts.assert(
+		window.asserts.assert(
 			this.video_.readyState > 0,
 			'The media element should be ready before we listen for seeking.'
 		);

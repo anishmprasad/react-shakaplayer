@@ -69,9 +69,9 @@ class Pssh {
 	 * @private
 	 */
 	parseBox_(box) {
-		goog.asserts.assert(box.version != null, 'PSSH boxes are full boxes and must have a valid version');
+		window.asserts.assert(box.version != null, 'PSSH boxes are full boxes and must have a valid version');
 
-		goog.asserts.assert(box.flags != null, 'PSSH boxes are full boxes and must have a valid flag');
+		window.asserts.assert(box.flags != null, 'PSSH boxes are full boxes and must have a valid flag');
 
 		if (box.version > 1) {
 			shaka.log.warning('Unrecognized PSSH version found!');

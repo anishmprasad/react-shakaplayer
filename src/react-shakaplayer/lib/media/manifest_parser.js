@@ -139,7 +139,7 @@ class ManifestParser {
 
 			return new Factory();
 		} catch (error) {
-			goog.asserts.assert(error instanceof Error, 'Incorrect error type');
+			window.asserts.assert(error instanceof Error, 'Incorrect error type');
 
 			// Regardless of what the error was, we need to upgrade it to a critical
 			// error. We can't do anything if we can't create a manifest parser.

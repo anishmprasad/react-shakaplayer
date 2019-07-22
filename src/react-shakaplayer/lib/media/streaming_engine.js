@@ -263,7 +263,7 @@ class StreamingEngine {
    * @return {!Promise}
    */
   async start() {
-    goog.asserts.assert(this.config_,
+    window.asserts.assert(this.config_,
         'StreamingEngine configure() must be called before init()!');
 
     // Determine which Period we must buffer.
@@ -512,7 +512,7 @@ class StreamingEngine {
    */
   switchTextStream(textStream) {
     const ContentType = ManifestParserUtils.ContentType;
-    goog.asserts.assert(textStream && textStream.type == ContentType.TEXT,
+    window.asserts.assert(textStream && textStream.type == ContentType.TEXT,
         'Wrong stream type passed to switchTextStream!');
     this.switchInternal_(textStream, /* clearBuffer= */ true,
         /* safeMargin= */ 0, /* force= */ false);
@@ -551,7 +551,7 @@ class StreamingEngine {
       this.loadNewTextStream(stream);
       return;
     }
-    goog.asserts.assert(mediaState, 'switch: expected mediaState to exist');
+    window.asserts.assert(mediaState, 'switch: expected mediaState to exist');
     if (!mediaState) {
       return;
     }
@@ -595,7 +595,7 @@ class StreamingEngine {
 
     // Ensure the Period is ready.
     let canSwitchRecord = this.canSwitchPeriod_[periodIndex];
-    goog.asserts.assert(
+    window.asserts.assert(
         canSwitchRecord && canSwitchRecord.resolved,
         'switch: expected Period ' + periodIndex + ' to be ready');
     if (!canSwitchRecord || !canSwitchRecord.resolved) {
@@ -604,7 +604,7 @@ class StreamingEngine {
 
     // Sanity check. If the Period is ready then the Stream should be ready too.
     canSwitchRecord = this.canSwitchStream_.get(stream.id);
-    goog.asserts.assert(canSwitchRecord && canSwitchRecord.resolved,
+    window.asserts.assert(canSwitchRecord && canSwitchRecord.resolved,
         'switch: expected Stream ' + stream.id + ' to be ready');
     if (!canSwitchRecord || !canSwitchRecord.resolved) {
       return;
@@ -852,7 +852,7 @@ class StreamingEngine {
    * @private
    */
   async initStreams_(audio, video, text, resumeAt) {
-    goog.asserts.assert(this.config_,
+    window.asserts.assert(this.config_,
         'StreamingEngine configure() must be called before init()!');
 
     // Determine which Period we must buffer.
@@ -957,7 +957,7 @@ class StreamingEngine {
     if (canSwitchRecord) {
       shaka.log.debug(
           '(all) Period ' + periodIndex + ' is being or has been set up');
-      goog.asserts.assert(canSwitchRecord.promise, 'promise must not be null');
+      window.asserts.assert(canSwitchRecord.promise, 'promise must not be null');
       return canSwitchRecord.promise;
     }
 
@@ -1004,7 +1004,7 @@ class StreamingEngine {
         this.canSwitchPeriod_[periodIndex].promise.reject();
         delete this.canSwitchPeriod_[periodIndex];
         shaka.log.warning('(all) failed to setup Period ' + periodIndex);
-        goog.asserts.assert(error instanceof Error,
+        window.asserts.assert(error instanceof Error,
             'Bad error type');
         this.playerInterface_.onError(error);
         // Don't stop other Periods from being set up.
@@ -1100,14 +1100,14 @@ class StreamingEngine {
     const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
     // Sanity check.
-    goog.asserts.assert(
+    window.asserts.assert(
         !mediaState.performingUpdate && (mediaState.updateTimer != null),
         logPrefix + ' unexpected call to onUpdate_()');
     if (mediaState.performingUpdate || (mediaState.updateTimer == null)) {
       return;
     }
 
-    goog.asserts.assert(
+    window.asserts.assert(
         !mediaState.clearingBuffer, logPrefix +
         ' onUpdate_() should not be called when clearing the buffer');
     if (mediaState.clearingBuffer) {
@@ -1177,8 +1177,8 @@ class StreamingEngine {
    * @private
    */
   update_(mediaState) {
-    goog.asserts.assert(this.manifest_, 'manifest_ should not be null');
-    goog.asserts.assert(this.config_, 'config_ should not be null');
+    window.asserts.assert(this.manifest_, 'manifest_ should not be null');
+    window.asserts.assert(this.config_, 'config_ should not be null');
 
     const ContentType = ManifestParserUtils.ContentType;
 
@@ -1379,7 +1379,7 @@ class StreamingEngine {
 
     if (mediaState.lastSegmentReference) {
       // Something is buffered from another Stream.
-      goog.asserts.assert(mediaState.lastStream,
+      window.asserts.assert(mediaState.lastStream,
           'lastStream should not be null');
       shaka.log.v1(logPrefix, 'next position unknown: another Stream buffered');
       const lastPeriodIndex =
@@ -1393,7 +1393,7 @@ class StreamingEngine {
       // Either nothing is buffered, or we have cleared part of the buffer.  If
       // we still have some buffered, use that time to find the segment,
       // otherwise start at the playhead time.
-      goog.asserts.assert(!mediaState.lastStream, 'lastStream should be null');
+      window.asserts.assert(!mediaState.lastStream, 'lastStream should be null');
       shaka.log.v1(logPrefix, 'next position unknown: nothing buffered');
       position = this.lookupSegmentPosition_(
           mediaState, bufferEnd || presentationTime, currentPeriodIndex);
@@ -1543,7 +1543,7 @@ class StreamingEngine {
         followingPeriod.startTime + StreamingEngine.APPEND_WINDOW_END_FUDGE_ :
         duration;
 
-    goog.asserts.assert(
+    window.asserts.assert(
         reference.startTime <= appendWindowEnd,
         logPrefix + ' segment should start before append window end');
 
@@ -1593,7 +1593,7 @@ class StreamingEngine {
       if (this.fatalError_) {
         return;
       }
-      goog.asserts.assert(error instanceof Error,
+      window.asserts.assert(error instanceof Error,
           'Should only receive a Shaka error');
 
       mediaState.performingUpdate = false;
@@ -1768,7 +1768,7 @@ class StreamingEngine {
 
     shaka.log.v1(logPrefix, 'fetching init segment');
 
-    goog.asserts.assert(
+    window.asserts.assert(
         mediaState.stream.initSegmentReference, 'Should have init segment');
     const fetchInit =
         this.fetch_(mediaState, mediaState.stream.initSegmentReference);
@@ -1990,7 +1990,7 @@ class StreamingEngine {
     // We must use |stream| because switch() may have been called.
     const currentPeriodIndex = this.findPeriodContainingStream_(stream);
 
-    goog.asserts.assert(
+    window.asserts.assert(
         mediaStates.every((ms) => {
           // It is possible for one stream (usually text) to buffer the whole
           // Period and need the next one.
@@ -2054,7 +2054,7 @@ class StreamingEngine {
     // streamwill handle it.
     // This only works when all streams either need the same Period or are still
     // performing updates.
-    goog.asserts.assert(
+    window.asserts.assert(
         mediaStates.every((ms) => {
           return ms.needPeriodIndex == needPeriodIndex || ms.hasError ||
               !StreamingEngine.isIdle_(ms);
@@ -2177,7 +2177,7 @@ class StreamingEngine {
               /* safeMargin= */ 0, /* force= */ false);
           this.scheduleUpdate_(this.mediaStates_.get(type), 0);
         } else {
-          goog.asserts.assert(type == ContentType.TEXT,
+          window.asserts.assert(type == ContentType.TEXT,
               'Invalid streams chosen');
           this.mediaStates_.delete(type);
         }
@@ -2238,7 +2238,7 @@ class StreamingEngine {
    * @private
    */
   findPeriodContainingStream_(stream) {
-    goog.asserts.assert(this.manifest_,
+    window.asserts.assert(this.manifest_,
         'Must have a manifest to find a stream.');
 
     const periods = this.manifest_.periods;
@@ -2317,7 +2317,7 @@ class StreamingEngine {
   async clearBuffer_(mediaState, flush, safeMargin) {
     const logPrefix = StreamingEngine.logPrefix_(mediaState);
 
-    goog.asserts.assert(
+    window.asserts.assert(
         !mediaState.performingUpdate && (mediaState.updateTimer == null),
         logPrefix + ' unexpected call to clearBuffer_()');
 
@@ -2363,7 +2363,7 @@ class StreamingEngine {
   scheduleUpdate_(mediaState, delay) {
     const logPrefix = StreamingEngine.logPrefix_(mediaState);
     shaka.log.v2(logPrefix, 'updating in ' + delay + ' seconds');
-    goog.asserts.assert(mediaState.updateTimer == null,
+    window.asserts.assert(mediaState.updateTimer == null,
         logPrefix + ' did not expect update to be scheduled');
 
     mediaState.updateTimer = new DelayedTick(async () => {

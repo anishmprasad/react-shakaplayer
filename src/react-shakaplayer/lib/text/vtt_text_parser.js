@@ -41,7 +41,7 @@ var goog = window.goog;
 class VttTextParser {
 	/** @override */
 	parseInit(data) {
-		goog.asserts.assert(false, 'VTT does not have init segments');
+		window.asserts.assert(false, 'VTT does not have init segments');
 	}
 
 	/**
@@ -281,7 +281,7 @@ class VttTextParser {
 			shaka.log.warning('VTT parser could not find a region with id: ', id, ' The region will be ignored.');
 			return null;
 		}
-		goog.asserts.assert(regionsWithId.length == 1, 'VTTRegion ids should be unique!');
+		window.asserts.assert(regionsWithId.length == 1, 'VTTRegion ids should be unique!');
 
 		return regionsWithId[0];
 	}
@@ -328,7 +328,7 @@ class VttTextParser {
 		if (align == 'middle') {
 			cue.textAlign = Cue.textAlign.CENTER;
 		} else {
-			goog.asserts.assert(
+			window.asserts.assert(
 				align.toUpperCase() in Cue.textAlign,
 				align.toUpperCase() + ' Should be in Cue.textAlign values!'
 			);
@@ -380,7 +380,7 @@ class VttTextParser {
 			cue.lineInterpretation = Cue.lineInterpretation.PERCENTAGE;
 			cue.line = Number(results[1]);
 			if (results[2]) {
-				goog.asserts.assert(
+				window.asserts.assert(
 					results[2].toUpperCase() in Cue.lineAlign,
 					results[2].toUpperCase() + ' Should be in Cue.lineAlign values!'
 				);
@@ -390,7 +390,7 @@ class VttTextParser {
 			cue.lineInterpretation = Cue.lineInterpretation.LINE_NUMBER;
 			cue.line = Number(results[1]);
 			if (results[2]) {
-				goog.asserts.assert(
+				window.asserts.assert(
 					results[2].toUpperCase() in Cue.lineAlign,
 					results[2].toUpperCase() + ' Should be in Cue.lineAlign values!'
 				);

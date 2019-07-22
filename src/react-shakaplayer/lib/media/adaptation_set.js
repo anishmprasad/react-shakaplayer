@@ -103,12 +103,12 @@ shaka.media.AdaptationSet = class {
 			return false;
 		}
 
-		goog.asserts.assert(!!a.audio == !!b.audio, 'Both should either have audio or not have audio.');
+		window.asserts.assert(!!a.audio == !!b.audio, 'Both should either have audio or not have audio.');
 		if (a.audio && b.audio && !AdaptationSet.areAudiosCompatible_(a.audio, b.audio)) {
 			return false;
 		}
 
-		goog.asserts.assert(!!a.video == !!b.video, 'Both should either have video or not have video.');
+		window.asserts.assert(!!a.video == !!b.video, 'Both should either have video or not have video.');
 		if (a.video && b.video && !AdaptationSet.areVideosCompatible_(a.video, b.video)) {
 			return false;
 		}

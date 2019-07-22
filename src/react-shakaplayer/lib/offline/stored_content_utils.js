@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.StoredContentUtils');
+// goog.provide('StoredContentUtils');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.media.PresentationTimeline');
-// goog.require('shaka.offline.ManifestConverter');
-// goog.require('shaka.offline.OfflineUri');
+// goog.require('ManifestConverter');
+// goog.require('OfflineUri');
 // goog.require('shaka.util.StreamUtils');
 
 import PresentationTimeline from '../media/presentation_timeline';
@@ -44,7 +44,7 @@ export default class StoredContentUtils {
 	 * @return {shaka.extern.StoredContent}
 	 */
 	static fromManifest(originalUri, manifest, size, metadata) {
-		goog.asserts.assert(manifest.periods.length, 'Cannot create stored content from manifest with no periods.');
+		window.asserts.assert(manifest.periods.length, 'Cannot create stored content from manifest with no periods.');
 
 		/** @type {number} */
 		const expiration = manifest.expiration == undefined ? Infinity : manifest.expiration;
@@ -73,12 +73,12 @@ export default class StoredContentUtils {
 	}
 
 	/**
-	 * @param {!shaka.offline.OfflineUri} offlineUri
+	 * @param {!OfflineUri} offlineUri
 	 * @param {shaka.extern.ManifestDB} manifestDB
 	 * @return {shaka.extern.StoredContent}
 	 */
 	static fromManifestDB(offlineUri, manifestDB) {
-		goog.asserts.assert(manifestDB.periods.length, 'Cannot create stored content from manifestDB with no periods.');
+		window.asserts.assert(manifestDB.periods.length, 'Cannot create stored content from manifestDB with no periods.');
 
 		const converter = new ManifestConverter(offlineUri.mechanism(), offlineUri.cell());
 
@@ -94,7 +94,7 @@ export default class StoredContentUtils {
 		const metadata = manifestDB.appMetadata || {};
 
 		/** @type {!Array.<shaka.extern.Track>} */
-		const tracks = shaka.offline.StoredContentUtils.getTracks_(firstPeriod);
+		const tracks = StoredContentUtils.getTracks_(firstPeriod);
 
 		/** @type {shaka.extern.StoredContent} */
 		const content = {

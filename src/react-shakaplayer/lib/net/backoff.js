@@ -50,7 +50,7 @@ export default class Backoff {
 		 */
 		this.maxAttempts_ = parameters.maxAttempts == null ? defaults.maxAttempts : parameters.maxAttempts;
 
-		goog.asserts.assert(this.maxAttempts_ >= 1, 'maxAttempts should be >= 1');
+		window.asserts.assert(this.maxAttempts_ >= 1, 'maxAttempts should be >= 1');
 
 		/**
 		 * @const
@@ -58,7 +58,7 @@ export default class Backoff {
 		 */
 		this.baseDelay_ = parameters.baseDelay == null ? defaults.baseDelay : parameters.baseDelay;
 
-		goog.asserts.assert(this.baseDelay_ >= 0, 'baseDelay should be >= 0');
+		window.asserts.assert(this.baseDelay_ >= 0, 'baseDelay should be >= 0');
 
 		/**
 		 * @const
@@ -66,7 +66,7 @@ export default class Backoff {
 		 */
 		this.fuzzFactor_ = parameters.fuzzFactor == null ? defaults.fuzzFactor : parameters.fuzzFactor;
 
-		goog.asserts.assert(this.fuzzFactor_ >= 0, 'fuzzFactor should be >= 0');
+		window.asserts.assert(this.fuzzFactor_ >= 0, 'fuzzFactor should be >= 0');
 
 		/**
 		 * @const
@@ -74,7 +74,7 @@ export default class Backoff {
 		 */
 		this.backoffFactor_ = parameters.backoffFactor == null ? defaults.backoffFactor : parameters.backoffFactor;
 
-		goog.asserts.assert(this.backoffFactor_ >= 0, 'backoffFactor should be >= 0');
+		window.asserts.assert(this.backoffFactor_ >= 0, 'backoffFactor should be >= 0');
 
 		/** @private {number} */
 		this.numAttempts_ = 0;
@@ -90,7 +90,7 @@ export default class Backoff {
 			// intended user of auto-reset mode), the first attempt was implied, so we
 			// reset numAttempts to 1.  Therefore maxAttempts (which includes the
 			// first attempt) must be at least 2 for us to see a delay.
-			goog.asserts.assert(this.maxAttempts_ >= 2, 'maxAttempts must be >= 2 for autoReset == true');
+			window.asserts.assert(this.maxAttempts_ >= 2, 'maxAttempts must be >= 2 for autoReset == true');
 			this.numAttempts_ = 1;
 		}
 	}
@@ -112,7 +112,7 @@ export default class Backoff {
 		this.numAttempts_++;
 
 		if (currentAttempt == 0) {
-			goog.asserts.assert(!this.autoReset_, 'Failed to delay with auto-reset!');
+			window.asserts.assert(!this.autoReset_, 'Failed to delay with auto-reset!');
 			return;
 		}
 
@@ -172,7 +172,7 @@ export default class Backoff {
 	 * @private
 	 */
 	reset_() {
-		goog.asserts.assert(this.autoReset_, 'Should only be used for auto-reset!');
+		window.asserts.assert(this.autoReset_, 'Should only be used for auto-reset!');
 		this.numAttempts_ = 1;
 		this.nextUnfuzzedDelay_ = this.baseDelay_;
 	}

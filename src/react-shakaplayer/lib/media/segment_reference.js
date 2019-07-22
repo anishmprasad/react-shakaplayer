@@ -126,8 +126,8 @@ class SegmentReference {
 	 *   segment extends to the end of the resource.
 	 */
 	constructor(position, startTime, endTime, uris, startByte, endByte) {
-		goog.asserts.assert(startTime < endTime, 'startTime must be less than endTime');
-		goog.asserts.assert(startByte < endByte || endByte == null, 'startByte must be < endByte');
+		window.asserts.assert(startTime < endTime, 'startTime must be less than endTime');
+		window.asserts.assert(startByte < endByte || endByte == null, 'startByte must be < endByte');
 		/** @const {number} */
 		this.position = position;
 

@@ -101,7 +101,7 @@ class PatchedMediaKeysApple {
 	 */
 	static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
 		shaka.log.debug('PatchedMediaKeysApple.requestMediaKeySystemAccess');
-		goog.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
+		window.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
 
 		// Alias.
 		const PatchedMediaKeysApple = shaka.polyfill.PatchedMediaKeysApple;
@@ -123,7 +123,7 @@ class PatchedMediaKeysApple {
 	 */
 	static setMediaKeys(mediaKeys) {
 		shaka.log.debug('PatchedMediaKeysApple.setMediaKeys');
-		goog.asserts.assert(this instanceof HTMLMediaElement, 'bad "this" for setMediaKeys');
+		window.asserts.assert(this instanceof HTMLMediaElement, 'bad "this" for setMediaKeys');
 
 		// Alias
 		const PatchedMediaKeysApple = shaka.polyfill.PatchedMediaKeysApple;
@@ -132,7 +132,7 @@ class PatchedMediaKeysApple {
 		const oldMediaKeys = /** @type {shaka.polyfill.PatchedMediaKeysApple.MediaKeys} */ (this.mediaKeys);
 
 		if (oldMediaKeys && oldMediaKeys != newMediaKeys) {
-			goog.asserts.assert(
+			window.asserts.assert(
 				oldMediaKeys instanceof PatchedMediaKeysApple.MediaKeys,
 				'non-polyfill instance of oldMediaKeys'
 			);
@@ -144,7 +144,7 @@ class PatchedMediaKeysApple {
 		this['mediaKeys'] = mediaKeys; // work around read-only declaration
 
 		if (newMediaKeys) {
-			goog.asserts.assert(
+			window.asserts.assert(
 				newMediaKeys instanceof PatchedMediaKeysApple.MediaKeys,
 				'non-polyfill instance of newMediaKeys'
 			);
@@ -229,15 +229,15 @@ class PatchedMediaKeysApple {
 
 		const PatchedMediaKeysApple = shaka.polyfill.PatchedMediaKeysApple;
 		const mediaKeys = /** @type {shaka.polyfill.PatchedMediaKeysApple.MediaKeys} */ (this.mediaKeys);
-		goog.asserts.assert(
+		window.asserts.assert(
 			mediaKeys instanceof PatchedMediaKeysApple.MediaKeys,
 			'non-polyfill instance of newMediaKeys'
 		);
 
-		goog.asserts.assert(event.initData != null, 'missing init data!');
+		window.asserts.assert(event.initData != null, 'missing init data!');
 
 		const certificate = mediaKeys.certificate;
-		goog.asserts.assert(certificate != null, 'missing certificate!');
+		window.asserts.assert(certificate != null, 'missing certificate!');
 
 		// NOTE: Because "this" is a real EventTarget, the event we dispatch here
 		// must also be a real Event.
@@ -633,7 +633,7 @@ PatchedMediaKeysApple.MediaKeySession = class extends FakeEventTarget {
 
 		// We can now resolve this.generateRequestPromise, which should be
 		// non-null.
-		goog.asserts.assert(this.generateRequestPromise_, 'generateRequestPromise_ should be set before now!');
+		window.asserts.assert(this.generateRequestPromise_, 'generateRequestPromise_ should be set before now!');
 		if (this.generateRequestPromise_) {
 			this.generateRequestPromise_.resolve();
 			this.generateRequestPromise_ = null;
@@ -660,10 +660,10 @@ PatchedMediaKeysApple.MediaKeySession = class extends FakeEventTarget {
 
 		// This shouldn't fire while we're in the middle of generateRequest,
 		// but if it does, we will need to change the logic to account for it.
-		goog.asserts.assert(!this.generateRequestPromise_, 'Key added during generate!');
+		window.asserts.assert(!this.generateRequestPromise_, 'Key added during generate!');
 
 		// We can now resolve this.updatePromise, which should be non-null.
-		goog.asserts.assert(this.updatePromise_, 'updatePromise_ should be set before now!');
+		window.asserts.assert(this.updatePromise_, 'updatePromise_ should be set before now!');
 		if (this.updatePromise_) {
 			this.updateKeyStatus_('usable');
 			this.updatePromise_.resolve();
@@ -791,7 +791,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
 	 * @override
 	 */
 	entries() {
-		goog.asserts.assert(false, 'Not used!  Provided only for the compiler.');
+		window.asserts.assert(false, 'Not used!  Provided only for the compiler.');
 	}
 
 	/**
@@ -799,7 +799,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
 	 * @override
 	 */
 	keys() {
-		goog.asserts.assert(false, 'Not used!  Provided only for the compiler.');
+		window.asserts.assert(false, 'Not used!  Provided only for the compiler.');
 	}
 
 	/**
@@ -807,7 +807,7 @@ PatchedMediaKeysApple.MediaKeyStatusMap = class {
 	 * @override
 	 */
 	values() {
-		goog.asserts.assert(false, 'Not used!  Provided only for the compiler.');
+		window.asserts.assert(false, 'Not used!  Provided only for the compiler.');
 	}
 };
 

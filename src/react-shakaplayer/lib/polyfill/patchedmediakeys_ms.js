@@ -96,7 +96,7 @@ export default class PatchedMediaKeysMs {
 	 */
 	static requestMediaKeySystemAccess(keySystem, supportedConfigurations) {
 		shaka.log.debug('PatchedMediaKeysMs.requestMediaKeySystemAccess');
-		goog.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
+		window.asserts.assert(this == navigator, 'bad "this" for requestMediaKeySystemAccess');
 
 		// Alias.
 		// const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
@@ -317,7 +317,7 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
 	 */
 	static setMediaKeys(mediaKeys) {
 		shaka.log.debug('PatchedMediaKeysMs.setMediaKeys');
-		goog.asserts.assert(this instanceof HTMLMediaElement, 'bad "this" for setMediaKeys');
+		window.asserts.assert(this instanceof HTMLMediaElement, 'bad "this" for setMediaKeys');
 
 		// Alias
 		const PatchedMediaKeysMs = shaka.polyfill.PatchedMediaKeysMs;
@@ -326,7 +326,7 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
 		const oldMediaKeys = /** @type {shaka.polyfill.PatchedMediaKeysMs.MediaKeys} */ (this.mediaKeys);
 
 		if (oldMediaKeys && oldMediaKeys != newMediaKeys) {
-			goog.asserts.assert(
+			window.asserts.assert(
 				oldMediaKeys instanceof PatchedMediaKeysMs.MediaKeys,
 				'non-polyfill instance of oldMediaKeys'
 			);
@@ -338,7 +338,7 @@ PatchedMediaKeysMs.MediaKeySystemAccess = class {
 		this['mediaKeys'] = mediaKeys; // work around read-only declaration
 
 		if (newMediaKeys) {
-			goog.asserts.assert(
+			window.asserts.assert(
 				newMediaKeys instanceof PatchedMediaKeysMs.MediaKeys,
 				'non-polyfill instance of newMediaKeys'
 			);
@@ -601,7 +601,7 @@ PatchedMediaKeysMs.MediaKeySession = class extends FakeEventTarget {
 
 		// We can now resolve this.generateRequestPromise, which should be
 		// non-null.
-		goog.asserts.assert(this.generateRequestPromise_, 'generateRequestPromise_ not set in onMsKeyMessage_');
+		window.asserts.assert(this.generateRequestPromise_, 'generateRequestPromise_ not set in onMsKeyMessage_');
 		if (this.generateRequestPromise_) {
 			this.generateRequestPromise_.resolve();
 			this.generateRequestPromise_ = null;
@@ -633,7 +633,7 @@ PatchedMediaKeysMs.MediaKeySession = class extends FakeEventTarget {
 		// 'mskeymessage'.
 		if (this.generateRequestPromise_) {
 			shaka.log.debug('Simulating completion for a PR persistent license.');
-			goog.asserts.assert(
+			window.asserts.assert(
 				!this.updatePromise_,
 				'updatePromise_ and ' + 'generateRequestPromise_ set in onMsKeyAdded_'
 			);
@@ -644,7 +644,7 @@ PatchedMediaKeysMs.MediaKeySession = class extends FakeEventTarget {
 		}
 
 		// We can now resolve this.updatePromise, which should be non-null.
-		goog.asserts.assert(this.updatePromise_, 'updatePromise_ not set in onMsKeyAdded_');
+		window.asserts.assert(this.updatePromise_, 'updatePromise_ not set in onMsKeyAdded_');
 		if (this.updatePromise_) {
 			this.updateKeyStatus_('usable');
 			this.updatePromise_.resolve();
@@ -772,7 +772,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
 	 * @override
 	 */
 	entries() {
-		goog.asserts.assert(false, 'Not used!  Provided only for the compiler.');
+		window.asserts.assert(false, 'Not used!  Provided only for the compiler.');
 	}
 
 	/**
@@ -780,7 +780,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
 	 * @override
 	 */
 	keys() {
-		goog.asserts.assert(false, 'Not used!  Provided only for the compiler.');
+		window.asserts.assert(false, 'Not used!  Provided only for the compiler.');
 	}
 
 	/**
@@ -788,7 +788,7 @@ PatchedMediaKeysMs.MediaKeyStatusMap = class {
 	 * @override
 	 */
 	values() {
-		goog.asserts.assert(false, 'Not used!  Provided only for the compiler.');
+		window.asserts.assert(false, 'Not used!  Provided only for the compiler.');
 	}
 };
 

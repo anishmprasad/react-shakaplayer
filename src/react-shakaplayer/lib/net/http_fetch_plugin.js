@@ -164,7 +164,7 @@ class HttpFetchPlugin {
 					}
 
 					if (readObj.done) {
-						goog.asserts.assert(!readObj.value, 'readObj should be unset when "done" is true.');
+						window.asserts.assert(!readObj.value, 'readObj should be unset when "done" is true.');
 						controller.close();
 					} else {
 						controller.enqueue(readObj.value);

@@ -87,7 +87,7 @@ class PlayRateController {
 	 * @param {number} rate
 	 */
 	set(rate) {
-		goog.asserts.assert(rate != 0, 'Should never set rate of 0 explicitly!');
+		window.asserts.assert(rate != 0, 'Should never set rate of 0 explicitly!');
 		this.rate_ = rate;
 		this.apply_();
 	}

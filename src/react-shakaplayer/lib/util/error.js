@@ -845,7 +845,7 @@ class ErrorUtils {
 		NO_INIT_DATA_FOR_OFFLINE: 9007,
 
 		/**
-		 * shaka.offline.Storage was constructed with a Player proxy instead of a
+		 * Storage was constructed with a Player proxy instead of a
 		 * local player instance.  To fix this, use Player directly with Storage
 		 * instead of the results of CastProxy.prototype.getPlayer().
 		 */

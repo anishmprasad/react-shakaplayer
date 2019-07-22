@@ -15,14 +15,14 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.indexeddb.StorageMechanism');
+// goog.provide('indexeddb.StorageMechanism');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.log');
-// goog.require('shaka.offline.StorageMuxer');
-// goog.require('shaka.offline.indexeddb.EmeSessionStorageCell');
-// goog.require('shaka.offline.indexeddb.V1StorageCell');
-// goog.require('shaka.offline.indexeddb.V2StorageCell');
+// goog.require('StorageMuxer');
+// goog.require('indexeddb.EmeSessionStorageCell');
+// goog.require('indexeddb.V1StorageCell');
+// goog.require('indexeddb.V2StorageCell');
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.PublicPromise');
 
@@ -147,7 +147,7 @@ class StorageMechanism {
 	 * @override
 	 */
 	getEmeSessionCell() {
-		goog.asserts.assert(this.sessions_, 'Cannot be destroyed.');
+		window.asserts.assert(this.sessions_, 'Cannot be destroyed.');
 		return this.sessions_;
 	}
 
@@ -191,7 +191,7 @@ class StorageMechanism {
 	 * @private
 	 */
 	static createV1_(db) {
-		const StorageMechanism = shaka.offline.indexeddb.StorageMechanism;
+		// const StorageMechanism = StorageMechanism;
 		const segmentStore = StorageMechanism.V1_SEGMENT_STORE;
 		const manifestStore = StorageMechanism.V1_MANIFEST_STORE;
 		const stores = db.objectStoreNames;
@@ -209,7 +209,7 @@ class StorageMechanism {
 	 * @private
 	 */
 	static createV2_(db) {
-		const StorageMechanism = shaka.offline.indexeddb.StorageMechanism;
+		// const StorageMechanism = StorageMechanism;
 		const segmentStore = StorageMechanism.V2_SEGMENT_STORE;
 		const manifestStore = StorageMechanism.V2_MANIFEST_STORE;
 		const stores = db.objectStoreNames;
@@ -227,7 +227,7 @@ class StorageMechanism {
 	 * @private
 	 */
 	static createV3_(db) {
-		const StorageMechanism = shaka.offline.indexeddb.StorageMechanism;
+		// const StorageMechanism = indexeddb.StorageMechanism;
 		const segmentStore = StorageMechanism.V3_SEGMENT_STORE;
 		const manifestStore = StorageMechanism.V3_MANIFEST_STORE;
 		const stores = db.objectStoreNames;
@@ -247,7 +247,7 @@ class StorageMechanism {
 	 * @private
 	 */
 	static createEmeSession_(db) {
-		const StorageMechanism = shaka.offline.indexeddb.StorageMechanism;
+		// const StorageMechanism = indexeddb.StorageMechanism;
 		const store = StorageMechanism.SESSION_ID_STORE;
 		if (db.objectStoreNames.contains(store)) {
 			shaka.log.debug('Mounting session ID idb storage cell');

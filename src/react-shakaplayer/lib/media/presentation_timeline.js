@@ -121,7 +121,7 @@ class PresentationTimeline {
 	 * @export
 	 */
 	setDuration(duration) {
-		goog.asserts.assert(duration > 0, 'duration must be > 0');
+		window.asserts.assert(duration > 0, 'duration must be > 0');
 		this.duration_ = duration;
 	}
 
@@ -166,7 +166,7 @@ class PresentationTimeline {
 	 * @export
 	 */
 	setSegmentAvailabilityDuration(segmentAvailabilityDuration) {
-		goog.asserts.assert(segmentAvailabilityDuration >= 0, 'segmentAvailabilityDuration must be >= 0');
+		window.asserts.assert(segmentAvailabilityDuration >= 0, 'segmentAvailabilityDuration must be >= 0');
 		this.segmentAvailabilityDuration_ = segmentAvailabilityDuration;
 	}
 
@@ -180,7 +180,7 @@ class PresentationTimeline {
 		// NOTE: This is no longer used internally, but is exported.
 		// So we cannot remove it without deprecating it and waiting one release
 		// cycle, or else we risk breaking custom manifest parsers.
-		goog.asserts.assert(delay >= 0, 'delay must be >= 0');
+		window.asserts.assert(delay >= 0, 'delay must be >= 0');
 		this.presentationDelay_ = delay;
 	}
 
@@ -307,7 +307,7 @@ class PresentationTimeline {
 	 * @export
 	 */
 	getSegmentAvailabilityStart() {
-		goog.asserts.assert(this.segmentAvailabilityDuration_ >= 0, 'The availability duration should be positive');
+		window.asserts.assert(this.segmentAvailabilityDuration_ >= 0, 'The availability duration should be positive');
 
 		if (this.segmentAvailabilityDuration_ == Infinity) {
 			return this.userSeekStart_;
@@ -430,7 +430,7 @@ class PresentationTimeline {
 	 * @private
 	 */
 	getLiveEdge_() {
-		goog.asserts.assert(
+		window.asserts.assert(
 			this.presentationStartTime_ != null,
 			'Cannot compute timeline live edge without start time'
 		);
@@ -448,14 +448,14 @@ class PresentationTimeline {
 			if (this.isLive()) {
 				// Implied by isLive(): infinite and dynamic.
 				// Live streams should have a start time.
-				goog.asserts.assert(
+				window.asserts.assert(
 					this.presentationStartTime_ != null,
 					'Detected as live stream, but does not match our model of live!'
 				);
 			} else if (this.isInProgress()) {
 				// Implied by isInProgress(): finite and dynamic.
 				// IPR streams should have a start time, and segments should not expire.
-				goog.asserts.assert(
+				window.asserts.assert(
 					this.presentationStartTime_ != null && this.segmentAvailabilityDuration_ == Infinity,
 					'Detected as IPR stream, but does not match our model of IPR!'
 				);
@@ -463,7 +463,7 @@ class PresentationTimeline {
 				// VOD
 				// VOD segments should not expire and the presentation should be finite
 				// and static.
-				goog.asserts.assert(
+				window.asserts.assert(
 					this.segmentAvailabilityDuration_ == Infinity && this.duration_ != Infinity && this.static_,
 					'Detected as VOD stream, but does not match our model of VOD!'
 				);

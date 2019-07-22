@@ -645,15 +645,15 @@ shaka.Player = class extends FakeEventTarget {
 				resolve();
 			};
 			events.onCancel = () => {
-				goog.asserts.assert(false, 'Our final detach call should never be cancelled.');
+				window.asserts.assert(false, 'Our final detach call should never be cancelled.');
 				resolve();
 			};
 			events.onError = () => {
-				goog.asserts.assert(false, 'Our final detach call should never see an error');
+				window.asserts.assert(false, 'Our final detach call should never see an error');
 				resolve();
 			};
 			events.onSkip = () => {
-				goog.asserts.assert(false, 'Our final detach call should never be skipped');
+				window.asserts.assert(false, 'Our final detach call should never be skipped');
 				resolve();
 			};
 		});
@@ -737,7 +737,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @export
 	 */
 	static async probeSupport() {
-		goog.asserts.assert(shaka.Player.isBrowserSupported(), 'Must have basic support');
+		window.asserts.assert(shaka.Player.isBrowserSupported(), 'Must have basic support');
 		const drm = await DrmEngine.probeSupport();
 		const manifest = ManifestParser.probeSupport();
 		const media = MediaSourceEngine.probeSupport();
@@ -897,7 +897,7 @@ shaka.Player = class extends FakeEventTarget {
 				destination = this.detachNode_;
 			}
 
-			goog.asserts.assert(destination, 'We should have picked a destination.');
+			window.asserts.assert(destination, 'We should have picked a destination.');
 
 			// Copy over the media element because we want to keep using the same
 			// element - the other values don't matter.
@@ -1077,7 +1077,7 @@ shaka.Player = class extends FakeEventTarget {
 			}
 
 			// If we land here, both are feasible.
-			goog.asserts.assert(
+			window.asserts.assert(
 				canPlayNatively && canPlayMediaSource,
 				'Both native and MSE playback should be possible!'
 			);
@@ -1123,7 +1123,7 @@ shaka.Player = class extends FakeEventTarget {
 		//
 		// These constraints should be maintained and guaranteed by the routing
 		// logic in |getNextStep_|.
-		goog.asserts.assert(
+		window.asserts.assert(
 			has.mediaElement == null || has.mediaElement == wants.mediaElement,
 			'The routing logic failed. MediaElement requirement failed.'
 		);
@@ -1307,17 +1307,17 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	async onInitializeMediaSourceEngine_(has, wants) {
-		goog.asserts.assert(
+		window.asserts.assert(
 			Platform.supportsMediaSource(),
 			'We should not be initializing media source on a platform that does ' + 'not support media source.'
 		);
-		goog.asserts.assert(has.mediaElement, 'We should have a media element when initializing media source.');
-		goog.asserts.assert(
+		window.asserts.assert(has.mediaElement, 'We should have a media element when initializing media source.');
+		window.asserts.assert(
 			has.mediaElement == wants.mediaElement,
 			'|has| and |wants| should have the same media element when ' + 'initializing media source.'
 		);
 
-		goog.asserts.assert(this.mediaSourceEngine_ == null, 'We should not have a media source engine yet.');
+		window.asserts.assert(this.mediaSourceEngine_ == null, 'We should not have a media source engine yet.');
 
 		const closedCaptionsParser = MuxJSClosedCaptionParser.isSupported()
 			? new MuxJSClosedCaptionParser()
@@ -1354,14 +1354,14 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	async onInitializeParser_(has, wants) {
-		goog.asserts.assert(has.mediaElement, 'We should have a media element when initializing the parser.');
-		goog.asserts.assert(
+		window.asserts.assert(has.mediaElement, 'We should have a media element when initializing the parser.');
+		window.asserts.assert(
 			has.mediaElement == wants.mediaElement,
 			'|has| and |wants| should have the same media element when ' + 'initializing the parser.'
 		);
 
-		goog.asserts.assert(this.networkingEngine_, 'Need networking engine when initializing the parser.');
-		goog.asserts.assert(this.config_, 'Need player config when initializing the parser.');
+		window.asserts.assert(this.networkingEngine_, 'Need networking engine when initializing the parser.');
+		window.asserts.assert(this.config_, 'Need player config when initializing the parser.');
 
 		// We are going to "lock-in" the factory, mime type, and uri since they are
 		// what we are going to use to create our parser and parse the manifest.
@@ -1369,7 +1369,7 @@ shaka.Player = class extends FakeEventTarget {
 		has.mimeType = wants.mimeType;
 		has.uri = wants.uri;
 
-		goog.asserts.assert(has.uri, 'We should have an asset uri when initializing the parsing.');
+		window.asserts.assert(has.uri, 'We should have an asset uri when initializing the parsing.');
 
 		// Store references to things we asserted so that we don't need to reassert
 		// them again later.
@@ -1407,23 +1407,23 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	onParseManifest_(has, wants) {
-		goog.asserts.assert(
+		window.asserts.assert(
 			has.factory == wants.factory,
 			'|has| and |wants| should have the same factory when parsing.'
 		);
-		goog.asserts.assert(
+		window.asserts.assert(
 			has.mimeType == wants.mimeType,
 			'|has| and |wants| should have the same mime type when parsing.'
 		);
-		goog.asserts.assert(has.uri == wants.uri, '|has| and |wants| should have the same uri when parsing.');
+		window.asserts.assert(has.uri == wants.uri, '|has| and |wants| should have the same uri when parsing.');
 
-		goog.asserts.assert(has.uri, '|has| should have a valid uri when parsing.');
-		goog.asserts.assert(has.uri == this.assetUri_, '|has.uri| should match the cached asset uri.');
+		window.asserts.assert(has.uri, '|has| should have a valid uri when parsing.');
+		window.asserts.assert(has.uri == this.assetUri_, '|has.uri| should match the cached asset uri.');
 
-		goog.asserts.assert(this.networkingEngine_, 'Need networking engine to parse manifest.');
-		goog.asserts.assert(this.config_, 'Need player config to parse manifest.');
+		window.asserts.assert(this.networkingEngine_, 'Need networking engine to parse manifest.');
+		window.asserts.assert(this.config_, 'Need player config to parse manifest.');
 
-		goog.asserts.assert(this.parser_, '|this.parser_| should have been set in an earlier step.');
+		window.asserts.assert(this.parser_, '|this.parser_| should have been set in an earlier step.');
 
 		// Store references to things we asserted so that we don't need to reassert
 		// them again later.
@@ -1490,16 +1490,16 @@ shaka.Player = class extends FakeEventTarget {
 	 * @return {!Promise}
 	 */
 	async onInitializeDrm_(has, wants) {
-		goog.asserts.assert(has.factory == wants.factory, 'The load graph should have ensured the factories matched.');
-		goog.asserts.assert(
+		window.asserts.assert(has.factory == wants.factory, 'The load graph should have ensured the factories matched.');
+		window.asserts.assert(
 			has.mimeType == wants.mimeType,
 			'The load graph should have ensured the mime types matched.'
 		);
-		goog.asserts.assert(has.uri == wants.uri, 'The load graph should have ensured the uris matched');
+		window.asserts.assert(has.uri == wants.uri, 'The load graph should have ensured the uris matched');
 
-		goog.asserts.assert(this.networkingEngine_, '|onInitializeDrm_| should never be called after |destroy|');
-		goog.asserts.assert(this.config_, '|onInitializeDrm_| should never be called after |destroy|');
-		goog.asserts.assert(this.manifest_, '|this.manifest_| should have been set in an earlier step.');
+		window.asserts.assert(this.networkingEngine_, '|onInitializeDrm_| should never be called after |destroy|');
+		window.asserts.assert(this.config_, '|onInitializeDrm_| should never be called after |destroy|');
+		window.asserts.assert(this.manifest_, '|this.manifest_| should have been set in an earlier step.');
 
 		this.drmEngine_ = this.createDrmEngine({
 			netEngine: this.networkingEngine_,
@@ -1549,18 +1549,18 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	async onLoad_(has, wants) {
-		goog.asserts.assert(
+		window.asserts.assert(
 			has.factory == wants.factory,
 			'|has| and |wants| should have the same factory when loading.'
 		);
-		goog.asserts.assert(
+		window.asserts.assert(
 			has.mimeType == wants.mimeType,
 			'|has| and |wants| should have the same mime type when loading.'
 		);
-		goog.asserts.assert(has.uri == wants.uri, '|has| and |wants| should have the same uri when loading.');
+		window.asserts.assert(has.uri == wants.uri, '|has| and |wants| should have the same uri when loading.');
 
-		goog.asserts.assert(has.mediaElement, 'We should have a media element when loading.');
-		goog.asserts.assert(wants.startTimeOfLoad, '|wants| should tell us when the load was originally requested');
+		window.asserts.assert(has.mediaElement, 'We should have a media element when loading.');
+		window.asserts.assert(wants.startTimeOfLoad, '|wants| should tell us when the load was originally requested');
 
 		// Since we are about to start playback, we will lock in the start time as
 		// something we are now depending on.
@@ -1715,11 +1715,11 @@ shaka.Player = class extends FakeEventTarget {
 	async onInitializeSrcEqualsDrm_(has, wants) {
 		const ContentType = ManifestParserUtils.ContentType;
 
-		goog.asserts.assert(
+		window.asserts.assert(
 			this.networkingEngine_,
 			'|onInitializeSrcEqualsDrm_| should never be called after |destroy|'
 		);
-		goog.asserts.assert(this.config_, '|onInitializeSrcEqualsDrm_| should never be called after |destroy|');
+		window.asserts.assert(this.config_, '|onInitializeSrcEqualsDrm_| should never be called after |destroy|');
 
 		this.drmEngine_ = this.createDrmEngine({
 			netEngine: this.networkingEngine_,
@@ -1800,10 +1800,10 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	onSrcEquals_(has, wants) {
-		goog.asserts.assert(has.mediaElement, 'We should have a media element when loading.');
-		goog.asserts.assert(wants.uri, '|has| should have a valid uri when loading.');
-		goog.asserts.assert(wants.startTimeOfLoad, '|wants| should tell us when the load was originally requested');
-		goog.asserts.assert(this.video_ == has.mediaElement, 'The video element should match our media element');
+		window.asserts.assert(has.mediaElement, 'We should have a media element when loading.');
+		window.asserts.assert(wants.uri, '|has| should have a valid uri when loading.');
+		window.asserts.assert(wants.startTimeOfLoad, '|wants| should tell us when the load was originally requested');
+		window.asserts.assert(this.video_ == has.mediaElement, 'The video element should match our media element');
 
 		// Lock-in the values that we are using so that the routing logic knows what
 		// we have.
@@ -2007,8 +2007,8 @@ shaka.Player = class extends FakeEventTarget {
 				lowestAverageBandwidth = averageBandwidth;
 			}
 		});
-		goog.asserts.assert(bestCodecs != null, 'Should have chosen codecs!');
-		goog.asserts.assert(!isNaN(lowestAverageBandwidth), 'Bandwidth should be a number!');
+		window.asserts.assert(bestCodecs != null, 'Should have chosen codecs!');
+		window.asserts.assert(!isNaN(lowestAverageBandwidth), 'Bandwidth should be a number!');
 
 		// Filter out any variants that don't match, forcing AbrManager to choose
 		// from the most efficient variants possible.
@@ -2065,8 +2065,8 @@ shaka.Player = class extends FakeEventTarget {
 	 * @return {!Playhead}
 	 */
 	createPlayhead(startTime) {
-		goog.asserts.assert(this.manifest_, 'Must have manifest');
-		goog.asserts.assert(this.video_, 'Must have video');
+		window.asserts.assert(this.manifest_, 'Must have manifest');
+		window.asserts.assert(this.video_, 'Must have video');
 		return new MediaSourcePlayhead(
 			this.video_,
 			this.manifest_,
@@ -2085,9 +2085,9 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	createPlayheadObserversForMSE_() {
-		goog.asserts.assert(this.manifest_, 'Must have manifest');
-		goog.asserts.assert(this.regionTimeline_, 'Must have region timeline');
-		goog.asserts.assert(this.video_, 'Must have video element');
+		window.asserts.assert(this.manifest_, 'Must have manifest');
+		window.asserts.assert(this.regionTimeline_, 'Must have region timeline');
+		window.asserts.assert(this.video_, 'Must have video element');
 
 		// Create the period observer. This will allow us to notify the app when we
 		// transition between periods.
@@ -2128,9 +2128,9 @@ shaka.Player = class extends FakeEventTarget {
 	 * @param {number} rebufferingGoal
 	 */
 	startBufferManagement_(rebufferingGoal) {
-		goog.asserts.assert(!this.bufferObserver_, 'No buffering observer should exist before initialization.');
+		window.asserts.assert(!this.bufferObserver_, 'No buffering observer should exist before initialization.');
 
-		goog.asserts.assert(!this.bufferPoller_, 'No buffer timer should exist before initialization.');
+		window.asserts.assert(!this.bufferPoller_, 'No buffer timer should exist before initialization.');
 
 		// The threshold to transition back to satisfied when starving.
 		const starvingThreshold = rebufferingGoal;
@@ -2164,9 +2164,9 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	pollBufferState_() {
-		goog.asserts.assert(this.video_, 'Need a media element to update the buffering observer');
+		window.asserts.assert(this.video_, 'Need a media element to update the buffering observer');
 
-		goog.asserts.assert(this.bufferObserver_, 'Need a buffering observer to update');
+		window.asserts.assert(this.bufferObserver_, 'Need a buffering observer to update');
 
 		let bufferedToEnd;
 		switch (this.loadMode_) {
@@ -2212,7 +2212,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @return {!StreamingEngine}
 	 */
 	createStreamingEngine() {
-		goog.asserts.assert(
+		window.asserts.assert(
 			this.playhead_ && this.abrManager_ && this.mediaSourceEngine_ && this.manifest_,
 			'Must not be destroyed'
 		);
@@ -2254,15 +2254,15 @@ shaka.Player = class extends FakeEventTarget {
 	 * @export
 	 */
 	configure(config, value) {
-		goog.asserts.assert(this.config_, 'Config must not be null!');
-		goog.asserts.assert(typeof config == 'object' || arguments.length == 2, 'String configs should have values!');
+		window.asserts.assert(this.config_, 'Config must not be null!');
+		window.asserts.assert(typeof config == 'object' || arguments.length == 2, 'String configs should have values!');
 
 		// ('fieldName', value) format
 		if (arguments.length == 2 && typeof config == 'string') {
 			config = ConfigUtils.convertToConfigObject(config, value);
 		}
 
-		goog.asserts.assert(typeof config == 'object', 'Should be an object!');
+		window.asserts.assert(typeof config == 'object', 'Should be an object!');
 
 		const ret = PlayerConfiguration.mergeConfigObjects(this.config_, config, this.defaultConfig_());
 
@@ -2349,7 +2349,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @export
 	 */
 	getConfiguration() {
-		goog.asserts.assert(this.config_, 'Config must not be null!');
+		window.asserts.assert(this.config_, 'Config must not be null!');
 
 		const ret = this.defaultConfig_();
 		PlayerConfiguration.mergeConfigObjects(ret, this.config_, this.defaultConfig_());
@@ -2365,7 +2365,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @return {shaka.extern.PlayerConfiguration}
 	 */
 	getSharedConfiguration() {
-		goog.asserts.assert(this.config_, 'Cannot call getSharedConfiguration after call destroy!');
+		window.asserts.assert(this.config_, 'Cannot call getSharedConfiguration after call destroy!');
 		return this.config_;
 	}
 
@@ -2374,7 +2374,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @export
 	 */
 	resetConfiguration() {
-		goog.asserts.assert(this.config_, 'Cannot be destroyed');
+		window.asserts.assert(this.config_, 'Cannot be destroyed');
 		// Remove the old keys so we remove open-ended dictionaries like drm.servers
 		// but keeps the same object reference.
 		for (const key in this.config_) {
@@ -2638,7 +2638,7 @@ shaka.Player = class extends FakeEventTarget {
 		// and doesn't make sense for trick play.  If you set a rate of 0 for trick
 		// play, we will reject it and issue a warning.  If it happens during a
 		// test, we will fail the test through this assertion.
-		goog.asserts.assert(rate != 0, 'Should never set a trick play rate of 0!');
+		window.asserts.assert(rate != 0, 'Should never set a trick play rate of 0!');
 		if (rate == 0) {
 			shaka.log.alwaysWarn('A trick play rate of 0 is unsupported!');
 			return;
@@ -2737,7 +2737,6 @@ shaka.Player = class extends FakeEventTarget {
 			return tracks;
 		} else if (this.video_ && this.video_.src && this.video_.textTracks) {
 			const textTracks = Array.from(this.video_.textTracks);
-			const StreamUtils = StreamUtils;
 			return textTracks.map(text => StreamUtils.html5TextTrackToTrack(text));
 		} else {
 			return [];
@@ -3041,7 +3040,7 @@ shaka.Player = class extends FakeEventTarget {
 		if (this.manifest_) {
 			// Make sure our values are still in-sync.
 			const actual = this.mediaSourceEngine_.getTextDisplayer().isTextVisible();
-			goog.asserts.assert(actual == expected, 'text visibility has fallen out of sync');
+			window.asserts.assert(actual == expected, 'text visibility has fallen out of sync');
 
 			// Always return the actual value so that the app has the most accurate
 			// information (in the case that the values come out of sync in prod).
@@ -3232,7 +3231,7 @@ shaka.Player = class extends FakeEventTarget {
 
 		this.updateStateHistory_();
 
-		goog.asserts.assert(this.video_, 'If we have stats, we should have video_');
+		window.asserts.assert(this.video_, 'If we have stats, we should have video_');
 		const element = /** @type {!HTMLVideoElement} */ (this.video_);
 
 		if (element.getVideoPlaybackQuality) {
@@ -3353,7 +3352,7 @@ shaka.Player = class extends FakeEventTarget {
 		period.textStreams.push(stream);
 
 		await this.streamingEngine_.loadNewTextStream(stream);
-		goog.asserts.assert(period, 'The period should still be non-null here.');
+		window.asserts.assert(period, 'The period should still be non-null here.');
 
 		const activeText = this.streamingEngine_.getBufferingText();
 		if (activeText) {
@@ -3551,9 +3550,8 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	filterAllPeriods_(periods) {
-		goog.asserts.assert(this.video_, 'Must not be destroyed');
-		const ArrayUtils = ArrayUtils;
-		const StreamUtils = StreamUtils;
+		window.asserts.assert(this.video_, 'Must not be destroyed');
+
 
 		/** @type {?shaka.extern.Stream} */
 		const activeAudio = this.streamingEngine_ ? this.streamingEngine_.getBufferingAudio() : null;
@@ -3603,8 +3601,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	filterNewPeriod_(period) {
-		goog.asserts.assert(this.video_, 'Must not be destroyed');
-		const StreamUtils = StreamUtils;
+		window.asserts.assert(this.video_, 'Must not be destroyed');
 
 		/** @type {?shaka.extern.Stream} */
 		const activeAudio = this.streamingEngine_ ? this.streamingEngine_.getBufferingAudio() : null;
@@ -3719,13 +3716,13 @@ shaka.Player = class extends FakeEventTarget {
 		const actualVariant = this.activeStreams_.getVariant(currentPeriod);
 		const actualText = this.activeStreams_.getText(currentPeriod);
 
-		goog.asserts.assert(actualVariant.audio == expectedAudio, 'Inconsistent active audio stream');
-		goog.asserts.assert(actualVariant.video == expectedVideo, 'Inconsistent active video stream');
+		window.asserts.assert(actualVariant.audio == expectedAudio, 'Inconsistent active audio stream');
+		window.asserts.assert(actualVariant.video == expectedVideo, 'Inconsistent active video stream');
 
 		// Because we always set a text stream to be active in the active stream
 		// map, regardless of whether or not we are actually streaming text, it is
 		// possible for these to be out of line.
-		goog.asserts.assert(expectedText == null || actualText == expectedText, 'Inconsistent active text stream');
+		window.asserts.assert(expectedText == null || actualText == expectedText, 'Inconsistent active text stream');
 	}
 
 	/**
@@ -3756,7 +3753,7 @@ shaka.Player = class extends FakeEventTarget {
 				return null;
 			}
 			const refTime = ref.startTime + period.startTime;
-			goog.asserts.assert(refTime <= time, 'Segment should start before time');
+			window.asserts.assert(refTime <= time, 'Segment should start before time');
 			return refTime;
 		}
 
@@ -3894,7 +3891,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	chooseVariant_(allVariants) {
-		goog.asserts.assert(this.config_, 'Must not be destroyed');
+		window.asserts.assert(this.config_, 'Must not be destroyed');
 
 		try {
 			// |variants| are the filtered variants, use |period.variants| so we know
@@ -3905,7 +3902,7 @@ shaka.Player = class extends FakeEventTarget {
 			return null;
 		}
 
-		goog.asserts.assert(allVariants.length, 'Should have thrown for no Variants.');
+		window.asserts.assert(allVariants.length, 'Should have thrown for no Variants.');
 
 		const playableVariants = allVariants.filter(variant => {
 			return StreamUtils.isPlayable(variant);
@@ -3944,7 +3941,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	chooseStreamsAndSwitch_(period) {
-		goog.asserts.assert(this.config_, 'Must not be destroyed');
+		window.asserts.assert(this.config_, 'Must not be destroyed');
 
 		// Because we're running this after a config change (manual language
 		// change), a new text stream, or a key status event, and because switching
@@ -3980,7 +3977,7 @@ shaka.Player = class extends FakeEventTarget {
 	onChooseStreams_(period) {
 		shaka.log.debug('onChooseStreams_', period);
 
-		goog.asserts.assert(this.config_, 'Must not be destroyed');
+		window.asserts.assert(this.config_, 'Must not be destroyed');
 
 		try {
 			shaka.log.v2('onChooseStreams_, choosing variant from ', period.variants);
@@ -4062,7 +4059,7 @@ shaka.Player = class extends FakeEventTarget {
 				// since it defaults to not shown.  Note that returning the |chosenText|
 				// below will make StreamingEngine stream the text.
 				this.mediaSourceEngine_.getTextDisplayer().setTextVisibility(true);
-				goog.asserts.assert(this.shouldStreamText_(), 'Should be streaming text');
+				window.asserts.assert(this.shouldStreamText_(), 'Should be streaming text');
 			}
 			this.onTextTrackVisibility_();
 		}
@@ -4121,7 +4118,7 @@ shaka.Player = class extends FakeEventTarget {
 	 */
 	canSwitch_() {
 		shaka.log.debug('canSwitch_');
-		goog.asserts.assert(this.config_, 'Must not be destroyed');
+		window.asserts.assert(this.config_, 'Must not be destroyed');
 
 		this.switchingPeriods_ = false;
 
@@ -4184,15 +4181,15 @@ shaka.Player = class extends FakeEventTarget {
 	 */
 	switch_(variant, clearBuffer = false, safeMargin = 0) {
 		shaka.log.debug('switch_');
-		goog.asserts.assert(this.config_.abr.enabled, 'AbrManager should not call switch while disabled!');
-		goog.asserts.assert(
+		window.asserts.assert(this.config_.abr.enabled, 'AbrManager should not call switch while disabled!');
+		window.asserts.assert(
 			!this.switchingPeriods_,
 			'AbrManager should not call switch while transitioning between ' + 'Periods!'
 		);
-		goog.asserts.assert(this.manifest_, 'We need a manifest to switch ' + 'variants.');
+		window.asserts.assert(this.manifest_, 'We need a manifest to switch ' + 'variants.');
 
 		const period = this.findPeriodWithVariant_(variant);
-		goog.asserts.assert(period, 'A period should contain the variant.');
+		window.asserts.assert(period, 'A period should contain the variant.');
 
 		this.addVariantToSwitchHistory_(period, variant, /* fromAdaptation */ true);
 
@@ -4264,7 +4261,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	onError_(error) {
-		goog.asserts.assert(error instanceof Error, 'Wrong error type!');
+		window.asserts.assert(error instanceof Error, 'Wrong error type!');
 
 		// Errors dispatched after |destroy| is called are not meaningful and should
 		// be safe to ignore.
@@ -4311,7 +4308,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	videoErrorToShakaError_() {
-		goog.asserts.assert(this.video_.error, 'Video error expected, but missing!');
+		window.asserts.assert(this.video_.error, 'Video error expected, but missing!');
 		if (!this.video_.error) {
 			return null;
 		}
@@ -4712,7 +4709,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	getPresentationPeriod_() {
-		goog.asserts.assert(
+		window.asserts.assert(
 			this.manifest_ && this.playhead_,
 			'Only ask for the presentation period when loaded with media source.'
 		);
@@ -4730,7 +4727,7 @@ shaka.Player = class extends FakeEventTarget {
 			}
 		}
 
-		goog.asserts.assert(lastPeriod, 'Should have found a period.');
+		window.asserts.assert(lastPeriod, 'Should have found a period.');
 		return lastPeriod;
 	}
 
@@ -4791,9 +4788,9 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	isBufferedToEndMS_() {
-		goog.asserts.assert(this.video_, 'We need a video element to get buffering information');
-		goog.asserts.assert(this.mediaSourceEngine_, 'We need a media source engine to get buffering information');
-		goog.asserts.assert(this.manifest_, 'We need a manifest to get buffering information');
+		window.asserts.assert(this.video_, 'We need a video element to get buffering information');
+		window.asserts.assert(this.mediaSourceEngine_, 'We need a media source engine to get buffering information');
+		window.asserts.assert(this.manifest_, 'We need a manifest to get buffering information');
 
 		// This is a strong guarantee that we are buffered to the end, because it
 		// means the playhead is already at that end.
@@ -4829,7 +4826,7 @@ shaka.Player = class extends FakeEventTarget {
 	 * @private
 	 */
 	isBufferedToEndSrc_() {
-		goog.asserts.assert(this.video_, 'We need a video element to get buffering information');
+		window.asserts.assert(this.video_, 'We need a video element to get buffering information');
 
 		// This is a strong guarantee that we are buffered to the end, because it
 		// means the playhead is already at that end.
@@ -4995,7 +4992,7 @@ shaka.Player = class extends FakeEventTarget {
 			next = this.getNextAfterUnload_(wantsToBeAt, currentlyWith, wantsToHave);
 		}
 
-		goog.asserts.assert(next, 'Missing next step!');
+		window.asserts.assert(next, 'Missing next step!');
 		return next;
 	}
 

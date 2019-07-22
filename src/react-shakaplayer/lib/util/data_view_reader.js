@@ -186,7 +186,7 @@ class DataViewReader {
 	 * @export
 	 */
 	readBytes(bytes) {
-		goog.asserts.assert(bytes >= 0, 'Bad call to DataViewReader.readBytes');
+		window.asserts.assert(bytes >= 0, 'Bad call to DataViewReader.readBytes');
 		if (this.position_ + bytes > this.dataView_.byteLength) {
 			throw this.outOfBounds_();
 		}
@@ -204,7 +204,7 @@ class DataViewReader {
 	 * @export
 	 */
 	skip(bytes) {
-		goog.asserts.assert(bytes >= 0, 'Bad call to DataViewReader.skip');
+		window.asserts.assert(bytes >= 0, 'Bad call to DataViewReader.skip');
 		if (this.position_ + bytes > this.dataView_.byteLength) {
 			throw this.outOfBounds_();
 		}
@@ -219,7 +219,7 @@ class DataViewReader {
 	 * @export
 	 */
 	rewind(bytes) {
-		goog.asserts.assert(bytes >= 0, 'Bad call to DataViewReader.rewind');
+		window.asserts.assert(bytes >= 0, 'Bad call to DataViewReader.rewind');
 		if (this.position_ < bytes) {
 			throw this.outOfBounds_();
 		}
@@ -233,7 +233,7 @@ class DataViewReader {
 	 * @export
 	 */
 	seek(position) {
-		goog.asserts.assert(position >= 0, 'Bad call to DataViewReader.seek');
+		window.asserts.assert(position >= 0, 'Bad call to DataViewReader.seek');
 		if (position < 0 || position > this.dataView_.byteLength) {
 			throw this.outOfBounds_();
 		}

@@ -123,7 +123,7 @@ export default class TextParser {
 	 */
 	indexOf_(regex) {
 		// The global flag is required to use lastIndex.
-		goog.asserts.assert(regex.global, 'global flag should be set');
+		window.asserts.assert(regex.global, 'global flag should be set');
 
 		regex.lastIndex = this.position_;
 		const results = regex.exec(this.data_);

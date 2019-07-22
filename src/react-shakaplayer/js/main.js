@@ -24,10 +24,13 @@
 /*eslint-disable */
 
 import shakaAssets from './common/assets';
-import ShakaDemoCustom from './custom'
+import ShakaDemoUtils from '../js/demo_utils'
 import error from '../lib/util/error'
 import {Controls} from '../ui/controls'
 import CloseButton from '../js/close_button'
+import ConfigUtils from '../lib/util/config_utils'
+import PlayerConfiguration from '../lib/util/player_configuration'
+import Localization from '../ui/localization'
 
 
 const errorUtils = new error()
@@ -96,7 +99,7 @@ class ShakaDemoMain {
         return;
       }
 
-      this.onError_(/** @type {!shaka.util.Error} */ (event.error));
+      this.onError_(/** @type {!Error} */ (event.error));
     });
 
     // Set up event listeners.
@@ -116,7 +119,7 @@ class ShakaDemoMain {
     this.initCommon_();
 
     // Process a synthetic error about lack of browser support.
-    const severity = shaka.util.Error.Severity.CRITICAL;
+    const severity = Error.Severity.CRITICAL;
     const message = 'Your browser is not supported!';
     const href = 'https://github.com/google/shaka-player#' +
                  'platform-and-browser-support-matrix';
@@ -253,13 +256,13 @@ class ShakaDemoMain {
     // Dispatch drawer state change events when the drawer button or obfuscator
     // are pressed also.
     const drawerButton = document.querySelector('.mdl-layout__drawer-button');
-    goog.asserts.assert(drawerButton, 'There should be a drawer button.');
+    window.asserts.assert(drawerButton, 'There should be a drawer button.');
     drawerButton.addEventListener('click', () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
       this.showNode_(drawerCloseButton);
     });
     const obfuscator = document.querySelector('.mdl-layout__obfuscator');
-    goog.asserts.assert(obfuscator, 'There should be an obfuscator.');
+    window.asserts.assert(obfuscator, 'There should be an obfuscator.');
     obfuscator.addEventListener('click', () => {
       this.dispatchEventWithName_('shaka-main-drawer-state-change');
       this.hideNode_(drawerCloseButton);
@@ -270,7 +273,7 @@ class ShakaDemoMain {
   /** @return {boolean} */
   getIsDrawerOpen() {
     const drawer = document.querySelector('.mdl-layout__drawer');
-    goog.asserts.assert(drawer, 'There should be a drawer.');
+    window.asserts.assert(drawer, 'There should be a drawer.');
     return drawer.classList.contains('is-visible');
   }
 
@@ -293,15 +296,15 @@ class ShakaDemoMain {
    * If and only if storage is not available, this will return null.
    * These storage instances are meant to be used once and then destroyed, using
    * the |Storage.destroy| method.
-   * @return {?shaka.offline.Storage}
+   * @return {?Storage}
    * @private
    */
   makeStorageInstance_() {
-    if (!shaka.offline.Storage.support()) {
+    if (!Storage.support()) {
       return null;
     }
 
-    const storage = new shaka.offline.Storage();
+    const storage = new Storage();
 
     // Set the progress callback;
     const getAssetWithIdentifier = (identifier) => {
@@ -368,7 +371,7 @@ class ShakaDemoMain {
         const stored = await storage.store(asset.manifestUri, metadata);
         asset.storedContent = stored;
       } catch (error) {
-        this.onError_(/** @type {!shaka.util.Error} */ (error));
+        this.onError_(/** @type {!Error} */ (error));
         asset.storedContent = null;
       }
       storage.destroy();
@@ -391,7 +394,7 @@ class ShakaDemoMain {
           await storage.remove(asset.storedContent.offlineUri);
           asset.storedContent = null;
         } catch (error) {
-          this.onError_(/** @type {!shaka.util.Error} */ (error));
+          this.onError_(/** @type {!Error} */ (error));
           // Presumably, if deleting the asset fails, it still exists?
         }
         storage.destroy();
@@ -463,7 +466,7 @@ class ShakaDemoMain {
       return 'This asset cannot be downloaded.';
     }
 
-    if (needOffline && !shaka.offline.Storage.support()) {
+    if (needOffline && !Storage.support()) {
       return 'Your browser does not support offline storage.';
     }
 
@@ -795,10 +798,10 @@ class ShakaDemoMain {
    */
   configure(config, value) {
     if (arguments.length == 2 && typeof(config) == 'string') {
-      config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
+      config = ConfigUtils.convertToConfigObject(config, value);
     }
     const asObj = /** @type {!Object} */ (config);
-    shaka.util.PlayerConfiguration.mergeConfigObjects(
+    PlayerConfiguration.mergeConfigObjects(
         this.desiredConfig_, asObj, this.defaultConfig_);
     this.player_.configure(config, value);
   }
@@ -839,7 +842,7 @@ class ShakaDemoMain {
 
   /**
    * @param {ShakaDemoAssetInfo} asset
-   * @param {shaka.offline.Storage=} storage
+   * @param {Storage=} storage
    * @return {!Promise}
    * @private
    */
@@ -847,7 +850,7 @@ class ShakaDemoMain {
     const netEngine = storage ?
                       storage.getNetworkingEngine() :
                       this.player_.getNetworkingEngine();
-    goog.asserts.assert(netEngine, 'There should be a net engine.');
+    window.asserts.assert(netEngine, 'There should be a net engine.');
     asset.applyFilters(netEngine);
 
     const assetConfig = asset.getConfiguration();
@@ -956,8 +959,8 @@ class ShakaDemoMain {
         this.video_.poster = ShakaDemoMain.audioOnlyPoster_;
       }
     } catch (reason) {
-      const error = /** @type {!shaka.util.Error} */ (reason);
-      if (error.code == shaka.util.Error.Code.LOAD_INTERRUPTED) {
+      const error = /** @type {!Error} */ (reason);
+      if (error.code == Error.Code.LOAD_INTERRUPTED) {
         // Don't use shaka.log, which is not present in compiled builds.
         console.debug('load() interrupted');
       } else {
@@ -1225,13 +1228,13 @@ class ShakaDemoMain {
   }
 
   /**
-   * @param {!shaka.util.Error} error
+   * @param {!Error} error
    * @private
    */
   onError_(error) {
     let severity = error.severity;
     if (severity == null || error.severity == undefined) {
-      // It's not a shaka.util.Error. Treat it as very severe, since those
+      // It's not a Error. Treat it as very severe, since those
       // should not be happening.
       
       severity = errorUtils.severity.CRITICAL;
@@ -1241,7 +1244,7 @@ class ShakaDemoMain {
 
     let href = '';
     if (error.code) {
-      href = '../docs/api/shaka.util.Error.html#value:' + error.code;
+      href = '../docs/api/Error.html#value:' + error.code;
     }
 
     console.error(error);
@@ -1249,7 +1252,7 @@ class ShakaDemoMain {
   }
 
   /**
-   * @param {!shaka.util.Error.Severity} severity
+   * @param {!Error.Severity} severity
    * @param {string} message
    * @param {string} href
    * @private

@@ -140,13 +140,13 @@ export default class Transmuxer {
 			} else if (profile == '77') {
 				newCodecString += '4d00';
 			} else {
-				goog.asserts.assert(profile == '100', 'Legacy avc1 parsing code out of sync with regex!');
+				window.asserts.assert(profile == '100', 'Legacy avc1 parsing code out of sync with regex!');
 				newCodecString += '6400';
 			}
 
 			// Convert the level to hex and append to the codec string.
 			const level = Number(match[2]);
-			goog.asserts.assert(level < 256, 'Invalid legacy avc1 level number!');
+			window.asserts.assert(level < 256, 'Invalid legacy avc1 level number!');
 			newCodecString += (level >> 4).toString(16);
 			newCodecString += (level & 0xf).toString(16);
 
@@ -163,7 +163,7 @@ export default class Transmuxer {
 	 *                     captions: !Array.<!muxjs.mp4.ClosedCaption>}>}
 	 */
 	transmux(data) {
-		goog.asserts.assert(!this.isTransmuxing_, 'No transmuxing should be in progress.');
+		window.asserts.assert(!this.isTransmuxing_, 'No transmuxing should be in progress.');
 		this.isTransmuxing_ = true;
 		this.transmuxPromise_ = new PublicPromise();
 		this.transmuxedData_ = [];

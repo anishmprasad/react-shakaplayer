@@ -30,7 +30,7 @@ window.shaka.abr.Ewma = class {
 	 *   new estimate.
 	 */
 	constructor(halfLife) {
-		goog.asserts.assert(halfLife > 0, 'expected halfLife to be positive');
+		window.asserts.assert(halfLife > 0, 'expected halfLife to be positive');
 
 		/**
 		 * Larger values of alpha expire historical data more slowly.

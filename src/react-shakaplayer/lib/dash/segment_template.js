@@ -45,7 +45,7 @@ shaka.dash.SegmentTemplate = class {
 	 * @return {shaka.dash.DashParser.StreamInfo}
 	 */
 	static createStream(context, requestInitSegment, segmentIndexMap, isUpdate) {
-		goog.asserts.assert(context.representation.segmentTemplate, 'Should only be called with SegmentTemplate');
+		window.asserts.assert(context.representation.segmentTemplate, 'Should only be called with SegmentTemplate');
 		const SegmentTemplate = shaka.dash.SegmentTemplate;
 
 		const init = SegmentTemplate.createInitSegment_(context);
@@ -194,7 +194,7 @@ shaka.dash.SegmentTemplate = class {
 				info.timeline = null;
 				info.segmentDuration = null;
 			} else {
-				goog.asserts.assert(info.timeline, 'There should be a timeline');
+				window.asserts.assert(info.timeline, 'There should be a timeline');
 				shaka.log.info('Using the SegmentTimeline by default.');
 				info.segmentDuration = null;
 			}
@@ -255,7 +255,7 @@ shaka.dash.SegmentTemplate = class {
 			);
 		}
 
-		goog.asserts.assert(info.indexTemplate, 'must be using index template');
+		window.asserts.assert(info.indexTemplate, 'must be using index template');
 		const filledTemplate = MpdUtils.fillUriTemplate(
 			info.indexTemplate,
 			context.representation.id,
@@ -287,7 +287,7 @@ shaka.dash.SegmentTemplate = class {
 	 * @private
 	 */
 	static createFromDuration_(context, info) {
-		goog.asserts.assert(info.mediaTemplate, 'There should be a media template with duration');
+		window.asserts.assert(info.mediaTemplate, 'There should be a media template with duration');
 		const MpdUtils = shaka.dash.MpdUtils;
 		const ManifestParserUtils = shaka.util.ManifestParserUtils;
 
@@ -373,7 +373,7 @@ shaka.dash.SegmentTemplate = class {
 			// Consider the presentation time offset in segment uri computation
 			const timeReplacement = unscaledStart + info.unscaledPresentationTimeOffset;
 			const createUris = () => {
-				goog.asserts.assert(info.mediaTemplate, 'There should be a media template with a timeline');
+				window.asserts.assert(info.mediaTemplate, 'There should be a media template with a timeline');
 				const mediaUri = MpdUtils.fillUriTemplate(
 					info.mediaTemplate,
 					context.representation.id,
@@ -413,7 +413,7 @@ shaka.dash.SegmentTemplate = class {
 		const bandwidth = context.bandwidth || null;
 		const baseUris = context.representation.baseUris;
 		const getUris = () => {
-			goog.asserts.assert(initialization, 'Should have returned earler');
+			window.asserts.assert(initialization, 'Should have returned earler');
 			const filledTemplate = MpdUtils.fillUriTemplate(initialization, repId, null, bandwidth, null);
 			const resolvedUris = ManifestParserUtils.resolveUris(baseUris, [filledTemplate]);
 			return resolvedUris;

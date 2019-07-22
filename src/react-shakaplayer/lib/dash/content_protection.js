@@ -67,7 +67,7 @@ window.shaka.dash.ContentProtection = class {
 			// non-CENC elements.
 			parsedNonCenc = parsed.filter(elem => {
 				if (elem.schemeUri == ContentProtection.MP4Protection_) {
-					goog.asserts.assert(!elem.init || elem.init.length, 'Init data must be null or non-empty.');
+					window.asserts.assert(!elem.init || elem.init.length, 'Init data must be null or non-empty.');
 					defaultInit = elem.init || defaultInit;
 					return false;
 				} else {
@@ -208,7 +208,7 @@ window.shaka.dash.ContentProtection = class {
 			const byteLength = view.getUint16(byteOffset, true);
 			byteOffset += 2;
 
-			goog.asserts.assert((byteLength & 1) === 0, 'expected byteLength to be an even number');
+			window.asserts.assert((byteLength & 1) === 0, 'expected byteLength to be an even number');
 
 			const recordValue = new Uint8Array(recordData, byteOffset, byteLength);
 
@@ -335,7 +335,7 @@ window.shaka.dash.ContentProtection = class {
 		for (const element of elements) {
 			const keySystem = defaultKeySystems.get(element.schemeUri);
 			if (keySystem) {
-				goog.asserts.assert(!element.init || element.init.length, 'Init data must be null or non-empty.');
+				window.asserts.assert(!element.init || element.init.length, 'Init data must be null or non-empty.');
 
 				const initData = element.init || defaultInit;
 				const info = ManifestParserUtils.createDrmInfo(keySystem, initData);
@@ -346,7 +346,7 @@ window.shaka.dash.ContentProtection = class {
 
 				out.push(info);
 			} else {
-				goog.asserts.assert(callback, 'ContentProtection callback is required');
+				window.asserts.assert(callback, 'ContentProtection callback is required');
 				const infos = callback(element.node) || [];
 				for (const info of infos) {
 					out.push(info);

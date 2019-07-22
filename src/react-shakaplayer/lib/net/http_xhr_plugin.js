@@ -71,7 +71,7 @@ class HttpXHRPlugin {
 			};
 			xhr.onload = event => {
 				const target = event.target;
-				goog.asserts.assert(target, 'XHR onload has no target!');
+				window.asserts.assert(target, 'XHR onload has no target!');
 				// Since IE and Edge incorrectly return the header with a leading new
 				// line character ('\n'), we trim the header here.
 				const headerLines = target
@@ -96,7 +96,7 @@ class HttpXHRPlugin {
 					);
 					resolve(response);
 				} catch (error) {
-					goog.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
+					window.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
 					reject(error);
 				}
 			};

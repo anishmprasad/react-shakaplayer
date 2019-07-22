@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.indexeddb.EmeSessionStorageCell');
+// goog.provide('indexeddb.EmeSessionStorageCell');
 
-// goog.require('shaka.offline.indexeddb.DBConnection');
+// goog.require('indexeddb.DBConnection');
 
 import DBConnection from '../indexeddb/db_connection';
 
@@ -35,7 +35,7 @@ export default class EmeSessionStorageCell {
 	 * @param {string} store
 	 */
 	constructor(connection, store) {
-		/** @private {!shaka.offline.indexeddb.DBConnection} */
+		/** @private {!indexeddb.DBConnection} */
 		this.connection_ = new DBConnection(connection);
 
 		/** @private {string} */
@@ -49,7 +49,7 @@ export default class EmeSessionStorageCell {
 
 	/** @override */
 	async getAll() {
-		/** @type {!shaka.offline.indexeddb.DBOperation} */
+		/** @type {!indexeddb.DBOperation} */
 		const op = this.connection_.startReadOnlyOperation(this.store_);
 		/** @type {!Array.<shaka.extern.EmeSessionDB>} */
 		const values = [];
@@ -76,7 +76,7 @@ export default class EmeSessionStorageCell {
 
 	/** @override */
 	async remove(sessionIds) {
-		/** @type {!shaka.offline.indexeddb.DBOperation} */
+		/** @type {!indexeddb.DBOperation} */
 		const op = this.connection_.startReadWriteOperation(this.store_);
 
 		await op.forEachEntry((key, value, cursor) => {

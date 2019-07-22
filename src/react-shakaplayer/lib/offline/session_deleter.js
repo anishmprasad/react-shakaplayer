@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.SessionDeleter');
+// goog.provide('SessionDeleter');
 
 // goog.require('shaka.log');
 // goog.require('shaka.util.ArrayUtils');
@@ -36,7 +36,7 @@ class SessionDeleter {
 	 * @return {!Promise.<!Array.<string>>} The session IDs that were deleted.
 	 */
 	async delete(config, netEngine, sessions) {
-		const SessionDeleter = shaka.offline.SessionDeleter;
+		const SessionDeleter = SessionDeleter;
 
 		let deleted = [];
 		for (const bucket of SessionDeleter.createBuckets_(sessions)) {
@@ -54,7 +54,7 @@ class SessionDeleter {
 	 *
 	 * @param {shaka.extern.DrmConfiguration} config
 	 * @param {!shaka.net.NetworkingEngine} netEngine
-	 * @param {shaka.offline.SessionDeleter.Bucket_} bucket
+	 * @param {SessionDeleter.Bucket_} bucket
 	 * @return {!Promise.<!Array.<string>>} The sessions that were deleted
 	 * @private
 	 */
@@ -115,13 +115,13 @@ class SessionDeleter {
 	 * we can't just use one CDM instance to delete everything.
 	 *
 	 * @param {!Array.<shaka.extern.EmeSessionDB>} sessions
-	 * @return {!Array.<shaka.offline.SessionDeleter.Bucket_>}
+	 * @return {!Array.<SessionDeleter.Bucket_>}
 	 * @private
 	 */
 	static createBuckets_(sessions) {
-		const SessionDeleter = shaka.offline.SessionDeleter;
+		const SessionDeleter = SessionDeleter;
 
-		/** @type {!Array.<shaka.offline.SessionDeleter.Bucket_>} */
+		/** @type {!Array.<SessionDeleter.Bucket_>} */
 		const ret = [];
 		for (const session of sessions) {
 			let found = false;

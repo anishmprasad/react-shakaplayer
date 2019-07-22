@@ -42,7 +42,7 @@ shaka.dash.SegmentList = class {
 	 * @return {shaka.dash.DashParser.StreamInfo}
 	 */
 	static createStream(context, segmentIndexMap) {
-		goog.asserts.assert(context.representation.segmentList, 'Should only be called with SegmentList');
+		window.asserts.assert(context.representation.segmentList, 'Should only be called with SegmentList');
 		const SegmentList = shaka.dash.SegmentList;
 
 		const init = shaka.dash.SegmentBase.createInitSegment(context, SegmentList.fromInheritance_);
@@ -235,7 +235,7 @@ shaka.dash.SegmentList = class {
 			} else {
 				// If segmentDuration and timeline are null then there must
 				// be exactly one segment.
-				goog.asserts.assert(
+				window.asserts.assert(
 					info.mediaSegments.length == 1 && periodDuration,
 					'There should be exactly one segment with a Period duration.'
 				);

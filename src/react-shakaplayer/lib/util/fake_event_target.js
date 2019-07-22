@@ -96,7 +96,7 @@ export default class FakeEventTarget {
 	dispatchEvent(event) {
 		// In many browsers, it is complex to overwrite properties of actual Events.
 		// Here we expect only to dispatch FakeEvents, which are simpler.
-		goog.asserts.assert(event instanceof FakeEvent, 'FakeEventTarget can only dispatch FakeEvents!');
+		window.asserts.assert(event instanceof FakeEvent, 'FakeEventTarget can only dispatch FakeEvents!');
 
 		const listeners = this.listeners_.get(event.type) || [];
 

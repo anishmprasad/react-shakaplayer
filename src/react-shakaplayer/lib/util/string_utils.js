@@ -228,7 +228,7 @@ export default class StringUtils {
 					// The compiler will complain about suspicious value if this isn't
 					// stored in a variable and used.
 					const foo = String.fromCharCode(...buffer);
-					goog.asserts.assert(foo, 'Should get value');
+					window.asserts.assert(foo, 'Should get value');
 					return true;
 				} catch (error) {
 					return false;
@@ -254,7 +254,7 @@ export default class StringUtils {
 			}
 		}
 
-		goog.asserts.assert(StringUtils.fromCharCodeImpl_, 'Unable to create a fromCharCode method');
+		window.asserts.assert(StringUtils.fromCharCodeImpl_, 'Unable to create a fromCharCode method');
 		return StringUtils.fromCharCodeImpl_(array);
 	}
 }

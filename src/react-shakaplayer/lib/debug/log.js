@@ -154,7 +154,7 @@ if (window.console) {
 		shaka.log.setLevel = level => {
 			const getLog = curLevel => {
 				if (curLevel <= level) {
-					goog.asserts.assert(shaka.log.logMap_[curLevel], 'Unexpected log level');
+					window.asserts.assert(shaka.log.logMap_[curLevel], 'Unexpected log level');
 					return shaka.log.logMap_[curLevel];
 				} else {
 					return () => {};

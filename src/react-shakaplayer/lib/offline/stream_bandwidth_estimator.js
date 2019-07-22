@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.StreamBandwidthEstimator');
+// goog.provide('StreamBandwidthEstimator');
 
 // goog.require('shaka.log');
 
@@ -65,7 +65,7 @@ class StreamBandwidthEstimator {
 		if (audio && video) {
 			// Get the audio's bandwidth. If it is missing, default to our default
 			// audio bandwidth.
-			const audioBitRate = audio.bandwidth || shaka.offline.StreamBandwidthEstimator.DEFAULT_AUDIO_BITRATE_;
+			const audioBitRate = audio.bandwidth || StreamBandwidthEstimator.DEFAULT_AUDIO_BITRATE_;
 
 			// Get the video's bandwidth. If it is missing, use the variant bandwidth
 			// less the audio. If we get a negative bit rate, fall back to our
@@ -99,7 +99,7 @@ class StreamBandwidthEstimator {
 	 * @param {shaka.extern.Stream} text
 	 */
 	addText(text) {
-		this.estimateByStreamId_[text.id] = shaka.offline.StreamBandwidthEstimator.DEFAULT_TEXT_BITRATE_;
+		this.estimateByStreamId_[text.id] = StreamBandwidthEstimator.DEFAULT_TEXT_BITRATE_;
 	}
 
 	/**

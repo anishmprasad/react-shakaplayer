@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-class ShakaDemoUtils {
+export default class ShakaDemoUtils {
 	/**
 	 * Goes through the various values in shaka.extern.PlayerConfiguration, and
 	 * calls the given callback on them so that they can be stored to or read from

@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.DownloadManager');
+// goog.provide('DownloadManager');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.net.NetworkingEngine');
-// goog.require('shaka.offline.DownloadProgressEstimator');
+// goog.require('DownloadProgressEstimator');
 // goog.require('shaka.util.Destroyer');
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.IDestroyable');
@@ -75,7 +75,7 @@ class DownloadManager {
 		 */
 		this.onProgress_ = onProgress;
 
-		/** @private {shaka.offline.DownloadProgressEstimator} */
+		/** @private {DownloadProgressEstimator} */
 		this.estimator_ = new DownloadProgressEstimator();
 	}
 
@@ -150,7 +150,7 @@ class DownloadManager {
 		const action = this.networkingEngine_.request(type, request);
 		const response = await action.promise;
 
-		goog.asserts.assert(response.data, 'Response data should be non-null!');
+		window.asserts.assert(response.data, 'Response data should be non-null!');
 		return response.data;
 	}
 }

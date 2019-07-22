@@ -232,7 +232,7 @@ class Mp4Parser {
 	 * @private
 	 */
 	static typeFromString_(name) {
-		goog.asserts.assert(name.length == 4, 'Mp4 box names must be 4 characters long');
+		window.asserts.assert(name.length == 4, 'Mp4 box names must be 4 characters long');
 
 		let code = 0;
 		for (let i = 0; i < name.length; i++) {

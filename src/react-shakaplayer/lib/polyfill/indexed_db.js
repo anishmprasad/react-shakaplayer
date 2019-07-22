@@ -42,7 +42,7 @@ export default class IndexedDB {
 		if (Platform.isChromecast()) {
 			shaka.log.debug('Removing IndexedDB from ChromeCast');
 			delete window.indexedDB;
-			goog.asserts.assert(!window.indexedDB, 'Failed to override window.indexedDB');
+			window.asserts.assert(!window.indexedDB, 'Failed to override window.indexedDB');
 		}
 	}
 }

@@ -107,7 +107,7 @@ class Controls extends FakeEventTarget {
      * @private {Timer}
      */
     this.seekTimer_ = new Timer(() => {
-      goog.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
+      window.asserts.assert(this.seekBar_ != null, 'Seekbar should not be null!');
       this.video_.currentTime = parseFloat(this.seekBar_.value);
     });
 

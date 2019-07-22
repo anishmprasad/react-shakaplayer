@@ -276,7 +276,7 @@ class MediaSourceEngine {
     this.captionParser_ = null;
     if (goog.DEBUG) {
       for (const contentType in this.queues_) {
-        goog.asserts.assert(
+        window.asserts.assert(
             this.queues_[contentType].length == 0,
             contentType + ' queue should be empty after destroy!');
       }
@@ -318,7 +318,7 @@ class MediaSourceEngine {
 
     for (const contentType of streamsByType.keys()) {
       const stream = streamsByType.get(contentType);
-      goog.asserts.assert(
+      window.asserts.assert(
           MediaSourceEngine.isStreamSupported(stream),
           'Type negotiation should happen before MediaSourceEngine.init!');
 
@@ -566,7 +566,7 @@ class MediaSourceEngine {
   async remove(contentType, startTime, endTime) {
     // On IE11, this operation would be permitted, but would have no effect!
     // See https://github.com/google/shaka-player/issues/251
-    goog.asserts.assert(endTime < Number.MAX_VALUE,
+    window.asserts.assert(endTime < Number.MAX_VALUE,
         'remove() with MAX_VALUE or Infinity is not IE-compatible!');
     const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
@@ -704,7 +704,7 @@ class MediaSourceEngine {
    * @return {!Promise}
    */
   async setDuration(duration) {
-    goog.asserts.assert(
+    window.asserts.assert(
         isNaN(this.mediaSource_.duration) ||
             this.mediaSource_.duration <= duration,
         'duration cannot decrease: ' + this.mediaSource_.duration + ' -> ' +
@@ -788,7 +788,7 @@ class MediaSourceEngine {
    */
   flush_(contentType) {
     // Never use flush_ if there's data.  It causes a hiccup in playback.
-    goog.asserts.assert(
+    window.asserts.assert(
         this.video_.buffered.length == 0, 'MediaSourceEngine.flush_ should ' +
         'only be used after clearing all data!');
 
@@ -845,8 +845,8 @@ class MediaSourceEngine {
    */
   onError_(contentType) {
     const operation = this.queues_[contentType][0];
-    goog.asserts.assert(operation, 'Spurious error event!');
-    goog.asserts.assert(!this.sourceBuffers_[contentType].updating,
+    window.asserts.assert(operation, 'Spurious error event!');
+    window.asserts.assert(!this.sourceBuffers_[contentType].updating,
         'SourceBuffer should not be updating on error!');
     const code = this.video_.error ? this.video_.error.code : 0;
     operation.p.reject(new Error(
@@ -867,11 +867,11 @@ class MediaSourceEngine {
    */
   onUpdateEnd_(contentType) {
     const operation = this.queues_[contentType][0];
-    goog.asserts.assert(operation, 'Spurious updateend event!');
+    window.asserts.assert(operation, 'Spurious updateend event!');
     if (!operation) {
       return;
     }
-    goog.asserts.assert(!this.sourceBuffers_[contentType].updating,
+    window.asserts.assert(!this.sourceBuffers_[contentType].updating,
         'SourceBuffer should not be updating on updateend!');
     operation.p.resolve();
     this.popFromQueue_(contentType);
@@ -956,7 +956,7 @@ class MediaSourceEngine {
       if (goog.DEBUG) {
         // If we did it correctly, nothing is updating.
         for (const contentType in this.sourceBuffers_) {
-          goog.asserts.assert(
+          window.asserts.assert(
               this.sourceBuffers_[contentType].updating == false,
               'SourceBuffers should not be updating after a blocking op!');
         }
@@ -982,7 +982,7 @@ class MediaSourceEngine {
       return ret;
     } catch (error) {
       // One of the waiters failed, which means we've been destroyed.
-      goog.asserts.assert(
+      window.asserts.assert(
           this.destroyer_.destroyed(), 'Should be destroyed by now');
       // We haven't popped from the queue.  Canceled waiters have been removed
       // by destroy.  What's left now should just be resolved waiters.  In
@@ -992,10 +992,10 @@ class MediaSourceEngine {
       if (goog.DEBUG) {
         for (const contentType in this.sourceBuffers_) {
           if (this.queues_[contentType].length) {
-            goog.asserts.assert(
+            window.asserts.assert(
                 this.queues_[contentType].length == 1,
                 'Should be at most one item in queue!');
-            goog.asserts.assert(
+            window.asserts.assert(
                 allWaiters.includes(this.queues_[contentType][0].p),
                 'The item in queue should be one of our waiters!');
             this.queues_[contentType].shift();
@@ -1034,7 +1034,7 @@ class MediaSourceEngine {
    * @return {!shaka.extern.TextDisplayer}
    */
   getTextDisplayer() {
-    goog.asserts.assert(
+    window.asserts.assert(
         this.textDisplayer_,
         'TextDisplayer should only be null when this is destroyed');
 

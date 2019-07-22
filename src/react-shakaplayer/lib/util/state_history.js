@@ -113,7 +113,7 @@ export default class StateHistory {
 	 * @private
 	 */
 	start_(state) {
-		goog.asserts.assert(this.open_ == null, 'There must be no open entry in order when we start');
+		window.asserts.assert(this.open_ == null, 'There must be no open entry in order when we start');
 
 		this.open_ = {
 			timestamp: this.getNowInSeconds_(),
@@ -127,7 +127,7 @@ export default class StateHistory {
 	 * @private
 	 */
 	update_(state) {
-		goog.asserts.assert(this.open_, 'There must be an open entry in order to update it');
+		window.asserts.assert(this.open_, 'There must be an open entry in order to update it');
 
 		const currentTimeSeconds = this.getNowInSeconds_();
 

@@ -149,7 +149,7 @@ shaka.hls.Tag = class {
 			return attr.name == name;
 		});
 
-		goog.asserts.assert(
+		window.asserts.assert(
 			attributes.length < 2,
 			'A tag should not have multiple attributes ' + 'with the same name!'
 		);

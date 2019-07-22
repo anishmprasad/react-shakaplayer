@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.indexeddb.V2StorageCell');
+// goog.provide('indexeddb.V2StorageCell');
 
-// goog.require('shaka.offline.indexeddb.DBConnection');
+// goog.require('indexeddb.DBConnection');
 // goog.require('shaka.util.Error');
 
 import DBConnection from '../../offline/indexeddb/db_connection';
@@ -39,7 +39,7 @@ export default class V2StorageCell {
 	 * @param {boolean} isFixedKey
 	 */
 	constructor(connection, segmentStore, manifestStore, isFixedKey) {
-		/** @private {!shaka.offline.indexeddb.DBConnection} */
+		/** @private {!indexeddb.DBConnection} */
 		this.connection_ = new DBConnection(connection);
 
 		/** @private {string} */
@@ -129,7 +129,7 @@ export default class V2StorageCell {
 	 * @override
 	 */
 	async getAllManifests() {
-		/** @type {!shaka.offline.indexeddb.DBOperation} */
+		/** @type {!indexeddb.DBOperation} */
 		const op = this.connection_.startReadOnlyOperation(this.manifestStore_);
 		/** @type {!Map.<number, shaka.extern.ManifestDB>} */
 		const values = new Map();

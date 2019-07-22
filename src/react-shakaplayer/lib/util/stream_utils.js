@@ -120,12 +120,12 @@ class StreamUtils {
     const StreamUtils = shaka.util.StreamUtils;
 
     if (activeAudio) {
-      goog.asserts.assert(StreamUtils.isAudio(activeAudio),
+      window.asserts.assert(StreamUtils.isAudio(activeAudio),
           'Audio streams must have the audio type.');
     }
 
     if (activeVideo) {
-      goog.asserts.assert(StreamUtils.isVideo(activeVideo),
+      window.asserts.assert(StreamUtils.isVideo(activeVideo),
           'Video streams must have the video type.');
     }
 
@@ -512,7 +512,7 @@ class StreamUtils {
     const variantsByChannelCount = new Map();
     for (const variant of variantsWithChannelCounts) {
       const count = variant.audio.channelsCount;
-      goog.asserts.assert(count != null, 'Must have count after filtering!');
+      window.asserts.assert(count != null, 'Must have count after filtering!');
       if (!variantsByChannelCount.has(count)) {
         variantsByChannelCount.set(count, []);
       }
@@ -650,13 +650,13 @@ class StreamUtils {
    */
   static getVariantByStreams(audio, video, variants) {
     if (audio) {
-      goog.asserts.assert(
+      window.asserts.assert(
           shaka.util.StreamUtils.isAudio(audio),
           'Audio streams must have the audio type.');
     }
 
     if (video) {
-      goog.asserts.assert(
+      window.asserts.assert(
           shaka.util.StreamUtils.isVideo(video),
           'Video streams must have the video type.');
     }

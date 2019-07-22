@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.indexeddb.DBOperation');
+// goog.provide('indexeddb.DBOperation');
 
 // goog.require('shaka.util.PublicPromise');
 import PublicPromise from '../../util/public_promise';

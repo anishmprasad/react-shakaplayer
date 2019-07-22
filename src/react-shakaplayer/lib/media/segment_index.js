@@ -165,7 +165,7 @@ export default class SegmentIndex {
 				// start of the next period.  So, it is valid to have end time updated
 				// to the last segment reference in a period.
 				if (Math.abs(r1.endTime - r2.endTime) > 0.1) {
-					goog.asserts.assert(
+					window.asserts.assert(
 						r2.endTime > r1.endTime && i == this.references_.length - 1 && j == references.length - 1,
 						'This should be an update of the last segment in a period'
 					);
@@ -260,8 +260,8 @@ export default class SegmentIndex {
 	 * @param {?number} periodDuration
 	 */
 	fit(periodDuration) {
-		goog.asserts.assert(periodDuration != null, 'Period duration must be known for static content!');
-		goog.asserts.assert(periodDuration != Infinity, 'Period duration must be finite for static content!');
+		window.asserts.assert(periodDuration != null, 'Period duration must be known for static content!');
+		window.asserts.assert(periodDuration != Infinity, 'Period duration must be finite for static content!');
 
 		// Trim out references we will never use.
 		while (this.references_.length) {
@@ -307,7 +307,7 @@ if (goog.DEBUG) {
 	 * @private
 	 */
 	shaka.media.SegmentIndex.assertCorrectReferences_ = references => {
-		goog.asserts.assert(
+		window.asserts.assert(
 			references.every((r2, i) => {
 				if (i == 0) {
 					return true;

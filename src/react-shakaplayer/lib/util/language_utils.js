@@ -279,7 +279,7 @@ export default class LanguageUtils {
 		// const LanguageUtils = LanguageUtils;
 
 		const ContentType = ManifestParserUtils.ContentType;
-		goog.asserts.assert(stream.type == ContentType.TEXT, 'Can only get language from text streams');
+		window.asserts.assert(stream.type == ContentType.TEXT, 'Can only get language from text streams');
 
 		const language = stream.language || 'und';
 		return LanguageUtils.normalize(language);
@@ -392,7 +392,7 @@ export default class LanguageUtils {
 	static disassembleLocale_(locale) {
 		const components = locale.split('-');
 
-		goog.asserts.assert(
+		window.asserts.assert(
 			components.length <= 2,
 			['Locales should not have more than 2 components. ', locale, ' has too many components.'].join()
 		);

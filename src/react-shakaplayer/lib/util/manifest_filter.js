@@ -89,7 +89,7 @@ class ManifestFilter {
 	 * @param {shaka.extern.Manifest} manifest
 	 */
 	static filterByCommonCodecs(manifest) {
-		goog.asserts.assert(manifest.periods.length > 0, 'There should be at least be one period');
+		window.asserts.assert(manifest.periods.length > 0, 'There should be at least be one period');
 
 		// const ManifestFilter = shaka.util.ManifestFilter;
 

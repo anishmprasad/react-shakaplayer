@@ -61,7 +61,7 @@ shaka.dash.MpdUtils = class {
       }
 
       let value = valueTable[name];
-      goog.asserts.assert(value !== undefined, 'Unrecognized identifier');
+      window.asserts.assert(value !== undefined, 'Unrecognized identifier');
 
       // Note that |value| may be 0 or ''.
       if (value == null) {
@@ -81,7 +81,7 @@ shaka.dash.MpdUtils = class {
       }
 
       if (name == 'Time') {
-        goog.asserts.assert(Math.abs(value - Math.round(value)) < 0.2,
+        window.asserts.assert(Math.abs(value - Math.round(value)) < 0.2,
             'Calculated $Time$ values must be close to integers');
         value = Math.round(value);
       }
@@ -105,7 +105,7 @@ shaka.dash.MpdUtils = class {
           valueString = value.toString(16).toUpperCase();
           break;
         default:
-          goog.asserts.assert(false, 'Unhandled format specifier');
+          window.asserts.assert(false, 'Unhandled format specifier');
           valueString = value.toString();
           break;
       }
@@ -135,10 +135,10 @@ shaka.dash.MpdUtils = class {
   static createTimeline(
       segmentTimeline, timescale, unscaledPresentationTimeOffset,
       periodDuration) {
-    goog.asserts.assert(
+    window.asserts.assert(
         timescale > 0 && timescale < Infinity,
         'timescale must be a positive, finite integer');
-    goog.asserts.assert(
+    window.asserts.assert(
         periodDuration > 0, 'period duration must be a positive integer');
 
     // Alias.
@@ -260,7 +260,7 @@ shaka.dash.MpdUtils = class {
    * @return {shaka.dash.MpdUtils.SegmentInfo}
    */
   static parseSegmentInfo(context, callback) {
-    goog.asserts.assert(
+    window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type.');
     const MpdUtils = shaka.dash.MpdUtils;
@@ -323,7 +323,7 @@ shaka.dash.MpdUtils = class {
    */
   static inheritAttribute(context, callback, attribute) {
     const Functional = shaka.util.Functional;
-    goog.asserts.assert(
+    window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type');
 
@@ -350,7 +350,7 @@ shaka.dash.MpdUtils = class {
    */
   static inheritChild(context, callback, child) {
     const Functional = shaka.util.Functional;
-    goog.asserts.assert(
+    window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type');
 
@@ -429,7 +429,7 @@ shaka.dash.MpdUtils = class {
     const requestOperation = networkingEngine.request(requestType, request);
     // The interface is abstract, but we know it was implemented with the
     // more capable internal class.
-    goog.asserts.assert(
+    window.asserts.assert(
         requestOperation instanceof shaka.util.AbortableOperation,
         'Unexpected implementation of IAbortableOperation!');
     // Satisfy the compiler with a cast.

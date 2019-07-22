@@ -69,7 +69,7 @@ class Mp4VttParser {
 			.box('trak', Mp4Parser.children)
 			.box('mdia', Mp4Parser.children)
 			.fullBox('mdhd', box => {
-				goog.asserts.assert(box.version == 0 || box.version == 1, 'MDHD version can only be 0 or 1');
+				window.asserts.assert(box.version == 0 || box.version == 1, 'MDHD version can only be 0 or 1');
 				if (box.version == 0) {
 					box.reader.skip(4); // Skip "creation_time".
 					box.reader.skip(4); // Skip "modification_time".
@@ -134,23 +134,23 @@ class Mp4VttParser {
 			.box('traf', Mp4Parser.children)
 			.fullBox('tfdt', box => {
 				sawTFDT = true;
-				goog.asserts.assert(box.version == 0 || box.version == 1, 'TFDT version can only be 0 or 1');
+				window.asserts.assert(box.version == 0 || box.version == 1, 'TFDT version can only be 0 or 1');
 				baseTime = box.version == 0 ? box.reader.readUint32() : box.reader.readUint64();
 			})
 			.fullBox('tfhd', box => {
-				goog.asserts.assert(box.flags != null, 'A TFHD box should have a valid flags value');
+				window.asserts.assert(box.flags != null, 'A TFHD box should have a valid flags value');
 				defaultDuration = Mp4VttParser.parseTFHD_(box.flags, box.reader);
 			})
 			.fullBox('trun', box => {
 				sawTRUN = true;
-				goog.asserts.assert(box.version != null, 'A TRUN box should have a valid version value');
-				goog.asserts.assert(box.flags != null, 'A TRUN box should have a valid flags value');
+				window.asserts.assert(box.version != null, 'A TRUN box should have a valid version value');
+				window.asserts.assert(box.flags != null, 'A TRUN box should have a valid flags value');
 				presentations = Mp4VttParser.parseTRUN_(box.version, box.flags, box.reader);
 			})
 			.box(
 				'mdat',
 				Mp4Parser.allData(data => {
-					goog.asserts.assert(!sawMDAT, 'VTT cues in mp4 with multiple MDAT are not currently supported');
+					window.asserts.assert(!sawMDAT, 'VTT cues in mp4 with multiple MDAT are not currently supported');
 					sawMDAT = true;
 					rawPayload = data;
 				})
@@ -208,7 +208,7 @@ class Mp4VttParser {
 
 				if (duration) {
 					if (payload) {
-						goog.asserts.assert(this.timescale_ != null, 'Timescale should not be null!');
+						window.asserts.assert(this.timescale_ != null, 'Timescale should not be null!');
 						cues.push(
 							shaka.text.Mp4VttParser.parseVTTC_(
 								payload,
@@ -221,7 +221,7 @@ class Mp4VttParser {
 					shaka.log.error('WVTT sample duration unknown, and no default found!');
 				}
 
-				goog.asserts.assert(
+				window.asserts.assert(
 					!presentation.sampleSize || totalSize <= presentation.sampleSize,
 					'The samples do not fit evenly into the sample sizes given in ' + 'the TRUN box!'
 				);
@@ -231,7 +231,7 @@ class Mp4VttParser {
 			} while (presentation.sampleSize && totalSize < presentation.sampleSize);
 		}
 
-		goog.asserts.assert(
+		window.asserts.assert(
 			!reader.hasMoreData(),
 			'MDAT which contain VTT cues and non-VTT data are not currently ' + 'supported!'
 		);

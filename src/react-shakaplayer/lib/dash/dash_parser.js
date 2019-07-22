@@ -111,7 +111,7 @@ export default class DashParser {
    * @exportInterface
    */
   configure(config) {
-    goog.asserts.assert(config.dash != null,
+    window.asserts.assert(config.dash != null,
         'DashManifestConfiguration should not be null!');
 
     this.config_ = config;
@@ -122,7 +122,7 @@ export default class DashParser {
    * @exportInterface
    */
   async start(uri, playerInterface) {
-    goog.asserts.assert(this.config_, 'Must call configure() before start()!');
+    window.asserts.assert(this.config_, 'Must call configure() before start()!');
     this.manifestUris_ = [uri];
     this.playerInterface_ = playerInterface;
 
@@ -140,7 +140,7 @@ export default class DashParser {
           shaka.util.Error.Code.OPERATION_ABORTED);
     }
 
-    goog.asserts.assert(this.manifest_, 'Manifest should be non-null!');
+    window.asserts.assert(this.manifest_, 'Manifest should be non-null!');
     return this.manifest_;
   }
 
@@ -175,7 +175,7 @@ export default class DashParser {
       if (!this.playerInterface_ || !error) {
         return;
       }
-      goog.asserts.assert(error instanceof shaka.util.Error, 'Bad error type');
+      window.asserts.assert(error instanceof shaka.util.Error, 'Bad error type');
       this.playerInterface_.onError(error);
     }
   }
@@ -489,7 +489,7 @@ export default class DashParser {
       // both the initial manifest parse and for updates.
       // See https://github.com/google/shaka-player/issues/963
       const periodId = context.period.id;
-      goog.asserts.assert(periodId, 'Period IDs should not be null!');
+      window.asserts.assert(periodId, 'Period IDs should not be null!');
       if (!this.periodIds_.includes(periodId)) {
         this.periodIds_.push(periodId);
 
@@ -698,9 +698,9 @@ export default class DashParser {
 
     // Since both audio and video are of the same type, this assertion will
     // catch certain mistakes at runtime that the compiler would miss.
-    goog.asserts.assert(!audio || audio.contentType == ContentType.AUDIO,
+    window.asserts.assert(!audio || audio.contentType == ContentType.AUDIO,
         'Audio parameter mismatch!');
-    goog.asserts.assert(!video || video.contentType == ContentType.VIDEO,
+    window.asserts.assert(!video || video.contentType == ContentType.VIDEO,
         'Video parameter mismatch!');
 
     /** @type {number} */
@@ -1016,7 +1016,7 @@ export default class DashParser {
         streamInfo = shaka.dash.SegmentTemplate.createStream(
             context, requestInitSegment, this.segmentIndexMap_, hasManifest);
       } else {
-        goog.asserts.assert(isText,
+        window.asserts.assert(isText,
             'Must have Segment* with non-text streams.');
 
         const baseUris = context.representation.baseUris;
@@ -1092,7 +1092,7 @@ export default class DashParser {
    * @private
    */
   async onUpdate_() {
-    goog.asserts.assert(this.updatePeriod_ >= 0,
+    window.asserts.assert(this.updatePeriod_ >= 0,
         'There should be an update period');
 
     shaka.log.info('Updating manifest...');
@@ -1104,7 +1104,7 @@ export default class DashParser {
     try {
       updateDelay = await this.requestManifest_();
     } catch (error) {
-      goog.asserts.assert(error instanceof shaka.util.Error,
+      window.asserts.assert(error instanceof shaka.util.Error,
           'Should only receive a Shaka error');
 
       // Try updating again, but ensure we haven't been destroyed.
@@ -1160,7 +1160,7 @@ export default class DashParser {
    * @private
    */
   createFrame_(elem, parent, baseUris) {
-    goog.asserts.assert(parent || baseUris,
+    window.asserts.assert(parent || baseUris,
         'Must provide either parent or baseUris');
     const ManifestParserUtils = shaka.util.ManifestParserUtils;
     const XmlUtils = shaka.util.XmlUtils;
@@ -1350,7 +1350,7 @@ export default class DashParser {
         frame.segmentList = null;
         frame.segmentTemplate = null;
       } else {
-        goog.asserts.assert(frame.segmentList, 'There should be a SegmentList');
+        window.asserts.assert(frame.segmentList, 'There should be a SegmentList');
         shaka.log.info('Using SegmentList by default.');
         frame.segmentTemplate = null;
       }

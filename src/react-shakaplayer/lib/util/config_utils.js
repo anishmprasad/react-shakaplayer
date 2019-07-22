@@ -39,7 +39,7 @@ export default class ConfigUtils {
 	 * @export
 	 */
 	static mergeConfigObjects(destination, source, template, overrides, path) {
-		goog.asserts.assert(destination, 'Destination config must not be null!');
+		window.asserts.assert(destination, 'Destination config must not be null!');
 
 		/**
 		 * @type {boolean}

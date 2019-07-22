@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.offline.Storage');
+// goog.provide('Storage');
 
 // goog.require('goog.asserts');
 // goog.require('shaka.Deprecate');
@@ -24,12 +24,12 @@
 // goog.require('shaka.media.DrmEngine');
 // goog.require('shaka.media.ManifestParser');
 // goog.require('shaka.net.NetworkingEngine');
-// goog.require('shaka.offline.DownloadManager');
-// goog.require('shaka.offline.OfflineUri');
-// goog.require('shaka.offline.SessionDeleter');
-// goog.require('shaka.offline.StorageMuxer');
-// goog.require('shaka.offline.StoredContentUtils');
-// goog.require('shaka.offline.StreamBandwidthEstimator');
+// goog.require('DownloadManager');
+// goog.require('OfflineUri');
+// goog.require('SessionDeleter');
+// goog.require('StorageMuxer');
+// goog.require('StoredContentUtils');
+// goog.require('StreamBandwidthEstimator');
 // goog.require('shaka.util.ArrayUtils');
 // goog.require('shaka.util.Destroyer');
 // goog.require('shaka.util.Error');
@@ -62,6 +62,7 @@ import Periods from '../util/periods'
 import Platform from '../util/platform'
 import PlayerConfiguration from '../util/player_configuration'
 import StreamUtil from '../util/stream_utils'
+import ConfigUtils from '../util/config_utils'
 
 
 var shaka = window.shaka;
@@ -72,14 +73,14 @@ var goog = window.goog;
  * @summary
  * This manages persistent offline data including storage, listing, and deleting
  * stored manifests.  Playback of offline manifests are done through the Player
- * using a special URI (see shaka.offline.OfflineUri).
+ * using a special URI (see OfflineUri).
  *
  * First, check support() to see if offline is supported by the platform.
  * Second, configure() the storage object with callbacks to your application.
  * Third, call store(), remove(), or list() as needed.
  * When done, call destroy().
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @export
  */
 class Storage {
@@ -99,10 +100,10 @@ class Storage {
     //  initializing storage with a player proxy, we should either remove
     //  this error or rename the error.
     if (player && player.constructor != shaka.Player) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.LOCAL_PLAYER_INSTANCE_REQUIRED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.STORAGE,
+          Error.Code.LOCAL_PLAYER_INSTANCE_REQUIRED);
     }
 
     /** @private {?shaka.extern.PlayerConfiguration} */
@@ -117,12 +118,12 @@ class Storage {
       this.config_ = player.getSharedConfiguration();
       this.networkingEngine_ = player.getNetworkingEngine();
 
-      goog.asserts.assert(
+      window.asserts.assert(
           this.networkingEngine_,
           'Storage should not be initialized with a player that had ' +
               '|destroy| called on it.');
     } else {
-      this.config_ = shaka.util.PlayerConfiguration.createDefault();
+      this.config_ = PlayerConfiguration.createDefault();
       this.networkingEngine_ = new NetworkingEngine();
     }
 
@@ -139,7 +140,7 @@ class Storage {
 
     /**
      * A list of open operations that are being performed by this instance of
-     * |shaka.offline.Storage|.
+     * |Storage|.
      *
      * @private {!Array.<!Promise>}
      */
@@ -154,7 +155,7 @@ class Storage {
      */
     const destroyNetworkingEngine = !player;
 
-    /** @private {!shaka.util.Destroyer} */
+    /** @private {!Destroyer} */
     this.destroyer_ = new Destroyer(async () => {
       // Wait for all the open operations to end. Wrap each operations so that a
       // single rejected promise won't cause |Promise.all| to return early or to
@@ -216,21 +217,21 @@ class Storage {
    * @export
    */
   configure(config, value) {
-    goog.asserts.assert(typeof(config) == 'object' || arguments.length == 2,
+    window.asserts.assert(typeof(config) == 'object' || arguments.length == 2,
         'String configs should have values!');
 
     // ('fieldName', value) format
     if (arguments.length == 2 && typeof(config) == 'string') {
-      config = shaka.util.ConfigUtils.convertToConfigObject(config, value);
+      config = ConfigUtils.convertToConfigObject(config, value);
     }
 
-    goog.asserts.assert(typeof(config) == 'object', 'Should be an object!');
+    window.asserts.assert(typeof(config) == 'object', 'Should be an object!');
 
-    shaka.offline.Storage.verifyConfig_(config);
+    Storage.verifyConfig_(config);
 
-    goog.asserts.assert(
+    window.asserts.assert(
         this.config_, 'Cannot reconfigure stroage after calling destroy.');
-    return shaka.util.PlayerConfiguration.mergeConfigObjects(
+    return PlayerConfiguration.mergeConfigObjects(
         this.config_ /* destination */, config /* updates */);
   }
 
@@ -243,7 +244,7 @@ class Storage {
    * @export
    */
   getConfiguration() {
-    goog.asserts.assert(this.config_, 'Config must not be null!');
+    window.asserts.assert(this.config_, 'Config must not be null!');
 
     const ret = PlayerConfiguration.createDefault();
     PlayerConfiguration.mergeConfigObjects(
@@ -301,7 +302,7 @@ class Storage {
         return new Factory();
       }
 
-      goog.asserts.assert(
+      window.asserts.assert(
           this.networkingEngine_, 'Should not call |store| after |destroy|');
 
       const parser = await ManifestParser.create(
@@ -327,7 +328,7 @@ class Storage {
   }
 
   /**
-   * See |shaka.offline.Storage.store| for details.
+   * See |Storage.store| for details.
    *
    * @param {string} uri
    * @param {!Object} appMetadata
@@ -340,10 +341,10 @@ class Storage {
     this.requireSupport_();
 
     if (this.storeInProgress_) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.STORE_ALREADY_IN_PROGRESS);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.STORAGE,
+          Error.Code.STORE_ALREADY_IN_PROGRESS);
     }
     this.storeInProgress_ = true;
 
@@ -358,10 +359,10 @@ class Storage {
     const canDownload = !manifest.presentationTimeline.isLive() &&
                         !manifest.presentationTimeline.isInProgress();
     if (!canDownload) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.CANNOT_STORE_LIVE_OFFLINE,
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.STORAGE,
+          Error.Code.CANNOT_STORE_LIVE_OFFLINE,
           uri);
     }
 
@@ -372,9 +373,9 @@ class Storage {
     // that they may be null/undefined when we get there.
     /** @type {?shaka.media.DrmEngine} */
     let drmEngine = null;
-    /** @type {shaka.offline.StorageMuxer} */
-    const muxer = new shaka.offline.StorageMuxer();
-    /** @type {?shaka.offline.StorageCellHandle} */
+    /** @type {StorageMuxer} */
+    const muxer = new StorageMuxer();
+    /** @type {?StorageCellHandle} */
     let activeHandle = null;
 
     // This will be used to store any errors from drm engine. Whenever drm
@@ -405,7 +406,7 @@ class Storage {
       activeHandle = await muxer.getActive();
       this.ensureNotDestroyed_();
 
-      goog.asserts.assert(drmEngine, 'drmEngine should be non-null here.');
+      window.asserts.assert(drmEngine, 'drmEngine should be non-null here.');
 
       const manifestDB = await this.downloadManifest_(
           activeHandle.cell, drmEngine, manifest, uri, appMetadata);
@@ -480,7 +481,7 @@ class Storage {
       const allTracks = [];
 
       for (const variant of period.variants) {
-        goog.asserts.assert(
+        window.asserts.assert(
             StreamUtils.isPlayable(variant),
             'We should have already filtered by "is playable"');
 
@@ -531,14 +532,14 @@ class Storage {
    * @private
    */
   async downloadManifest_(storage, drmEngine, manifest, uri, metadata) {
-    goog.asserts.assert(
+    window.asserts.assert(
         this.networkingEngine_,
         'Cannot call |downloadManifest_| after calling |destroy|.');
 
     const pendingContent = StoredContentUtils.fromManifest(
         uri, manifest, /* size */ 0, metadata);
 
-    /** @type {!shaka.offline.DownloadManager} */
+    /** @type {!DownloadManager} */
     const downloader = new DownloadManager(
         this.networkingEngine_,
         (progress, size) => {
@@ -573,7 +574,7 @@ class Storage {
   }
 
   /**
-   * See |shaka.offline.Storage.remove| for details.
+   * See |Storage.remove| for details.
    *
    * @param {string} contentUri
    * @return {!Promise}
@@ -585,16 +586,16 @@ class Storage {
     const nullableUri = OfflineUri.parse(contentUri);
     if (nullableUri == null || !nullableUri.isManifest()) {
       throw new Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
+          Error.Severity.CRITICAL,
+          Error.Category.STORAGE,
+          Error.Code.MALFORMED_OFFLINE_URI,
           contentUri);
     }
 
-    /** @type {!shaka.offline.OfflineUri} */
+    /** @type {!OfflineUri} */
     const uri = nullableUri;
 
-    /** @type {!shaka.offline.StorageMuxer} */
+    /** @type {!StorageMuxer} */
     const muxer = new StorageMuxer();
 
     try {
@@ -620,7 +621,7 @@ class Storage {
    * @private
    */
   static getCapabilities_(manifestDb, isVideo) {
-    const MimeUtils = shaka.util.MimeUtils;
+    const MimeUtils = MimeUtils;
 
     const ret = [];
     for (const period of manifestDb.periods) {
@@ -642,21 +643,21 @@ class Storage {
   }
 
   /**
-   * @param {!shaka.offline.OfflineUri} uri
+   * @param {!OfflineUri} uri
    * @param {shaka.extern.ManifestDB} manifestDb
-   * @param {!shaka.offline.StorageMuxer} muxer
+   * @param {!StorageMuxer} muxer
    * @return {!Promise}
    * @private
    */
   async removeFromDRM_(uri, manifestDb, muxer) {
-    goog.asserts.assert(this.networkingEngine_, 'Cannot be destroyed');
+    window.asserts.assert(this.networkingEngine_, 'Cannot be destroyed');
     await Storage.deleteLicenseFor_(
         this.networkingEngine_, this.config_.drm, muxer, manifestDb);
   }
 
   /**
    * @param {shaka.extern.StorageCell} storage
-   * @param {!shaka.offline.OfflineUri} uri
+   * @param {!OfflineUri} uri
    * @param {shaka.extern.ManifestDB} manifest
    * @return {!Promise}
    * @private
@@ -701,13 +702,13 @@ class Storage {
   async removeEmeSessions_() {
     this.requireSupport_();
 
-    goog.asserts.assert(this.networkingEngine_, 'Cannot be destroyed');
+    window.asserts.assert(this.networkingEngine_, 'Cannot be destroyed');
     const net = this.networkingEngine_;
     const config = this.config_.drm;
 
-    /** @type {!shaka.offline.StorageMuxer} */
+    /** @type {!StorageMuxer} */
     const muxer = new StorageMuxer();
-    /** @type {!shaka.offline.SessionDeleter} */
+    /** @type {!SessionDeleter} */
     const deleter = new SessionDeleter();
 
     let hasRemaining = false;
@@ -755,7 +756,7 @@ class Storage {
   }
 
   /**
-   * See |shaka.offline.Storage.list| for details.
+   * See |Storage.list| for details.
    *
    * @return {!Promise.<!Array.<shaka.extern.StoredContent>>}
    * @private
@@ -766,7 +767,7 @@ class Storage {
     /** @type {!Array.<shaka.extern.StoredContent>} */
     const result = [];
 
-    /** @type {!shaka.offline.StorageMuxer} */
+    /** @type {!StorageMuxer} */
     const muxer = new StorageMuxer();
     try {
       await muxer.init();
@@ -811,7 +812,7 @@ class Storage {
     let error = null;
 
     const networkingEngine = this.networkingEngine_;
-    goog.asserts.assert(networkingEngine, 'Should be initialized!');
+    window.asserts.assert(networkingEngine, 'Should be initialized!');
 
     /** @type {shaka.extern.ManifestParser.PlayerInterface} */
     const playerInterface = {
@@ -873,11 +874,11 @@ class Storage {
    * This method is public so that it can be override in testing.
    *
    * @param {shaka.extern.Manifest} manifest
-   * @param {function(shaka.util.Error)} onError
+   * @param {function(Error)} onError
    * @return {!Promise.<!shaka.media.DrmEngine>}
    */
   async createDrmEngine(manifest, onError) {
-    goog.asserts.assert(
+    window.asserts.assert(
         this.networkingEngine_,
         'Cannot call |createDrmEngine| after |destroy|');
 
@@ -907,7 +908,7 @@ class Storage {
    * the segments yet, only adds them to the download manager through
    * createPeriod_.
    *
-   * @param {!shaka.offline.DownloadManager} downloader
+   * @param {!DownloadManager} downloader
    * @param {shaka.extern.StorageCell} storage
    * @param {!shaka.media.DrmEngine} drmEngine
    * @param {shaka.extern.Manifest} manifest
@@ -930,10 +931,10 @@ class Storage {
 
     if (drmInfo && this.config_.offline.usePersistentLicense) {
       if (!sessions.length) {
-        throw new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.STORAGE,
-            shaka.util.Error.Code.NO_INIT_DATA_FOR_OFFLINE,
+        throw new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.STORAGE,
+            Error.Code.NO_INIT_DATA_FOR_OFFLINE,
             originalManifestUri);
       }
       // Don't store init data, since we have stored sessions.
@@ -958,9 +959,9 @@ class Storage {
    * index and add all the segments to the download manager through
    * createStream_.
    *
-   * @param {!shaka.offline.DownloadManager} downloader
+   * @param {!DownloadManager} downloader
    * @param {shaka.extern.StorageCell} storage
-   * @param {shaka.offline.StreamBandwidthEstimator} estimator
+   * @param {StreamBandwidthEstimator} estimator
    * @param {!shaka.media.DrmEngine} drmEngine
    * @param {shaka.extern.Manifest} manifest
    * @param {shaka.extern.Period} period
@@ -1010,9 +1011,9 @@ class Storage {
    * Converts a manifest stream to a database stream.  This will search the
    * segment index and add all the segments to the download manager.
    *
-   * @param {!shaka.offline.DownloadManager} downloader
+   * @param {!DownloadManager} downloader
    * @param {shaka.extern.StorageCell} storage
-   * @param {shaka.offline.StreamBandwidthEstimator} estimator
+   * @param {StreamBandwidthEstimator} estimator
    * @param {shaka.extern.Manifest} manifest
    * @param {shaka.extern.Period} period
    * @param {shaka.extern.Stream} stream
@@ -1050,7 +1051,7 @@ class Storage {
     const downloadGroup = stream.id;
 
     Storage.forEachSegment_(stream, startTime, (segment) => {
-      const request = shaka.util.Networking.createSegmentRequest(
+      const request = Networking.createSegmentRequest(
           segment.getUris(),
           segment.startByte,
           segment.endByte,
@@ -1118,10 +1119,10 @@ class Storage {
    */
   ensureNotDestroyed_() {
     if (this.destroyer_.destroyed()) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.OPERATION_ABORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.STORAGE,
+          Error.Code.OPERATION_ABORTED);
     }
   }
 
@@ -1134,10 +1135,10 @@ class Storage {
    */
   requireSupport_() {
     if (!Storage.support()) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.STORAGE,
-          shaka.util.Error.Code.STORAGE_NOT_SUPPORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.STORAGE,
+          Error.Code.STORAGE_NOT_SUPPORTED);
     }
   }
 
@@ -1198,7 +1199,7 @@ class Storage {
    * @export
    */
   static async deleteAll() {
-    /** @type {!shaka.offline.StorageMuxer} */
+    /** @type {!StorageMuxer} */
     const muxer = new StorageMuxer();
     try {
       // Wipe all content from all storage mechanisms.
@@ -1212,7 +1213,7 @@ class Storage {
   /**
    * @param {!shaka.net.NetworkingEngine} net
    * @param {!shaka.extern.DrmConfiguration} drmConfig
-   * @param {!shaka.offline.StorageMuxer} muxer
+   * @param {!StorageMuxer} muxer
    * @param {shaka.extern.ManifestDB} manifestDb
    * @return {!Promise}
    * @private
@@ -1335,14 +1336,14 @@ class Storage {
   static validateManifest_(manifest) {
     // Make sure that the period has not been reduced to nothing.
     if (manifest.periods.length == 0) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.NO_PERIODS);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.NO_PERIODS);
     }
 
     for (const period of manifest.periods) {
-      shaka.offline.Storage.validatePeriod_(period);
+      Storage.validatePeriod_(period);
     }
   }
 

@@ -240,7 +240,7 @@ export default class Walker {
 			return this.takeNextStep_();
 		}
 
-		goog.asserts.assert(this.waitForWork_ == null, 'We should not have a promise yet.');
+		window.asserts.assert(this.waitForWork_ == null, 'We should not have a promise yet.');
 
 		// We have no more work to do. We will wait until new work has been provided
 		// via request route or until we are destroyed.
@@ -266,7 +266,7 @@ export default class Walker {
 	 * @private
 	 */
 	tryNewRoute_() {
-		goog.asserts.assert(this.currentStep_ == null, 'We should never have a current step between taking steps.');
+		window.asserts.assert(this.currentStep_ == null, 'We should never have a current step between taking steps.');
 
 		if (this.requests_.length == 0) {
 			return false;
@@ -327,7 +327,7 @@ export default class Walker {
 	 * @private
 	 */
 	async takeNextStep_() {
-		goog.asserts.assert(this.currentRoute_, 'We need a current route to take the next step.');
+		window.asserts.assert(this.currentRoute_, 'We need a current route to take the next step.');
 
 		// Figure out where we are supposed to go next.
 		this.currentlyAt_ = this.implementation_.getNext(
@@ -362,7 +362,7 @@ export default class Walker {
 			}
 		} catch (error) {
 			if (error.code == errorutil.code.OPERATION_ABORTED) {
-				goog.asserts.assert(
+				window.asserts.assert(
 					this.currentRoute_.interruptible,
 					'Do not put abortable steps in non-interruptible routes!'
 				);

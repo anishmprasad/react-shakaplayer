@@ -175,7 +175,7 @@ EventManager.Binding_ = class {
 	 * the event listener is already detached.
 	 */
 	unlisten() {
-		goog.asserts.assert(this.target, 'Missing target');
+		window.asserts.assert(this.target, 'Missing target');
 		this.target.removeEventListener(this.type, this.listener, this.options);
 
 		this.target = null;
@@ -205,7 +205,7 @@ EventManager.Binding_ = class {
 			// ignoring an important option.
 			const ignored = new Set(['passive', 'capture']);
 			const keys = Object.keys(value).filter(k => !ignored.has(k));
-			goog.asserts.assert(keys.length == 0, 'Unsupported flag(s) to addEventListener: ' + keys.join(','));
+			window.asserts.assert(keys.length == 0, 'Unsupported flag(s) to addEventListener: ' + keys.join(','));
 
 			const supports = EventManager.Binding_.doesSupportObject_(target);
 			if (supports) {

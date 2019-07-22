@@ -140,7 +140,7 @@ shaka.util.EbmlParser = class {
 		// Determine the index of the highest bit set.
 		const index = Math.floor(Math.log2(firstByte));
 		const numBytes = 8 - index;
-		goog.asserts.assert(numBytes <= 8 && numBytes >= 1, 'Incorrect log2 value');
+		window.asserts.assert(numBytes <= 8 && numBytes >= 1, 'Incorrect log2 value');
 
 		const vint = new Uint8Array(numBytes);
 		vint[0] = firstByte;

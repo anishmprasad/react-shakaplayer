@@ -138,7 +138,7 @@ class TextEngine {
 		}
 
 		const Factory = shaka.text.TextEngine.parserMap_[mimeType];
-		goog.asserts.assert(Factory, 'Text type negotiation should have happened already');
+		window.asserts.assert(Factory, 'Text type negotiation should have happened already');
 		this.parser_ = new Factory();
 	}
 
@@ -150,7 +150,7 @@ class TextEngine {
 	 * @throws {shaka.util.Error} on failure
 	 */
 	getStartTime(buffer) {
-		goog.asserts.assert(this.parser_, 'The parser should already be initialized');
+		window.asserts.assert(this.parser_, 'The parser should already be initialized');
 
 		/** @type {shaka.extern.TextParser.TimeContext} **/
 		const time = {
@@ -182,7 +182,7 @@ class TextEngine {
 	 * @return {!Promise}
 	 */
 	async appendBuffer(buffer, startTime, endTime) {
-		goog.asserts.assert(this.parser_, 'The parser should already be initialized');
+		window.asserts.assert(this.parser_, 'The parser should already be initialized');
 
 		// Start the operation asynchronously to avoid blocking the caller.
 		await Promise.resolve();
@@ -222,8 +222,8 @@ class TextEngine {
 		} else {
 			// We already had something in buffer, and we assume we are extending
 			// the range from the end.
-			goog.asserts.assert(this.bufferEnd_ != null, 'There should already be a buffered range end.');
-			goog.asserts.assert(startTime - this.bufferEnd_ <= 1, 'There should not be a gap in text references >1s');
+			window.asserts.assert(this.bufferEnd_ != null, 'There should already be a buffered range end.');
+			window.asserts.assert(startTime - this.bufferEnd_ <= 1, 'There should not be a gap in text references >1s');
 		}
 		this.bufferEnd_ = Math.min(endTime, this.appendWindowEnd_);
 	}
@@ -239,9 +239,9 @@ class TextEngine {
 
 		if (this.displayer_ && this.displayer_.remove(startTime, endTime)) {
 			if (this.bufferStart_ == null) {
-				goog.asserts.assert(this.bufferEnd_ == null, 'end must be null if startTime is null');
+				window.asserts.assert(this.bufferEnd_ == null, 'end must be null if startTime is null');
 			} else {
-				goog.asserts.assert(this.bufferEnd_ != null, 'end must be non-null if startTime is non-null');
+				window.asserts.assert(this.bufferEnd_ != null, 'end must be non-null if startTime is non-null');
 
 				// Update buffered range.
 				if (endTime <= this.bufferStart_ || startTime >= this.bufferEnd_) {
@@ -257,7 +257,7 @@ class TextEngine {
 					this.bufferEnd_ = startTime;
 				} else {
 					// We removed from the middle?  StreamingEngine isn't supposed to.
-					goog.asserts.assert(false, 'removal from the middle is not supported by TextEngine');
+					window.asserts.assert(false, 'removal from the middle is not supported by TextEngine');
 				}
 			}
 		}
@@ -313,7 +313,7 @@ class TextEngine {
 			return 0;
 		}
 
-		goog.asserts.assert(this.bufferStart_ != null, 'start should not be null if end is not null');
+		window.asserts.assert(this.bufferStart_ != null, 'start should not be null if end is not null');
 
 		return this.bufferEnd_ - Math.max(t, this.bufferStart_);
 	}

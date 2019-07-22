@@ -240,7 +240,7 @@ class SimpleTextDisplayer {
 
     track.mode = tempState;
 
-    goog.asserts.assert(
+    window.asserts.assert(
         track.cues,
         'Cues should be accessible when mode is set to "' + tempState + '".');
 

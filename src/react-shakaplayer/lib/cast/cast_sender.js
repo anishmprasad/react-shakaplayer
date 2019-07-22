@@ -313,7 +313,7 @@ export default class CastSender {
 	 * @return {?}
 	 */
 	get(targetName, property) {
-		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
+		window.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
 		const CastUtils = CastUtils;
 		if (targetName == 'video') {
 			if (CastUtils.VideoVoidMethods.includes(property)) {
@@ -322,7 +322,7 @@ export default class CastSender {
 		} else if (targetName == 'player') {
 			if (CastUtils.PlayerGetterMethodsThatRequireLive[property]) {
 				const isLive = this.get('player', 'isLive')();
-				goog.asserts.assert(isLive, property + ' should be called on a live stream!');
+				window.asserts.assert(isLive, property + ' should be called on a live stream!');
 				// If the property shouldn't exist, return a fake function so that the
 				// user doesn't call an undefined function and get a second error.
 				if (!isLive) {
@@ -350,7 +350,7 @@ export default class CastSender {
 	 * @param {?} value
 	 */
 	set(targetName, property, value) {
-		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
+		window.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
 
 		this.cachedProperties_[targetName][property] = value;
 		this.sendMessage_({
@@ -409,7 +409,7 @@ export default class CastSender {
 	 * @private
 	 */
 	propertyGetter_(targetName, property) {
-		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
+		window.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
 		return this.cachedProperties_[targetName][property];
 	}
 
@@ -420,7 +420,7 @@ export default class CastSender {
 	 * @private
 	 */
 	remoteCall_(targetName, methodName, ...varArgs) {
-		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
+		window.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
 		this.sendMessage_({
 			type: 'call',
 			targetName: targetName,
@@ -437,7 +437,7 @@ export default class CastSender {
 	 * @private
 	 */
 	remoteAsyncCall_(targetName, methodName, ...varArgs) {
-		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
+		window.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
 
 		const p = new PublicPromise();
 		const id = this.nextAsyncCallId_.toString();
@@ -579,7 +579,7 @@ export default class CastSender {
 				const p = this.asyncCallPromises_[id];
 				delete this.asyncCallPromises_[id];
 
-				goog.asserts.assert(p, 'Unexpected async id');
+				window.asserts.assert(p, 'Unexpected async id');
 				if (!p) {
 					break;
 				}

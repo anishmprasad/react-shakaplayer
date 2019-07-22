@@ -43,7 +43,7 @@ var goog = window.goog;
 class TtmlTextParser {
 	/** @override */
 	parseInit(data) {
-		goog.asserts.assert(false, 'TTML does not have init segments');
+		window.asserts.assert(false, 'TTML does not have init segments');
 	}
 
 	/** @override */
@@ -158,9 +158,9 @@ class TtmlTextParser {
 			const isSpanChildOfP = childNodes[i].nodeName == 'span' && element.nodeName == 'p';
 			if (childNodes[i].nodeType == Node.ELEMENT_NODE && childNodes[i].nodeName != 'br' && !isSpanChildOfP) {
 				// Get the leaves the child might contain.
-				goog.asserts.assert(childNodes[i] instanceof Element, 'Node should be Element!');
+				window.asserts.assert(childNodes[i] instanceof Element, 'Node should be Element!');
 				const leafChildren = shaka.text.TtmlTextParser.getLeafNodes_(/** @type {Element} */ (childNodes[i]));
-				goog.asserts.assert(leafChildren.length > 0, 'Only a null Element should return no leaves!');
+				window.asserts.assert(leafChildren.length > 0, 'Only a null Element should return no leaves!');
 				result = result.concat(leafChildren);
 			}
 		}
@@ -408,7 +408,7 @@ class TtmlTextParser {
 			cue.positionAlign = TtmlTextParser.textAlignToPositionAlign_[align];
 			cue.lineAlign = TtmlTextParser.textAlignToLineAlign_[align];
 
-			goog.asserts.assert(
+			window.asserts.assert(
 				align.toUpperCase() in Cue.textAlign,
 				align.toUpperCase() + ' Should be in Cue.textAlign values!'
 			);
@@ -418,7 +418,7 @@ class TtmlTextParser {
 
 		const displayAlign = TtmlTextParser.getStyleAttribute_(cueElement, region, styles, 'displayAlign');
 		if (displayAlign) {
-			goog.asserts.assert(
+			window.asserts.assert(
 				displayAlign.toUpperCase() in Cue.displayAlign,
 				displayAlign.toUpperCase() + ' Should be in Cue.displayAlign values!'
 			);
@@ -462,7 +462,7 @@ class TtmlTextParser {
 
 		const fontStyle = TtmlTextParser.getStyleAttribute_(cueElement, region, styles, 'fontStyle');
 		if (fontStyle) {
-			goog.asserts.assert(
+			window.asserts.assert(
 				fontStyle.toUpperCase() in Cue.fontStyle,
 				fontStyle.toUpperCase() + ' Should be in Cue.fontStyle values!'
 			);

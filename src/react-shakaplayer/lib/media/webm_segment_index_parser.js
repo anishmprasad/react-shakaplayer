@@ -229,7 +229,7 @@ shaka.media.WebmSegmentIndexParser = class {
 			const currentOffset = segmentOffset + tuple.relativeOffset;
 
 			if (lastTime != null) {
-				goog.asserts.assert(lastOffset != null, 'last offset cannot be null');
+				window.asserts.assert(lastOffset != null, 'last offset cannot be null');
 
 				references.push(
 					new shaka.media.SegmentReference(
@@ -248,7 +248,7 @@ shaka.media.WebmSegmentIndexParser = class {
 		}
 
 		if (lastTime != null) {
-			goog.asserts.assert(lastOffset != null, 'last offset cannot be null');
+			window.asserts.assert(lastOffset != null, 'last offset cannot be null');
 
 			references.push(
 				new shaka.media.SegmentReference(
