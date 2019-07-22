@@ -20,6 +20,7 @@
 /** @type {?ShakaDemoCustom} */
 import shakaDemoMain from './main';
 import { ShakaDemoTextInput } from '../js/input';
+import ShakaDemoAssetInfo from '../js/common/asset';
 
 const shaka = window.shaka;
 

@@ -1253,7 +1253,7 @@ class Controls extends FakeEventTarget {
       return;
     }
 
-    const Constants = Constants;
+    // const Constants = Constants;
     let displayTime = this.isSeeking_ ?
         Number(this.seekBar_.value) :
         Number(this.video_.currentTime);

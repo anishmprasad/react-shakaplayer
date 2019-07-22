@@ -22,6 +22,7 @@ import shakaAssets from './common/assets';
 import ShakaDemoInputContainer from './input_container';
 import AssetCard from './asset_card';
 import { ShakaDemoBoolInput, ShakaDemoSelectInput } from '../js/input';
+import Dom from '../lib/util/dom_utils';
 
 const shaka = window.shaka;
 
@@ -116,7 +117,7 @@ class ShakaDemoSearch {
 
 	/** @private */
 	remakeResultsDiv_() {
-		shaka.util.Dom.removeAllChildren(this.resultsDiv_);
+		Dom.removeAllChildren(this.resultsDiv_);
 
 		const assets = this.searchResults_();
 		this.assetCards_ = assets.map(asset => this.createAssetCardFor_(asset));

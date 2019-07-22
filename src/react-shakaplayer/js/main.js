@@ -171,7 +171,7 @@ class ShakaDemoMain {
       console.debug('Registering service worker.');
       try {
         const registration =
-            await navigator.serviceWorker.register('service_worker.js');
+            await navigator.serviceWorker.register('./service_worker.js');
         console.debug('Service worker registered!', registration.scope);
       } catch (error) {
         console.error('Service worker registration failed!', error);
