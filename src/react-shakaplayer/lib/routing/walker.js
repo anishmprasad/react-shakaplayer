@@ -31,6 +31,7 @@ import Payload from '../routing/payload';
 import Destroyer from '../util/destroyer';
 import IDestroyable from '../util/i_destroyable';
 import ErrorUtils from '../util/error';
+import PublicPromise from '../util/public_promise';
 
 const errorutil = new ErrorUtils();
 

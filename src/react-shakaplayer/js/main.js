@@ -26,6 +26,8 @@
 import shakaAssets from './common/assets';
 import ShakaDemoCustom from './custom'
 import error from '../lib/util/error'
+import {Controls} from '../ui/controls'
+import CloseButton from '../js/close_button'
 
 
 const errorUtils = new error()
@@ -61,7 +63,7 @@ class ShakaDemoMain {
     /** @private {boolean} */
     this.fullyLoaded_ = false;
 
-    /** @private {?shaka.ui.Controls} */
+    /** @private {?Controls} */
     this.controls_ = null;
 
     /** @private {?Array.<shaka.extern.StoredContent>} */
@@ -197,7 +199,7 @@ class ShakaDemoMain {
     this.player_ = ui.getControls().getPlayer();
 
     // Register custom controls to the UI.
-    shaka.ui.Controls.registerElement('close', new CloseButton.Factory());
+    Controls.registerElement('close', new CloseButton.Factory());
 
     // Configure UI.
     const uiConfig = ui.getConfiguration();
@@ -233,7 +235,7 @@ class ShakaDemoMain {
 
     // Set up localization lazy-loading.
     const localization = this.controls_.getLocalization();
-    const UNKNOWN_LOCALES = shaka.ui.Localization.UNKNOWN_LOCALES;
+    const UNKNOWN_LOCALES = Localization.UNKNOWN_LOCALES;
     localization.addEventListener(UNKNOWN_LOCALES, (event) => {
       for (const locale of event['locales']) {
         this.loadUILocale_(locale);
@@ -940,7 +942,7 @@ class ShakaDemoMain {
         if (self.nativeControlsEnabled_) {
           return new shaka.text.SimpleTextDisplayer(self.video_);
         } else {
-          return new shaka.ui.TextDisplayer(self.video_, self.container_);
+          return new TextDisplayer(self.video_, self.container_);
         }
       };
       this.player_.configure('textDisplayFactory', textDisplayer);

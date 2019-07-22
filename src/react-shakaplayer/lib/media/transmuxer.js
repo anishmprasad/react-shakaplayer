@@ -24,6 +24,21 @@
 // goog.require('shaka.util.PublicPromise');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import { IClosedCaptionParser } from '../media/closed_caption_parser';
+import TimeRangesUtils from '../media/time_ranges_utils';
+import TextEngine from '../text/text_engine';
+import Destroyer from '../util/destroyer';
+import Error from '../util/error';
+import EventManager from '../util/event_manager';
+import Functional from '../util/functional';
+import IDestroyable from '../util/i_destroyable';
+import ManifestParserUtils from '../util/manifest_parser_utils';
+import MimeUtils from '../util/mime_utils';
+import Platform from '../util/platform';
+import PublicPromise from '../util/public_promise';
+import Uint8ArrayUtils from '../util/uint8array_utils';
+import muxjs from 'mux.js';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -31,16 +46,16 @@ var goog = window.goog;
  * Transmuxer provides all operations for transmuxing from Transport
  * Stream to MP4.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  */
-shaka.media.Transmuxer = class {
+export default class Transmuxer {
 	constructor() {
 		/** @private {muxjs.mp4.Transmuxer} */
 		this.muxTransmuxer_ = new muxjs.mp4.Transmuxer({
 			keepOriginalTimestamps: true
 		});
 
-		/** @private {shaka.util.PublicPromise} */
+		/** @private {PublicPromise} */
 		this.transmuxPromise_ = null;
 
 		/** @private {!Array.<!Uint8Array>} */
@@ -80,7 +95,7 @@ shaka.media.Transmuxer = class {
 		if (contentType) {
 			return MediaSource.isTypeSupported(convertTsCodecs(contentType, mimeType));
 		}
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 		return (
 			MediaSource.isTypeSupported(convertTsCodecs(ContentType.AUDIO, mimeType)) ||
 			MediaSource.isTypeSupported(convertTsCodecs(ContentType.VIDEO, mimeType))
@@ -103,7 +118,7 @@ shaka.media.Transmuxer = class {
 	 * @return {string}
 	 */
 	static convertTsCodecs(contentType, tsMimeType) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 		let mp4MimeType = tsMimeType.replace('mp2t', 'mp4');
 		if (contentType == ContentType.AUDIO) {
 			mp4MimeType = mp4MimeType.replace('video', 'audio');
@@ -150,7 +165,7 @@ shaka.media.Transmuxer = class {
 	transmux(data) {
 		goog.asserts.assert(!this.isTransmuxing_, 'No transmuxing should be in progress.');
 		this.isTransmuxing_ = true;
-		this.transmuxPromise_ = new shaka.util.PublicPromise();
+		this.transmuxPromise_ = new PublicPromise();
 		this.transmuxedData_ = [];
 		this.captions_ = [];
 
@@ -165,11 +180,7 @@ shaka.media.Transmuxer = class {
 		// Treat it as a transmuxing failure and reject the promise.
 		if (this.isTransmuxing_) {
 			this.transmuxPromise_.reject(
-				new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.MEDIA,
-					shaka.util.Error.Code.TRANSMUXING_FAILED
-				)
+				new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.TRANSMUXING_FAILED)
 			);
 		}
 		return this.transmuxPromise_;
@@ -199,11 +210,11 @@ shaka.media.Transmuxer = class {
 	 */
 	onTransmuxDone_() {
 		const output = {
-			data: shaka.util.Uint8ArrayUtils.concat(...this.transmuxedData_),
+			data: Uint8ArrayUtils.concat(...this.transmuxedData_),
 			captions: this.captions_
 		};
 
 		this.transmuxPromise_.resolve(output);
 		this.isTransmuxing_ = false;
 	}
-};
+}

@@ -27,10 +27,14 @@
 // goog.require('shaka.util.IDestroyable');
 // goog.require('shaka.util.PublicPromise');
 
+import Timer from '../util/timer';
+import FakeEvent from '../util/fake_event';
+import PublicPromise from '../util/public_promise';
+
 var shaka = window.shaka;
 
 /**
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  */
 export default class CastSender {
 	/**
@@ -39,7 +43,7 @@ export default class CastSender {
 	 *   changes.
 	 * @param {function()} onFirstCastStateUpdate A callback invoked when an
 	 *   "update" event has been received for the first time.
-	 * @param {function(string, !shaka.util.FakeEvent)} onRemoteEvent A callback
+	 * @param {function(string, !FakeEvent)} onRemoteEvent A callback
 	 *   invoked with target name and event when a remote event is received.
 	 * @param {function()} onResumeLocal A callback invoked when the local player
 	 *   should resume playback.  Called before the cached remote state is wiped.
@@ -57,8 +61,8 @@ export default class CastSender {
 		/** @private {string} */
 		this.receiverAppId_ = receiverAppId;
 
-		/** @private {shaka.util.Timer} */
-		this.statusChangeTimer_ = new shaka.util.Timer(onStatusChanged);
+		/** @private {Timer} */
+		this.statusChangeTimer_ = new Timer(onStatusChanged);
 
 		/** @private {?function()} */
 		this.onFirstCastStateUpdate_ = onFirstCastStateUpdate;
@@ -66,7 +70,7 @@ export default class CastSender {
 		/** @private {boolean} */
 		this.hasJoinedExistingSession_ = false;
 
-		/** @private {?function(string, !shaka.util.FakeEvent)} */
+		/** @private {?function(string, !FakeEvent)} */
 		this.onRemoteEvent_ = onRemoteEvent;
 
 		/** @private {?function()} */
@@ -102,10 +106,10 @@ export default class CastSender {
 		/** @private {number} */
 		this.nextAsyncCallId_ = 0;
 
-		/** @private {Object.<string, !shaka.util.PublicPromise>} */
+		/** @private {Object.<string, !PublicPromise>} */
 		this.asyncCallPromises_ = {};
 
-		/** @private {shaka.util.PublicPromise} */
+		/** @private {PublicPromise} */
 		this.castPromise_ = null;
 
 		CastSender.instances_.add(this);
@@ -251,28 +255,16 @@ export default class CastSender {
 	 */
 	async cast(initState) {
 		if (!this.apiReady_) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.RECOVERABLE,
-				shaka.util.Error.Category.CAST,
-				shaka.util.Error.Code.CAST_API_UNAVAILABLE
-			);
+			throw new Error(Error.Severity.RECOVERABLE, Error.Category.CAST, Error.Code.CAST_API_UNAVAILABLE);
 		}
 		if (!CastSender.hasReceivers_) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.RECOVERABLE,
-				shaka.util.Error.Category.CAST,
-				shaka.util.Error.Code.NO_CAST_RECEIVERS
-			);
+			throw new Error(Error.Severity.RECOVERABLE, Error.Category.CAST, Error.Code.NO_CAST_RECEIVERS);
 		}
 		if (this.isCasting_) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.RECOVERABLE,
-				shaka.util.Error.Category.CAST,
-				shaka.util.Error.Code.ALREADY_CASTING
-			);
+			throw new Error(Error.Severity.RECOVERABLE, Error.Category.CAST, Error.Code.ALREADY_CASTING);
 		}
 
-		this.castPromise_ = new shaka.util.PublicPromise();
+		this.castPromise_ = new PublicPromise();
 		chrome.cast.requestSession(
 			session => this.onSessionInitiated_(initState, session),
 			error => this.onConnectionError_(error)
@@ -393,23 +385,21 @@ export default class CastSender {
 	 */
 	onConnectionError_(error) {
 		// Default error code:
-		let code = shaka.util.Error.Code.UNEXPECTED_CAST_ERROR;
+		let code = Error.Code.UNEXPECTED_CAST_ERROR;
 
 		switch (error.code) {
 			case 'cancel':
-				code = shaka.util.Error.Code.CAST_CANCELED_BY_USER;
+				code = Error.Code.CAST_CANCELED_BY_USER;
 				break;
 			case 'timeout':
-				code = shaka.util.Error.Code.CAST_CONNECTION_TIMED_OUT;
+				code = Error.Code.CAST_CONNECTION_TIMED_OUT;
 				break;
 			case 'receiver_unavailable':
-				code = shaka.util.Error.Code.CAST_RECEIVER_APP_UNAVAILABLE;
+				code = Error.Code.CAST_RECEIVER_APP_UNAVAILABLE;
 				break;
 		}
 
-		this.castPromise_.reject(
-			new shaka.util.Error(shaka.util.Error.Severity.CRITICAL, shaka.util.Error.Category.CAST, code, error)
-		);
+		this.castPromise_.reject(new Error(Error.Severity.CRITICAL, Error.Category.CAST, code, error));
 	}
 
 	/**
@@ -449,7 +439,7 @@ export default class CastSender {
 	remoteAsyncCall_(targetName, methodName, ...varArgs) {
 		goog.asserts.assert(targetName == 'video' || targetName == 'player', 'Unexpected target name');
 
-		const p = new shaka.util.PublicPromise();
+		const p = new PublicPromise();
 		const id = this.nextAsyncCallId_.toString();
 		this.nextAsyncCallId_++;
 		this.asyncCallPromises_[id] = p;
@@ -473,7 +463,7 @@ export default class CastSender {
 
 		const initState = this.onInitStateRequired_();
 
-		this.castPromise_ = new shaka.util.PublicPromise();
+		this.castPromise_ = new PublicPromise();
 		this.hasJoinedExistingSession_ = true;
 
 		this.onSessionInitiated_(initState, session);
@@ -545,13 +535,7 @@ export default class CastSender {
 
 			// Reject pending async operations as if they were interrupted.
 			// At the moment, load() is the only async operation we are worried about.
-			p.reject(
-				new shaka.util.Error(
-					shaka.util.Error.Severity.RECOVERABLE,
-					shaka.util.Error.Category.PLAYER,
-					shaka.util.Error.Code.LOAD_INTERRUPTED
-				)
-			);
+			p.reject(new Error(Error.Severity.RECOVERABLE, Error.Category.PLAYER, Error.Code.LOAD_INTERRUPTED));
 		}
 	}
 
@@ -571,7 +555,7 @@ export default class CastSender {
 			case 'event': {
 				const targetName = message['targetName'];
 				const event = message['event'];
-				const fakeEvent = new shaka.util.FakeEvent(event['type'], event);
+				const fakeEvent = new FakeEvent(event['type'], event);
 				this.onRemoteEvent_(targetName, fakeEvent);
 				break;
 			}
@@ -602,7 +586,7 @@ export default class CastSender {
 
 				if (error) {
 					// This is a hacky way to reconstruct the serialized error.
-					const reconstructedError = new shaka.util.Error(error.severity, error.category, error.code);
+					const reconstructedError = new Error(error.severity, error.category, error.code);
 					for (const k in error) {
 						/** @type {Object} */ (reconstructedError)[k] = error[k];
 					}

@@ -21,6 +21,7 @@
 
 // goog.require('shaka.util.Dom');
 import Dom from '../lib/util/dom_utils';
+import Timer from '../lib/util/timer';
 
 /**
  * @implements {shaka.extern.TextDisplayer}

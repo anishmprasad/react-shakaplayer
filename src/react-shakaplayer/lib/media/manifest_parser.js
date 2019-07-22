@@ -24,6 +24,9 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.Platform');
 
+import Platform from '../util/platform';
+import NetworkingEngine from '../net/networking_engine';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -62,12 +65,12 @@ class ManifestParser {
 	 * @return {!Object.<string, boolean>}
 	 */
 	static probeSupport() {
-		const ManifestParser = shaka.media.ManifestParser;
+		// const ManifestParser = shaka.media.ManifestParser;
 		const support = {};
 
 		// Make sure all registered parsers are shown, but only for MSE-enabled
 		// platforms where our parsers matter.
-		if (shaka.util.Platform.supportsMediaSource()) {
+		if (Platform.supportsMediaSource()) {
 			for (const type in ManifestParser.parsersByMime) {
 				support[type] = true;
 			}
@@ -99,10 +102,10 @@ class ManifestParser {
 		for (const type of testMimeTypes) {
 			// Only query our parsers for MSE-enabled platforms.  Otherwise, query a
 			// temporary media element for native support for these types.
-			if (shaka.util.Platform.supportsMediaSource()) {
+			if (Platform.supportsMediaSource()) {
 				support[type] = !!ManifestParser.parsersByMime[type];
 			} else {
-				support[type] = shaka.util.Platform.supportsMediaType(type);
+				support[type] = Platform.supportsMediaType(type);
 			}
 		}
 
@@ -110,11 +113,11 @@ class ManifestParser {
 			// Only query our parsers for MSE-enabled platforms.  Otherwise, query a
 			// temporary media element for native support for these MIME type for the
 			// extension.
-			if (shaka.util.Platform.supportsMediaSource()) {
+			if (Platform.supportsMediaSource()) {
 				support[extension] = !!ManifestParser.parsersByExtension[extension];
 			} else {
 				const type = testExtensions[extension];
-				support[extension] = shaka.util.Platform.supportsMediaType(type);
+				support[extension] = Platform.supportsMediaType(type);
 			}
 		}
 
@@ -125,7 +128,7 @@ class ManifestParser {
 	 * Create a manifest parser to parse the manifest at |uri|.
 	 *
 	 * @param {string} uri
-	 * @param {!shaka.net.NetworkingEngine} netEngine
+	 * @param {!NetworkingEngine} netEngine
 	 * @param {shaka.extern.RetryParameters} retryParams
 	 * @param {?string} mimeType
 	 * @return {!Promise.<!shaka.extern.ManifestParser>}
@@ -136,11 +139,11 @@ class ManifestParser {
 
 			return new Factory();
 		} catch (error) {
-			goog.asserts.assert(error instanceof shaka.util.Error, 'Incorrect error type');
+			goog.asserts.assert(error instanceof Error, 'Incorrect error type');
 
 			// Regardless of what the error was, we need to upgrade it to a critical
 			// error. We can't do anything if we can't create a manifest parser.
-			error.severity = shaka.util.Error.Severity.CRITICAL;
+			error.severity = Error.Severity.CRITICAL;
 
 			throw error;
 		}
@@ -151,14 +154,14 @@ class ManifestParser {
 	 * parse the manifest at |uri|.
 	 *
 	 * @param {string} uri
-	 * @param {!shaka.net.NetworkingEngine} netEngine
+	 * @param {!NetworkingEngine} netEngine
 	 * @param {shaka.extern.RetryParameters} retryParams
 	 * @param {?string} mimeType
 	 * @return {!Promise.<shaka.extern.ManifestParser.Factory>}
 	 * @private
 	 */
 	static async getFactory_(uri, netEngine, retryParams, mimeType) {
-		const ManifestParser = shaka.media.ManifestParser;
+		// const ManifestParser = shaka.media.ManifestParser;
 
 		// Try using the MIME type we were given.
 		if (mimeType) {
@@ -195,24 +198,24 @@ class ManifestParser {
 			}
 		}
 
-		throw new shaka.util.Error(
-			shaka.util.Error.Severity.CRITICAL,
-			shaka.util.Error.Category.MANIFEST,
-			shaka.util.Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
+		throw new Error(
+			Error.Severity.CRITICAL,
+			Error.Category.MANIFEST,
+			Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
 			uri
 		);
 	}
 
 	/**
 	 * @param {string} uri
-	 * @param {!shaka.net.NetworkingEngine} netEngine
+	 * @param {!NetworkingEngine} netEngine
 	 * @param {shaka.extern.RetryParameters} retryParams
 	 * @return {!Promise.<string>}
 	 */
 	static async getMimeType(uri, netEngine, retryParams) {
-		const type = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+		const type = NetworkingEngine.RequestType.MANIFEST;
 
-		const request = shaka.net.NetworkingEngine.makeRequest([uri], retryParams);
+		const request = NetworkingEngine.makeRequest([uri], retryParams);
 		request.method = 'HEAD';
 
 		const response = await netEngine.request(type, request).promise;
@@ -253,7 +256,7 @@ class ManifestParser {
 	 */
 	static isSupported(uri, mimeType) {
 		// Without MediaSource, our own parsers are useless.
-		if (!shaka.util.Platform.supportsMediaSource()) {
+		if (!Platform.supportsMediaSource()) {
 			return false;
 		}
 

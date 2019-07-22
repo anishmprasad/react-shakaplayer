@@ -20,6 +20,9 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.PublicPromise');
 
+import PublicPromise from '../util/public_promise';
+import Error from '../util/error';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -106,7 +109,7 @@ class AbortableOperation {
 	 * @export
 	 */
 	static notAbortable(promise) {
-		return new shaka.util.AbortableOperation(
+		return new AbortableOperation(
 			promise,
 			// abort() here will return a Promise which is resolved when the input
 			// promise either resolves or fails.
@@ -124,14 +127,14 @@ class AbortableOperation {
 	}
 
 	/**
-	 * @param {!Array.<!shaka.util.AbortableOperation>} operations
-	 * @return {!shaka.util.AbortableOperation} An operation which is resolved
+	 * @param {!Array.<!AbortableOperation>} operations
+	 * @return {!AbortableOperation} An operation which is resolved
 	 *   when all operations are successful and fails when any operation fails.
 	 *   For this operation, abort() aborts all given operations.
 	 * @export
 	 */
 	static all(operations) {
-		return new shaka.util.AbortableOperation(Promise.all(operations.map(op => op.promise)), () =>
+		return new AbortableOperation(Promise.all(operations.map(op => op.promise)), () =>
 			Promise.all(operations.map(op => op.abort()))
 		);
 	}
@@ -149,7 +152,7 @@ class AbortableOperation {
 	 * @param {(undefined|
 	 *          function(T):U|
 	 *          function(T):!Promise.<U>|
-	 *          function(T):!shaka.util.AbortableOperation.<U>)} onSuccess
+	 *          function(T):!AbortableOperation.<U>)} onSuccess
 	 *   A callback to be invoked after this operation is complete, to chain to
 	 *   another operation.  The callback can return a plain value, a Promise to
 	 *   an asynchronous value, or another AbortableOperation.
@@ -157,24 +160,18 @@ class AbortableOperation {
 	 *   An optional callback to be invoked if this operation fails, to perform
 	 *   some cleanup or error handling.  Analogous to the second parameter of
 	 *   Promise.prototype.then.
-	 * @return {!shaka.util.AbortableOperation.<U>} An operation which is resolved
+	 * @return {!AbortableOperation.<U>} An operation which is resolved
 	 *   when this operation and the operation started by the callback are both
 	 *   complete.
 	 * @template U
 	 * @export
 	 */
 	chain(onSuccess, onError) {
-		const newPromise = new shaka.util.PublicPromise();
+		const newPromise = new PublicPromise();
 
 		// If called before "this" completes, just abort "this".
 		let abort = () => {
-			newPromise.reject(
-				new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.PLAYER,
-					shaka.util.Error.Code.OPERATION_ABORTED
-				)
-			);
+			newPromise.reject(new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED));
 			return this.abort();
 		};
 
@@ -185,11 +182,7 @@ class AbortableOperation {
 					// is complete but before the next stage in the chain begins, we should
 					// stop right away.
 					newPromise.reject(
-						new shaka.util.Error(
-							shaka.util.Error.Severity.CRITICAL,
-							shaka.util.Error.Category.PLAYER,
-							shaka.util.Error.Code.OPERATION_ABORTED
-						)
+						new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED)
 					);
 					return;
 				}
@@ -202,7 +195,7 @@ class AbortableOperation {
 
 				// Call the success callback, interpret the return value,
 				// set the Promise state, and get the next abort function.
-				abort = shaka.util.AbortableOperation.wrapChainCallback_(onSuccess, value, newPromise);
+				abort = AbortableOperation.wrapChainCallback_(onSuccess, value, newPromise);
 			},
 			e => {
 				// "This" failed or was aborted.
@@ -215,11 +208,11 @@ class AbortableOperation {
 
 				// Call the error callback, interpret the return value,
 				// set the Promise state, and get the next abort function.
-				abort = shaka.util.AbortableOperation.wrapChainCallback_(onError, e, newPromise);
+				abort = AbortableOperation.wrapChainCallback_(onError, e, newPromise);
 			}
 		);
 
-		return new shaka.util.AbortableOperation(
+		return new AbortableOperation(
 			newPromise,
 			// By creating a closure around abort(), we can update the value of
 			// abort() at various stages.
@@ -230,11 +223,11 @@ class AbortableOperation {
 	/**
 	 * @param {(function(T):U|
 	 *          function(T):!Promise.<U>|
-	 *          function(T):!shaka.util.AbortableOperation.<U>|
+	 *          function(T):!AbortableOperation.<U>|
 	 *          function(*))} callback
 	 *   A callback to be invoked with the given value.
 	 * @param {T} value
-	 * @param {!shaka.util.PublicPromise} newPromise The promise for the next
+	 * @param {!PublicPromise} newPromise The promise for the next
 	 *   stage in the chain.
 	 * @return {function():!Promise} The next abort() function for the chain.
 	 * @private

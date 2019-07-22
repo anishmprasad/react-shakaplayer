@@ -24,7 +24,7 @@
 
 import shakaDemoMain from './main';
 
-class CloseButton {
+export default class CloseButton {
 	/**
 	 * @param {!HTMLElement} parent
 	 * @param {!shaka.ui.Controls} controls

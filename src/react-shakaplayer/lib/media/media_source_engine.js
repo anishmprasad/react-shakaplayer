@@ -35,6 +35,21 @@
 // goog.require('shaka.util.Platform');
 // goog.require('shaka.util.PublicPromise');
 
+
+import {IClosedCaptionParser} from '../media/closed_caption_parser'
+import TimeRangesUtils from '../media/time_ranges_utils'
+import Transmuxer from '../media/transmuxer'
+import TextEngine from '../text/text_engine'
+import Destroyer from '../util/destroyer'
+import Error from '../util/error'
+import EventManager from '../util/event_manager'
+import Functional from '../util/functional'
+import IDestroyable from '../util/i_destroyable'
+import ManifestParserUtils from '../util/manifest_parser_utils'
+import MimeUtils from '../util/mime_utils'
+import Platform from '../util/platform'
+import PublicPromise from '../util/public_promise'
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -46,13 +61,13 @@ var goog = window.goog;
  * internally synchronized and serialized as needed.  Operations that can
  * be done in parallel will be done in parallel.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  */
 class MediaSourceEngine {
   /**
    * @param {HTMLMediaElement} video The video element, whose source is tied to
    *   MediaSource during the lifetime of the MediaSourceEngine.
-   * @param {!shaka.media.IClosedCaptionParser} closedCaptionParser
+   * @param {!IClosedCaptionParser} closedCaptionParser
    *    The closed caption parser that should be used to parser closed captions
    *    from the video stream. MediaSourceEngine takes ownership of the parser.
    *    When MediaSourceEngine is destroyed, it will destroy the parser.
@@ -68,36 +83,36 @@ class MediaSourceEngine {
     /** @private {shaka.extern.TextDisplayer} */
     this.textDisplayer_ = textDisplayer;
 
-    /** @private {!Object.<shaka.util.ManifestParserUtils.ContentType,
+    /** @private {!Object.<ManifestParserUtils.ContentType,
                            SourceBuffer>} */
     this.sourceBuffers_ = {};
 
-    /** @private {shaka.text.TextEngine} */
+    /** @private {TextEngine} */
     this.textEngine_ = null;
 
     /**
      * @private {!Object.<string,
-     *                    !Array.<shaka.media.MediaSourceEngine.Operation>>}
+     *                    !Array.<MediaSourceEngine.Operation>>}
      */
     this.queues_ = {};
 
-    /** @private {shaka.util.EventManager} */
-    this.eventManager_ = new shaka.util.EventManager();
+    /** @private {EventManager} */
+    this.eventManager_ = new EventManager();
 
-    /** @private {!Object.<string, !shaka.media.Transmuxer>} */
+    /** @private {!Object.<string, !Transmuxer>} */
     this.transmuxers_ = {};
 
-    /** @private {shaka.media.IClosedCaptionParser} */
+    /** @private {IClosedCaptionParser} */
     this.captionParser_ = closedCaptionParser;
 
-    /** @private {!shaka.util.PublicPromise} */
-    this.mediaSourceOpen_ = new shaka.util.PublicPromise();
+    /** @private {!PublicPromise} */
+    this.mediaSourceOpen_ = new PublicPromise();
 
     /** @private {MediaSource} */
     this.mediaSource_ = this.createMediaSource(this.mediaSourceOpen_);
 
-    /** @type {!shaka.util.Destroyer} */
-    this.destroyer_ = new shaka.util.Destroyer(() => this.doDestroy_());
+    /** @type {!Destroyer} */
+    this.destroyer_ = new Destroyer(() => this.doDestroy_());
   }
 
   /**
@@ -106,7 +121,7 @@ class MediaSourceEngine {
    *
    * Replaced by unit tests.
    *
-   * @param {!shaka.util.PublicPromise} p
+   * @param {!PublicPromise} p
    * @return {!MediaSource}
    */
   createMediaSource(p) {
@@ -115,7 +130,7 @@ class MediaSourceEngine {
     // Set up MediaSource on the video element.
     this.eventManager_.listenOnce(mediaSource, 'sourceopen', p.resolve);
     this.video_.src =
-        shaka.media.MediaSourceEngine.createObjectURL(mediaSource);
+        MediaSourceEngine.createObjectURL(mediaSource);
 
     return mediaSource;
   }
@@ -127,12 +142,12 @@ class MediaSourceEngine {
    * @return {boolean}
    */
   static isStreamSupported(stream) {
-    const fullMimeType = shaka.util.MimeUtils.getFullType(
+    const fullMimeType = MimeUtils.getFullType(
         stream.mimeType, stream.codecs);
-    const extendedMimeType = shaka.util.MimeUtils.getExtendedType(stream);
-    return shaka.text.TextEngine.isTypeSupported(fullMimeType) ||
+    const extendedMimeType = MimeUtils.getExtendedType(stream);
+    return TextEngine.isTypeSupported(fullMimeType) ||
         MediaSource.isTypeSupported(extendedMimeType) ||
-        shaka.media.Transmuxer.isSupported(fullMimeType, stream.type);
+        Transmuxer.isSupported(fullMimeType, stream.type);
   }
 
   /**
@@ -179,16 +194,16 @@ class MediaSourceEngine {
 
     const support = {};
     for (const type of testMimeTypes) {
-      if (shaka.util.Platform.supportsMediaSource()) {
+      if (Platform.supportsMediaSource()) {
         // Our TextEngine is only effective for MSE platforms at the moment.
-        if (shaka.text.TextEngine.isTypeSupported(type)) {
+        if (TextEngine.isTypeSupported(type)) {
           support[type] = true;
         } else {
           support[type] = MediaSource.isTypeSupported(type) ||
-                          shaka.media.Transmuxer.isSupported(type);
+                          Transmuxer.isSupported(type);
         }
       } else {
-        support[type] = shaka.util.Platform.supportsMediaType(type);
+        support[type] = Platform.supportsMediaType(type);
       }
 
       const basicType = type.split(';')[0];
@@ -205,7 +220,7 @@ class MediaSourceEngine {
 
   /** @private */
   async doDestroy_() {
-    const Functional = shaka.util.Functional;
+    const Functional = Functional;
 
     const cleanup = [];
 
@@ -224,7 +239,7 @@ class MediaSourceEngine {
 
       // The rest will be rejected silently if possible.
       for (let i = 1; i < q.length; ++i) {
-        q[i].p.reject(shaka.util.Destroyer.destroyedError());
+        q[i].p.reject(Destroyer.destroyedError());
       }
     }
 
@@ -283,7 +298,7 @@ class MediaSourceEngine {
    * Note that it is not valid to call this multiple times, except to add or
    * reinitialize text streams.
    *
-   * @param {!Map.<shaka.util.ManifestParserUtils.ContentType,
+   * @param {!Map.<ManifestParserUtils.ContentType,
    *               shaka.extern.Stream>} streamsByType
    *   A map of content types to streams.  All streams must be supported
    *   according to MediaSourceEngine.isStreamSupported.
@@ -297,7 +312,7 @@ class MediaSourceEngine {
    * @throws QuotaExceededError if the browser can't support that many buffers
    */
   async init(streamsByType, forceTransmuxTS) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     await this.mediaSourceOpen_;
 
@@ -307,7 +322,7 @@ class MediaSourceEngine {
           MediaSourceEngine.isStreamSupported(stream),
           'Type negotiation should happen before MediaSourceEngine.init!');
 
-      let mimeType = shaka.util.MimeUtils.getFullType(
+      let mimeType = MimeUtils.getFullType(
           stream.mimeType, stream.codecs);
       if (contentType == ContentType.TEXT) {
         this.reinitText(mimeType);
@@ -337,7 +352,7 @@ class MediaSourceEngine {
    */
   reinitText(mimeType) {
     if (!this.textEngine_) {
-      this.textEngine_ = new shaka.text.TextEngine(this.textDisplayer_);
+      this.textEngine_ = new TextEngine(this.textDisplayer_);
     }
     this.textEngine_.initParser(mimeType);
   }
@@ -353,11 +368,11 @@ class MediaSourceEngine {
   /**
    * Gets the first timestamp in buffer for the given content type.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @return {?number} The timestamp in seconds, or null if nothing is buffered.
    */
   bufferStart(contentType) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       return this.textEngine_.bufferStart();
     }
@@ -368,11 +383,11 @@ class MediaSourceEngine {
   /**
    * Gets the last timestamp in buffer for the given content type.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @return {?number} The timestamp in seconds, or null if nothing is buffered.
    */
   bufferEnd(contentType) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       return this.textEngine_.bufferEnd();
     }
@@ -384,13 +399,13 @@ class MediaSourceEngine {
    * Determines if the given time is inside the buffered range of the given
    * content type.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} time Playhead time
    * @param {number=} smallGapLimit
    * @return {boolean}
    */
   isBuffered(contentType, time, smallGapLimit) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       return this.textEngine_.isBuffered(time);
     } else {
@@ -404,12 +419,12 @@ class MediaSourceEngine {
    * Computes how far ahead of the given timestamp is buffered for the given
    * content type.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} time
    * @return {number} The amount of time buffered ahead in seconds.
    */
   bufferedAheadOf(contentType, time) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       return this.textEngine_.bufferedAheadOf(time);
     } else {
@@ -425,7 +440,7 @@ class MediaSourceEngine {
    * @param {shaka.extern.BufferedInfo} info
    */
   getBufferedInfo(info) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     const getBufferedInfo = TimeRangesUtils.getBufferedInfo;
     info.total = getBufferedInfo(this.video_.buffered);
@@ -444,7 +459,7 @@ class MediaSourceEngine {
   }
 
   /**
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @return {TimeRanges} The buffered ranges for the given content type, or
    *   null if the buffered ranges could not be obtained.
    * @private
@@ -469,7 +484,7 @@ class MediaSourceEngine {
    * Start and end times may be null for initialization segments; if present
    * they are relative to the presentation timeline.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {!ArrayBuffer} data
    * @param {?number} startTime relative to the start of the presentation
    * @param {?number} endTime relative to the start of the presentation
@@ -478,7 +493,7 @@ class MediaSourceEngine {
    * @return {!Promise}
    */
   async appendBuffer(contentType, data, startTime, endTime, hasClosedCaptions) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     if (contentType == ContentType.TEXT) {
       await this.textEngine_.appendBuffer(data, startTime, endTime);
@@ -535,7 +550,7 @@ class MediaSourceEngine {
    * @param {string} id
    */
   setSelectedClosedCaptionId(id) {
-    const VIDEO = shaka.util.ManifestParserUtils.ContentType.VIDEO;
+    const VIDEO = ManifestParserUtils.ContentType.VIDEO;
     const videoBufferEndTime = this.bufferEnd(VIDEO) || 0;
     this.textEngine_.setSelectedClosedCaptionId(id, videoBufferEndTime);
   }
@@ -543,7 +558,7 @@ class MediaSourceEngine {
   /**
    * Enqueue an operation to remove data from the SourceBuffer.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} startTime relative to the start of the presentation
    * @param {number} endTime relative to the start of the presentation
    * @return {!Promise}
@@ -553,7 +568,7 @@ class MediaSourceEngine {
     // See https://github.com/google/shaka-player/issues/251
     goog.asserts.assert(endTime < Number.MAX_VALUE,
         'remove() with MAX_VALUE or Infinity is not IE-compatible!');
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       await this.textEngine_.remove(startTime, endTime);
     } else {
@@ -566,11 +581,11 @@ class MediaSourceEngine {
   /**
    * Enqueue an operation to clear the SourceBuffer.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @return {!Promise}
    */
   async clear(contentType) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       if (!this.textEngine_) {
         return;
@@ -599,13 +614,13 @@ class MediaSourceEngine {
    * Enqueue an operation to flush the SourceBuffer.
    * This is a workaround for what we believe is a Chromecast bug.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @return {!Promise}
    */
   async flush(contentType) {
     // Flush the pipeline.  Necessary on Chromecast, even though we have removed
     // everything.
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       // Nothing to flush for text.
       return;
@@ -618,7 +633,7 @@ class MediaSourceEngine {
   /**
    * Sets the timestamp offset and append window end for the given content type.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} timestampOffset The timestamp offset.  Segments which start
    *   at time t will be inserted at time t + timestampOffset instead.  This
    *   value does not affect segments which have already been inserted.
@@ -632,7 +647,7 @@ class MediaSourceEngine {
    */
   async setStreamProperties(
       contentType, timestampOffset, appendWindowStart, appendWindowEnd) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (contentType == ContentType.TEXT) {
       this.textEngine_.setTimestampOffset(timestampOffset);
       this.textEngine_.setAppendWindow(appendWindowStart, appendWindowEnd);
@@ -710,7 +725,7 @@ class MediaSourceEngine {
 
   /**
    * Append data to the SourceBuffer.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {!ArrayBuffer} data
    * @throws QuotaExceededError if the browser's buffer is full
    * @private
@@ -722,7 +737,7 @@ class MediaSourceEngine {
 
   /**
    * Remove data from the SourceBuffer.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} startTime relative to the start of the presentation
    * @param {number} endTime relative to the start of the presentation
    * @private
@@ -743,7 +758,7 @@ class MediaSourceEngine {
    * Call abort() on the SourceBuffer.
    * This resets MSE's last_decode_timestamp on all track buffers, which should
    * trigger the splicing logic for overlapping segments.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
   abort_(contentType) {
@@ -768,7 +783,7 @@ class MediaSourceEngine {
    * Nudge the playhead to force the media pipeline to be flushed.
    * This seems to be necessary on Chromecast to get new content to replace old
    * content.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
   flush_(contentType) {
@@ -786,7 +801,7 @@ class MediaSourceEngine {
 
   /**
    * Set the SourceBuffer's timestamp offset.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} timestampOffset
    * @private
    */
@@ -807,7 +822,7 @@ class MediaSourceEngine {
 
   /**
    * Set the SourceBuffer's append window end.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {number} appendWindowStart
    * @param {number} appendWindowEnd
    * @private
@@ -825,7 +840,7 @@ class MediaSourceEngine {
   }
 
   /**
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
   onError_(contentType) {
@@ -834,10 +849,10 @@ class MediaSourceEngine {
     goog.asserts.assert(!this.sourceBuffers_[contentType].updating,
         'SourceBuffer should not be updating on error!');
     const code = this.video_.error ? this.video_.error.code : 0;
-    operation.p.reject(new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.MEDIA,
-        shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_FAILED,
+    operation.p.reject(new Error(
+        Error.Severity.CRITICAL,
+        Error.Category.MEDIA,
+        Error.Code.MEDIA_SOURCE_OPERATION_FAILED,
         code));
     // Do not pop from queue.  An 'updateend' event will fire next, and to
     // avoid synchronizing these two event handlers, we will allow that one to
@@ -847,7 +862,7 @@ class MediaSourceEngine {
   }
 
   /**
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
   onUpdateEnd_(contentType) {
@@ -865,7 +880,7 @@ class MediaSourceEngine {
   /**
    * Enqueue an operation and start it if appropriate.
    *
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @param {function()} start
    * @return {!Promise}
    * @private
@@ -875,7 +890,7 @@ class MediaSourceEngine {
 
     const operation = {
       start: start,
-      p: new shaka.util.PublicPromise(),
+      p: new PublicPromise(),
     };
     this.queues_[contentType].push(operation);
 
@@ -884,16 +899,16 @@ class MediaSourceEngine {
         operation.start();
       } catch (exception) {
         if (exception.name == 'QuotaExceededError') {
-          operation.p.reject(new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.MEDIA,
-              shaka.util.Error.Code.QUOTA_EXCEEDED_ERROR,
+          operation.p.reject(new Error(
+              Error.Severity.CRITICAL,
+              Error.Category.MEDIA,
+              Error.Code.QUOTA_EXCEEDED_ERROR,
               contentType));
         } else {
-          operation.p.reject(new shaka.util.Error(
-              shaka.util.Error.Severity.CRITICAL,
-              shaka.util.Error.Category.MEDIA,
-              shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
+          operation.p.reject(new Error(
+              Error.Severity.CRITICAL,
+              Error.Category.MEDIA,
+              Error.Code.MEDIA_SOURCE_OPERATION_THREW,
               exception));
         }
         this.popFromQueue_(contentType);
@@ -913,14 +928,14 @@ class MediaSourceEngine {
   async enqueueBlockingOperation_(run) {
     this.destroyer_.ensureNotDestroyed();
 
-    /** @type {Array.<!shaka.util.PublicPromise>} */
+    /** @type {Array.<!PublicPromise>} */
     const allWaiters = [];
 
     // Enqueue a 'wait' operation onto each queue.
     // This operation signals its readiness when it starts.
     // When all wait operations are ready, the real operation takes place.
     for (const contentType in this.sourceBuffers_) {
-      const ready = new shaka.util.PublicPromise();
+      const ready = new PublicPromise();
       const operation = {
         start: () => ready.resolve(),
         p: ready,
@@ -952,10 +967,10 @@ class MediaSourceEngine {
       try {
         run();
       } catch (exception) {
-        ret = Promise.reject(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.MEDIA,
-            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
+        ret = Promise.reject(new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.MEDIA,
+            Error.Code.MEDIA_SOURCE_OPERATION_THREW,
             exception));
       }
 
@@ -993,7 +1008,7 @@ class MediaSourceEngine {
 
   /**
    * Pop from the front of the queue and start a new operation.
-   * @param {shaka.util.ManifestParserUtils.ContentType} contentType
+   * @param {ManifestParserUtils.ContentType} contentType
    * @private
    */
   popFromQueue_(contentType) {
@@ -1005,10 +1020,10 @@ class MediaSourceEngine {
       try {
         next.start();
       } catch (exception) {
-        next.p.reject(new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.MEDIA,
-            shaka.util.Error.Code.MEDIA_SOURCE_OPERATION_THREW,
+        next.p.reject(new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.MEDIA,
+            Error.Code.MEDIA_SOURCE_OPERATION_THREW,
             exception));
         this.popFromQueue_(contentType);
       }
@@ -1056,13 +1071,13 @@ MediaSourceEngine.createObjectURL = window.URL.createObjectURL;
 /**
  * @typedef {{
  *   start: function(),
- *   p: !shaka.util.PublicPromise
+ *   p: !PublicPromise
  * }}
  *
  * @summary An operation in queue.
  * @property {function()} start
  *   The function which starts the operation.
- * @property {!shaka.util.PublicPromise} p
+ * @property {!PublicPromise} p
  *   The PublicPromise which is associated with this operation.
  */
 MediaSourceEngine.Operation;

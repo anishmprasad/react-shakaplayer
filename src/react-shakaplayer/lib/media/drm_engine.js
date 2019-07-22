@@ -1463,7 +1463,7 @@ class DrmEngine {
    * @return {!Promise.<!Object.<string, ?shaka.extern.DrmSupportType>>}
    */
   static async probeSupport() {
-    goog.asserts.assert(shaka.media.DrmEngine.isBrowserSupported(),
+    goog.asserts.assert(DrmEngine.isBrowserSupported(),
         'Must have basic EME support');
 
     const testKeySystems = [
