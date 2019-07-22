@@ -58,7 +58,7 @@ var goog = window.goog
  */
 class Controls extends FakeEventTarget {
   /**
-   * @param {!shaka.Player} player
+   * @param {!Player} player
    * @param {!HTMLElement} videoContainer
    * @param {!HTMLMediaElement} video
    * @param {shaka.extern.UIConfiguration} config
@@ -88,10 +88,10 @@ class Controls extends FakeEventTarget {
     /** @private {HTMLMediaElement} */
     this.localVideo_ = video;
 
-    /** @private {shaka.Player} */
+    /** @private {Player} */
     this.player_ = this.castProxy_.getPlayer();
 
-    /** @private {shaka.Player} */
+    /** @private {Player} */
     this.localPlayer_ = player;
 
     /** @private {!HTMLElement} */
@@ -486,7 +486,7 @@ class Controls extends FakeEventTarget {
 
 
   /**
-   * @return {shaka.Player}
+   * @return {Player}
    * @export
    */
   getPlayer() {
@@ -495,7 +495,7 @@ class Controls extends FakeEventTarget {
 
 
   /**
-   * @return {shaka.Player}
+   * @return {Player}
    * @export
    */
   getLocalPlayer() {

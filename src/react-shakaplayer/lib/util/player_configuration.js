@@ -24,6 +24,8 @@ import SimpleAbrManager from '../abr/simple_abr_manager';
 import ConfigUtils from '../util/config_utils';
 import NetworkingEngine from '../net/networking_engine';
 import Platform from '../util/platform';
+import ManifestParserUtils from '../util/manifest_parser_utils';
+import LanguageUtils from '../util/language_utils';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -212,7 +214,7 @@ class PlayerConfiguration {
 		// through the config object so that if it gets updated, we have the
 		// updated value.
 		offline.trackSelectionCallback = tracks => {
-			return shaka.util.PlayerConfiguration.defaultTrackSelect(tracks, config.preferredAudioLanguage);
+			return PlayerConfiguration.defaultTrackSelect(tracks, config.preferredAudioLanguage);
 		};
 
 		return config;
@@ -244,7 +246,7 @@ class PlayerConfiguration {
 		return ConfigUtils.mergeConfigObjects(
 			destination,
 			updates,
-			template || shaka.util.PlayerConfiguration.createDefault(),
+			template || PlayerConfiguration.createDefault(),
 			overrides,
 			''
 		);
@@ -256,8 +258,8 @@ class PlayerConfiguration {
 	 * @return {!Array.<shaka.extern.Track>}
 	 */
 	static defaultTrackSelect(tracks, preferredAudioLanguage) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
-		const LanguageUtils = shaka.util.LanguageUtils;
+		const ContentType = ManifestParserUtils.ContentType;
+		// const LanguageUtils = LanguageUtils;
 
 		/** @type {!Array.<shaka.extern.Track>} */
 		const allVariants = tracks.filter(track => track.type == 'variant');

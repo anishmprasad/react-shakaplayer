@@ -59,7 +59,7 @@ export default class CastProxy extends FakeEventTarget {
 	/**
 	 * @param {!HTMLMediaElement} video The local video element associated with
 	 *   the local Player instance.
-	 * @param {!shaka.Player} player A local Player instance.
+	 * @param {!Player} player A local Player instance.
 	 * @param {string} receiverAppId The ID of the cast receiver application.
 	 *   If blank, casting will not be available, but the proxy will still
 	 *   function otherwise.
@@ -70,7 +70,7 @@ export default class CastProxy extends FakeEventTarget {
 		/** @private {HTMLMediaElement} */
 		this.localVideo_ = video;
 
-		/** @private {shaka.Player} */
+		/** @private {Player} */
 		this.localPlayer_ = player;
 
 		/** @private {Object} */
@@ -168,11 +168,11 @@ export default class CastProxy extends FakeEventTarget {
 	 * objects as appropriate.
 	 *
 	 * @suppress {invalidCasts} to cast proxy Objects to unrelated types
-	 * @return {!shaka.Player}
+	 * @return {!Player}
 	 * @export
 	 */
 	getPlayer() {
-		return /** @type {!shaka.Player} */ (this.playerProxy_);
+		return /** @type {!Player} */ (this.playerProxy_);
 	}
 
 	/**

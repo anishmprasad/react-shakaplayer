@@ -29,7 +29,7 @@ class ShakaReceiverApp {
 		/** @private {HTMLMediaElement} */
 		this.video_ = null;
 
-		/** @private {shaka.Player} */
+		/** @private {Player} */
 		this.player_ = null;
 
 		/** @private {shaka.cast.CastReceiver} */

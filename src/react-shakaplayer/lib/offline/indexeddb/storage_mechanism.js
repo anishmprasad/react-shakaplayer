@@ -69,7 +69,7 @@ class StorageMechanism {
 		const name = StorageMechanism.DB_NAME;
 		const version = StorageMechanism.VERSION;
 
-		const p = new shaka.util.PublicPromise();
+		const p = new PublicPromise();
 		const open = window.indexedDB.open(name, version);
 		open.onsuccess = event => {
 			const db = event.target.result;
@@ -86,12 +86,7 @@ class StorageMechanism {
 		};
 		open.onerror = event => {
 			p.reject(
-				new Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.STORAGE,
-					shaka.util.Error.Code.INDEXED_DB_ERROR,
-					open.error
-				)
+				new Error(Error.Severity.CRITICAL, Error.Category.STORAGE, Error.Code.INDEXED_DB_ERROR, open.error)
 			);
 
 			// Firefox will raise an error on the main thread unless we stop it here.
@@ -284,7 +279,7 @@ class StorageMechanism {
 	static deleteAll_() {
 		const name = StorageMechanism.DB_NAME;
 
-		const p = new shaka.util.PublicPromise();
+		const p = new PublicPromise();
 
 		const del = window.indexedDB.deleteDatabase(name);
 		del.onblocked = event => {
@@ -295,12 +290,7 @@ class StorageMechanism {
 		};
 		del.onerror = event => {
 			p.reject(
-				new Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.STORAGE,
-					shaka.util.Error.Code.INDEXED_DB_ERROR,
-					del.error
-				)
+				new Error(Error.Severity.CRITICAL, Error.Category.STORAGE, Error.Code.INDEXED_DB_ERROR, del.error)
 			);
 
 			// Firefox will raise an error on the main thread unless we stop it here.

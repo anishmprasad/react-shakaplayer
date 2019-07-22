@@ -24,6 +24,7 @@
 /*eslint-disable */
 
 import shakaAssets from './common/assets';
+import ShakaDemoAssetInfo from './common/asset'
 import ShakaDemoUtils from '../js/demo_utils'
 import error from '../lib/util/error'
 import {Controls} from '../ui/controls'
@@ -31,6 +32,10 @@ import CloseButton from '../js/close_button'
 import ConfigUtils from '../lib/util/config_utils'
 import PlayerConfiguration from '../lib/util/player_configuration'
 import Localization from '../ui/localization'
+import Storage from '../lib/offline/storage'
+import Player from '../lib/player'
+
+console.log('shakaAssets', shakaAssets)
 
 
 const errorUtils = new error()
@@ -48,7 +53,7 @@ class ShakaDemoMain {
     /** @private {HTMLElement} */
     this.container_ = null;
 
-    /** @private {shaka.Player} */
+    /** @private {Player} */
     this.player_ = null;
 
     /** @type {?ShakaDemoAssetInfo} */
@@ -150,7 +155,7 @@ class ShakaDemoMain {
   async init() {
     this.initCommon_();
 
-    this.support_ = await shaka.Player.probeSupport();
+    this.support_ = await Player.probeSupport();
 
     this.video_ =
       /** @type {!HTMLVideoElement} */(document.getElementById('video'));
@@ -1186,7 +1191,7 @@ class ShakaDemoMain {
 
   /** @private */
   setUpVersionString_() {
-    const version = shaka.Player.version;
+    const version = Player.version;
     let split = version.split('-');
     const inParen = [];
 

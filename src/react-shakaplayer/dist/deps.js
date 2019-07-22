@@ -593,7 +593,7 @@ goog.addDependency(
 	[
 		'goog.asserts',
 		'shaka.Deprecate',
-		'shaka.Player',
+		'Player',
 		'shaka.log',
 		'shaka.media.DrmEngine',
 		'shaka.media.ManifestParser',
@@ -639,7 +639,7 @@ goog.addDependency(
 );
 goog.addDependency(
 	'../../../lib/player.js',
-	['shaka.Player'],
+	['Player'],
 	[
 		'goog.asserts',
 		'shaka.Deprecate',

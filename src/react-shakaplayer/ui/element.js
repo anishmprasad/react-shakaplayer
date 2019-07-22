@@ -50,7 +50,7 @@ export default class Element {
 		/** @protected {shaka.ui.Localization} */
 		this.localization = this.controls.getLocalization();
 
-		/** @protected {shaka.Player} */
+		/** @protected {Player} */
 		this.player = this.controls.getPlayer();
 
 		/** @protected {HTMLMediaElement} */

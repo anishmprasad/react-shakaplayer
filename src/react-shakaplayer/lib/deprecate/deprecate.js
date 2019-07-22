@@ -33,10 +33,10 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.Deprecate = class {
+export default class Deprecate {
 	/**
 	 * Initialize the system. This must happen before any calls to |enforce|. In
-	 * our code base, |shaka.Player| will be the only one to call this (it has the
+	 * our code base, |Player| will be the only one to call this (it has the
 	 * version string).
 	 *
 	 * If the |Deprecate| called |Player.version| to initialize itself, it would
@@ -52,13 +52,9 @@ shaka.Deprecate = class {
 	 * @param {string} versionString
 	 */
 	static init(versionString) {
-		window.asserts.assert(shaka.Deprecate.enforcer_ == null, 'Deprecate.init should only be called once.');
+		window.asserts.assert(Deprecate.enforcer_ == null, 'Deprecate.init should only be called once.');
 
-		shaka.Deprecate.enforcer_ = new Enforcer(
-			Version.parse(versionString),
-			shaka.Deprecate.onPending_,
-			shaka.Deprecate.onExpired_
-		);
+		Deprecate.enforcer_ = new Enforcer(Version.parse(versionString), Deprecate.onPending_, Deprecate.onExpired_);
 	}
 
 	/**
@@ -71,16 +67,16 @@ shaka.Deprecate = class {
 	 * @param {string} description
 	 */
 	static deprecateFeature(major, minor, name, description) {
-		const enforcer = shaka.Deprecate.enforcer_;
+		const enforcer = Deprecate.enforcer_;
 		window.asserts.assert(enforcer, 'Missing deprecation enforcer. Was |init| called?');
 
-		const expiresAt = new shaka.deprecate.Version(major, minor);
+		const expiresAt = new Deprecate.Version(major, minor);
 		enforcer.enforce(expiresAt, name, description);
 	}
 
 	/**
-	 * @param {!shaka.deprecate.Version} libraryVersion
-	 * @param {!shaka.deprecate.Version} featureVersion
+	 * @param {!deprecate.Version} libraryVersion
+	 * @param {!deprecate.Version} featureVersion
 	 * @param {string} name
 	 * @param {string} description
 	 * @private
@@ -103,8 +99,8 @@ shaka.Deprecate = class {
 	}
 
 	/**
-	 * @param {!shaka.deprecate.Version} libraryVersion
-	 * @param {!shaka.deprecate.Version} featureVersion
+	 * @param {!deprecate.Version} libraryVersion
+	 * @param {!deprecate.Version} featureVersion
 	 * @param {string} name
 	 * @param {string} description
 	 * @private
@@ -126,7 +122,7 @@ shaka.Deprecate = class {
 		shaka.log.alwaysError(errorMessage);
 		window.asserts.assert(false, errorMessage);
 	}
-};
+}
 
 /**
  * The global deprecation enforcer that will be set by the player (because the
@@ -136,4 +132,4 @@ shaka.Deprecate = class {
  *
  * @private {shaka.deprecate.Enforcer}
  */
-shaka.Deprecate.enforcer_ = null;
+Deprecate.enforcer_ = null;

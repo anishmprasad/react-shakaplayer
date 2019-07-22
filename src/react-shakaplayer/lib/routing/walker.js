@@ -51,7 +51,7 @@ var goog = window.goog;
  * destination to differ based on the current state and not the state when
  * the request was appended.
  *
- * Example (from shaka.Player):
+ * Example (from Player):
  *  When we unload, we need to either go to the attached or detached state based
  *  on whether or not we have a video element.
  *
@@ -65,7 +65,7 @@ var goog = window.goog;
  * interrupted. This is to allow potentially dependent routes to wait until
  * other routes have finished.
  *
- * Example (from shaka.Player):
+ * Example (from Player):
  *  A request to load content depends on an attach request finishing. We don't
  *  want load request to interrupt an attach request. By marking the attach
  *  request as non-interruptible we ensure that calling load before attach

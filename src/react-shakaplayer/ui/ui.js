@@ -31,6 +31,7 @@ import Platform from '../lib/util/platform';
 import Dom from '../lib/util/dom_utils';
 import ConfigUtils from '../lib/util/config_utils';
 import FakeEvent from '../lib/util/fake_event';
+import Player from '../lib/player';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};
@@ -44,12 +45,12 @@ var goog = window.goog;
  */
 class Overlay {
 	/**
-	 * @param {!shaka.Player} player
+	 * @param {!Player} player
 	 * @param {!HTMLElement} videoContainer
 	 * @param {!HTMLMediaElement} video
 	 */
 	constructor(player, videoContainer, video) {
-		/** @private {shaka.Player} */
+		/** @private {Player} */
 		this.player_ = player;
 
 		/** @private {!shaka.extern.UIConfiguration} */
@@ -151,7 +152,7 @@ class Overlay {
 	}
 
 	/**
-	 * @return {shaka.Player}
+	 * @return {Player}
 	 * @export
 	 * @deprecated Use getControls().getPlayer() instead.
 	 */
@@ -204,7 +205,7 @@ class Overlay {
 		// Install built-in polyfills to patch browser incompatibilities.
 		polyfill.installAll();
 		// Check to see if the browser supports the basic APIs Shaka needs.
-		if (!shaka.Player.isBrowserSupported()) {
+		if (!Player.isBrowserSupported()) {
 			shaka.log.error(
 				'Shaka Player does not support this browser. ' +
 					'Please see https://tinyurl.com/y7s4j9tr for the list of ' +
@@ -317,7 +318,7 @@ class Overlay {
 	 * @private
 	 */
 	static createUI_(container, video) {
-		const player = new shaka.Player(video);
+		const player = new Player(video);
 		const ui = new Overlay(player, container, video);
 
 		// If the browser's native controls are disabled, use UI TextDisplayer.

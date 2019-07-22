@@ -45,7 +45,7 @@ class CastReceiver extends FakeEventTarget {
   /**
    * @param {!HTMLMediaElement} video The local video element associated with
    *   the local Player instance.
-   * @param {!shaka.Player} player A local Player instance.
+   * @param {!Player} player A local Player instance.
    * @param {function(Object)=} appDataCallback A callback to handle
    *   application-specific data passed from the sender.  This can come either
    *   from a Shaka-based sender through CastProxy.setAppData, or from a
@@ -60,7 +60,7 @@ class CastReceiver extends FakeEventTarget {
     /** @private {HTMLMediaElement} */
     this.video_ = video;
 
-    /** @private {shaka.Player} */
+    /** @private {Player} */
     this.player_ = player;
 
     /** @private {shaka.util.EventManager} */

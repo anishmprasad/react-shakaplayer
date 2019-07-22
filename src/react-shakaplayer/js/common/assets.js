@@ -18,6 +18,10 @@ const shaka = window.shaka
 const shakaAssets = {};
 
 
+shakaAssets.Source = Source
+shakaAssets.Feature = Feature
+shakaAssets.KeySystem = KeySystem
+
 /**
  * @typedef {{
  *   uri: string,

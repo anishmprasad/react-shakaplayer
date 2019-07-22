@@ -19,7 +19,7 @@
 
 // goog.require('goog.asserts');
 // goog.require('shaka.Deprecate');
-// goog.require('shaka.Player');
+// goog.require('Player');
 // goog.require('shaka.log');
 // goog.require('shaka.media.DrmEngine');
 // goog.require('shaka.media.ManifestParser');
@@ -63,6 +63,7 @@ import Platform from '../util/platform'
 import PlayerConfiguration from '../util/player_configuration'
 import StreamUtil from '../util/stream_utils'
 import ConfigUtils from '../util/config_utils'
+import Player from '../player'
 
 
 var shaka = window.shaka;
@@ -85,7 +86,7 @@ var goog = window.goog;
  */
 class Storage {
   /**
-   * @param {!shaka.Player=} player
+   * @param {!Player=} player
    *    A player instance to share a networking engine and configuration with.
    *    When initializing with a player, storage is only valid as long as
    *    |destroy| has not been called on the player instance. When omitted,
@@ -99,7 +100,7 @@ class Storage {
     // TODO(vaage): After we decide whether or not we want to support
     //  initializing storage with a player proxy, we should either remove
     //  this error or rename the error.
-    if (player && player.constructor != shaka.Player) {
+    if (player && player.constructor != Player) {
       throw new Error(
           Error.Severity.CRITICAL,
           Error.Category.STORAGE,
@@ -1386,6 +1387,6 @@ class Storage {
   }
 };
 
-shaka.Player.registerSupportPlugin('offline', Storage.support);
+Player.registerSupportPlugin('offline', Storage.support);
 
 export default Storage
