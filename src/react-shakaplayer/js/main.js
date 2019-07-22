@@ -34,6 +34,7 @@ import PlayerConfiguration from '../lib/util/player_configuration'
 import Localization from '../ui/localization'
 import Storage from '../lib/offline/storage'
 import Player from '../lib/player'
+import localeJson from '../ui/locales/en-GB.json'
 
 console.log('shakaAssets', shakaAssets)
 
@@ -554,14 +555,16 @@ class ShakaDemoMain {
     if (!locale) {
       return;
     }
-    const url = '../ui/locales/' + locale + '.json';
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.warn('Unable to load locale', locale);
-      return;
-    }
+    // const url = '../ui/locales/' + locale + '.json';
+    // const response = await fetch(url);
+    // if (!response.ok) {
+    //   console.warn('Unable to load locale', locale);
+    //   return;
+    // }
 
-    const obj = await response.json();
+    // const obj = await response.json();
+    const obj = localeJson
+    // debugger
     const map = new Map();
     for (const key in obj) {
       map.set(key, obj[key]);

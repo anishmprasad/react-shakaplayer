@@ -28,6 +28,7 @@ import {
 	ShakaDemoDatalistInput,
 	ShakaDemoSelectInput
 } from '../js/input';
+import Dom from '../lib/util/dom_utils';
 
 var shaka = window.shaka;
 
@@ -94,7 +95,7 @@ class ShakaDemoConfig {
 
 	/** @private */
 	reload_() {
-		shaka.util.Dom.removeAllChildren(this.container_);
+		Dom.removeAllChildren(this.container_);
 		this.sections_ = [];
 
 		this.addMetaSection_();
