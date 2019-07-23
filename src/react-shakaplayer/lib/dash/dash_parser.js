@@ -218,8 +218,8 @@ export default class DashParser {
    * @private
    */
   async requestManifest_() {
-    const requestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-    const request = shaka.net.NetworkingEngine.makeRequest(
+    const requestType = NetworkingEngine.RequestType.MANIFEST;
+    const request = NetworkingEngine.makeRequest(
         this.manifestUris_, this.config_.retryParameters);
     const networkingEngine = this.playerInterface_.networkingEngine;
 
@@ -1393,10 +1393,10 @@ export default class DashParser {
   async requestForTiming_(baseUris, uri, method) {
     const requestUris =
         ManifestParserUtils.resolveUris(baseUris, [uri]);
-    const request = shaka.net.NetworkingEngine.makeRequest(
+    const request = NetworkingEngine.makeRequest(
         requestUris, this.config_.retryParameters);
     request.method = method;
-    const type = shaka.net.NetworkingEngine.RequestType.TIMING;
+    const type = NetworkingEngine.RequestType.TIMING;
 
     const operation =
     this.playerInterface_.networkingEngine.request(type, request);
@@ -1548,7 +1548,7 @@ export default class DashParser {
    * @private
    */
   async requestInitSegment_(uris, startByte, endByte) {
-    const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
+    const requestType = NetworkingEngine.RequestType.SEGMENT;
 
     const request = Networking.createSegmentRequest(
         uris,

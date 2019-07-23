@@ -40,7 +40,7 @@ class AbortableOperation {
 	 * @param {!Promise.<T>} promise
 	 *   A Promise which represents the underlying operation.  It is resolved when
 	 *   the operation is complete, and rejected if the operation fails or is
-	 *   aborted.  Aborted operations should be rejected with a shaka.util.Error
+	 *   aborted.  Aborted operations should be rejected with a Error
 	 *   object using the error code OPERATION_ABORTED.
 	 * @param {function():!Promise} onAbort
 	 *   Will be called by this object to abort the underlying operation.
@@ -61,48 +61,44 @@ class AbortableOperation {
 	}
 
 	/**
-	 * @param {!shaka.util.Error} error
-	 * @return {!shaka.util.AbortableOperation} An operation which has already
+	 * @param {!Error} error
+	 * @return {!AbortableOperation} An operation which has already
 	 *   failed with the error given by the caller.
 	 * @export
 	 */
 	static failed(error) {
-		return new shaka.util.AbortableOperation(Promise.reject(error), () => Promise.resolve());
+		return new AbortableOperation(Promise.reject(error), () => Promise.resolve());
 	}
 
 	/**
-	 * @return {!shaka.util.AbortableOperation} An operation which has already
+	 * @return {!AbortableOperation} An operation which has already
 	 *   failed with the error OPERATION_ABORTED.
 	 * @export
 	 */
 	static aborted() {
 		const p = Promise.reject(
-			new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.PLAYER,
-				shaka.util.Error.Code.OPERATION_ABORTED
-			)
+			new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED)
 		);
 		// Silence uncaught rejection errors, which may otherwise occur any place
 		// we don't explicitly handle aborted operations.
 		p.catch(() => {});
-		return new shaka.util.AbortableOperation(p, () => Promise.resolve());
+		return new AbortableOperation(p, () => Promise.resolve());
 	}
 
 	/**
 	 * @param {U} value
-	 * @return {!shaka.util.AbortableOperation.<U>} An operation which has already
+	 * @return {!AbortableOperation.<U>} An operation which has already
 	 *   completed with the given value.
 	 * @template U
 	 * @export
 	 */
 	static completed(value) {
-		return new shaka.util.AbortableOperation(Promise.resolve(value), () => Promise.resolve());
+		return new AbortableOperation(Promise.resolve(value), () => Promise.resolve());
 	}
 
 	/**
 	 * @param {!Promise.<U>} promise
-	 * @return {!shaka.util.AbortableOperation.<U>} An operation which cannot be
+	 * @return {!AbortableOperation.<U>} An operation which cannot be
 	 *   aborted.  It will be completed when the given Promise is resolved, or
 	 *   will be failed when the given Promise is rejected.
 	 * @template U

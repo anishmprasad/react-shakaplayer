@@ -29,20 +29,26 @@
 // goog.require('shaka.util.ObjectUtils');
 // goog.require('shaka.util.OperationManager');
 import OperationManager from '../util/operation_manager';
+import ObjectUtils from '../util/object_utils';
 import FakeEventTarget from '../util/fake_event_target';
+import FakeEvent from '../util/fake_event';
 import AbortableOperation from '../util/abortable_operation';
 import Backoff from '../net/backoff';
+import Error from '../util/error';
+import Uri from '../../third_party/closure/goog/uri/uri';
+
+const ErrorUtil = new Error();
 
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
- * @event shaka.net.NetworkingEngine.RetryEvent
+ * @event NetworkingEngine.RetryEvent
  * @description Fired when the networking engine receives a recoverable error
  *   and retries.
  * @property {string} type
  *   'retry'
- * @property {?shaka.util.Error} error
+ * @property {?Error} error
  *   The error that caused the retry. If it was a non-Shaka error, this is set
  *   to null.
  * @exportDoc
@@ -53,7 +59,7 @@ var goog = window.goog;
  * handle the actual request.  A plugin is registered using registerScheme.
  * Each scheme has at most one plugin to handle the request.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @export
  */
 class NetworkingEngine extends FakeEventTarget {
@@ -68,7 +74,7 @@ class NetworkingEngine extends FakeEventTarget {
 		/** @private {boolean} */
 		this.destroyed_ = false;
 
-		/** @private {!shaka.util.OperationManager} */
+		/** @private {!OperationManager} */
 		this.operationManager_ = new OperationManager();
 
 		/** @private {!Set.<shaka.extern.RequestFilter>} */
@@ -180,7 +186,7 @@ class NetworkingEngine extends FakeEventTarget {
 	 *
 	 * @return {shaka.extern.RetryParameters}
 	 *
-	 * NOTE: The implementation moved to shaka.net.Backoff to avoid a circular
+	 * NOTE: The implementation moved to Backoff to avoid a circular
 	 * dependency between the two classes.
 	 */
 	static defaultRetryParameters() {
@@ -220,23 +226,19 @@ class NetworkingEngine extends FakeEventTarget {
 	/**
 	 * Makes a network request and returns the resulting data.
 	 *
-	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {NetworkingEngine.RequestType} type
 	 * @param {shaka.extern.Request} request
-	 * @return {!shaka.net.NetworkingEngine.PendingRequest}
+	 * @return {!NetworkingEngine.PendingRequest}
 	 * @export
 	 */
 	request(type, request) {
-		const ObjectUtils = shaka.util.ObjectUtils;
+		// const ObjectUtils = ObjectUtils;
 		const numBytesRemainingObj = new NetworkingEngine.NumBytesRemainingClass();
 
 		// Reject all requests made after destroy is called.
 		if (this.destroyed_) {
 			const p = Promise.reject(
-				new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.PLAYER,
-					shaka.util.Error.Code.OPERATION_ABORTED
-				)
+				new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED)
 			);
 			// Silence uncaught rejection errors, which may otherwise occur any place
 			// we don't explicitly handle aborted operations.
@@ -307,8 +309,8 @@ class NetworkingEngine extends FakeEventTarget {
 				// here.  This is because by the time it gets here, we've exhausted
 				// retries.
 				if (e) {
-					window.asserts.assert(e instanceof shaka.util.Error, 'Wrong error type');
-					e.severity = shaka.util.Error.Severity.CRITICAL;
+					window.asserts.assert(e instanceof Error, 'Wrong error type');
+					e.severity = ErrorUtil.severity.CRITICAL;
 				}
 
 				throw e;
@@ -324,7 +326,7 @@ class NetworkingEngine extends FakeEventTarget {
 	}
 
 	/**
-	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {NetworkingEngine.RequestType} type
 	 * @param {shaka.extern.Request} request
 	 * @return {!shaka.extern.IAbortableOperation.<undefined>}
 	 * @private
@@ -340,31 +342,26 @@ class NetworkingEngine extends FakeEventTarget {
 		// Catch any errors thrown by request filters, and substitute
 		// them with a Shaka-native error.
 		return filterOperation.chain(undefined, e => {
-			if (e && e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+			if (e && e.code == Error.Code.OPERATION_ABORTED) {
 				// Don't change anything if the operation was aborted.
 				throw e;
 			}
 
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.NETWORK,
-				shaka.util.Error.Code.REQUEST_FILTER_ERROR,
-				e
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.NETWORK, Error.Code.REQUEST_FILTER_ERROR, e);
 		});
 	}
 
 	/**
-	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {NetworkingEngine.RequestType} type
 	 * @param {shaka.extern.Request} request
-	 * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
+	 * @param {NetworkingEngine.NumBytesRemainingClass}
 	 *            numBytesRemainingObj
 	 * @return {!shaka.extern.IAbortableOperation.<
-	 *            shaka.net.NetworkingEngine.ResponseAndGotProgress>}
+	 *            NetworkingEngine.ResponseAndGotProgress>}
 	 * @private
 	 */
 	makeRequestWithRetry_(type, request, numBytesRemainingObj) {
-		const backoff = new shaka.net.Backoff(request.retryParameters, /* autoReset */ false);
+		const backoff = new Backoff(request.retryParameters, /* autoReset */ false);
 		const index = 0;
 		return this.send_(type, request, backoff, index, /* lastError */ null, numBytesRemainingObj);
 	}
@@ -372,19 +369,19 @@ class NetworkingEngine extends FakeEventTarget {
 	/**
 	 * Sends the given request to the correct plugin and retry using Backoff.
 	 *
-	 * @param {shaka.net.NetworkingEngine.RequestType} type
+	 * @param {NetworkingEngine.RequestType} type
 	 * @param {shaka.extern.Request} request
-	 * @param {!shaka.net.Backoff} backoff
+	 * @param {!Backoff} backoff
 	 * @param {number} index
-	 * @param {?shaka.util.Error} lastError
-	 * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
+	 * @param {?Error} lastError
+	 * @param {NetworkingEngine.NumBytesRemainingClass}
 	 *     numBytesRemainingObj
 	 * @return {!shaka.extern.IAbortableOperation.<
-	 *               shaka.net.NetworkingEngine.ResponseAndGotProgress>}
+	 *               NetworkingEngine.ResponseAndGotProgress>}
 	 * @private
 	 */
 	send_(type, request, backoff, index, lastError, numBytesRemainingObj) {
-		const uri = new goog.Uri(request.uris[index]);
+		const uri = new Uri(request.uris[index]);
 		let scheme = uri.getScheme();
 		// Whether it got a progress event.
 		let gotProgress = false;
@@ -404,12 +401,7 @@ class NetworkingEngine extends FakeEventTarget {
 		const plugin = object ? object.plugin : null;
 		if (!plugin) {
 			return AbortableOperation.failed(
-				new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.NETWORK,
-					shaka.util.Error.Code.UNSUPPORTED_SCHEME,
-					uri
-				)
+				new Error(Error.Severity.CRITICAL, Error.Category.NETWORK, Error.Code.UNSUPPORTED_SCHEME, uri)
 			);
 		}
 
@@ -458,24 +450,24 @@ class NetworkingEngine extends FakeEventTarget {
 						return AbortableOperation.aborted();
 					}
 
-					if (error.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+					if (error.code == Error.Code.OPERATION_ABORTED) {
 						// Don't change anything if the operation was aborted.
 						throw error;
-					} else if (error.code == shaka.util.Error.Code.ATTEMPTS_EXHAUSTED) {
+					} else if (error.code == Error.Code.ATTEMPTS_EXHAUSTED) {
 						window.asserts.assert(lastError, 'Should have last error');
 						throw lastError;
 					}
 
-					if (error.severity == shaka.util.Error.Severity.RECOVERABLE) {
+					if (error.severity == Error.Severity.RECOVERABLE) {
 						// Don't pass in a non-shaka error, even if one is somehow thrown;
 						// instead, call the listener with a null error.
-						const errorOrNull = error instanceof shaka.util.Error ? error : null;
-						const event = new shaka.util.FakeEvent('retry', { error: errorOrNull });
+						const errorOrNull = error instanceof Error ? error : null;
+						const event = new FakeEvent('retry', { error: errorOrNull });
 						this.dispatchEvent(event);
 
 						// Move to the next URI.
 						index = (index + 1) % request.uris.length;
-						const shakaError = /** @type {shaka.util.Error} */ (error);
+						const shakaError = /** @type {Error} */ (error);
 						return this.send_(type, request, backoff, index, shakaError, numBytesRemainingObj);
 					}
 
@@ -488,11 +480,11 @@ class NetworkingEngine extends FakeEventTarget {
 	}
 
 	/**
-	 * @param {shaka.net.NetworkingEngine.RequestType} type
-	 * @param {shaka.net.NetworkingEngine.ResponseAndGotProgress}
+	 * @param {NetworkingEngine.RequestType} type
+	 * @param {NetworkingEngine.ResponseAndGotProgress}
 	 *        responseAndGotProgress
 	 * @return {!shaka.extern.IAbortableOperation.<
-	 *               shaka.net.NetworkingEngine.ResponseAndGotProgress>}
+	 *               NetworkingEngine.ResponseAndGotProgress>}
 	 * @private
 	 */
 	filterResponse_(type, responseAndGotProgress) {
@@ -511,24 +503,19 @@ class NetworkingEngine extends FakeEventTarget {
 				// Catch any errors thrown by request filters, and substitute
 				// them with a Shaka-native error.
 
-				if (e && e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+				if (e && e.code == Error.Code.OPERATION_ABORTED) {
 					// Don't change anything if the operation was aborted.
 					throw e;
 				}
 
 				// The error is assumed to be critical if the original wasn't a Shaka
 				// error.
-				let severity = shaka.util.Error.Severity.CRITICAL;
-				if (e instanceof shaka.util.Error) {
+				let severity = Error.Severity.CRITICAL;
+				if (e instanceof Error) {
 					severity = e.severity;
 				}
 
-				throw new shaka.util.Error(
-					severity,
-					shaka.util.Error.Category.NETWORK,
-					shaka.util.Error.Code.RESPONSE_FILTER_ERROR,
-					e
-				);
+				throw new Error(severity, Error.Category.NETWORK, Error.Code.RESPONSE_FILTER_ERROR, e);
 			}
 		);
 	}
@@ -583,7 +570,7 @@ NetworkingEngine.NumBytesRemainingClass = class {
  * download, and allows the request to be aborted if the network is slow.
  *
  * @implements {shaka.extern.IAbortableOperation.<shaka.extern.Response>}
- * @extends {shaka.util.AbortableOperation}
+ * @extends {AbortableOperation}
  * @export
  */
 NetworkingEngine.PendingRequest = class extends AbortableOperation {
@@ -592,20 +579,20 @@ NetworkingEngine.PendingRequest = class extends AbortableOperation {
 	 *   A Promise which represents the underlying operation.  It is resolved
 	 *   when the operation is complete, and rejected if the operation fails
 	 *   or is aborted.  Aborted operations should be rejected with a
-	 *   shaka.util.Error object using the error code OPERATION_ABORTED.
+	 *   Error object using the error code OPERATION_ABORTED.
 	 * @param {function():!Promise} onAbort
 	 *   Will be called by this object to abort the underlying operation.
 	 *   This is not cancelation, and will not necessarily result in any work
 	 *   being undone.  abort() should return a Promise which is resolved when
 	 *   the underlying operation has been aborted.  The returned Promise
 	 *   should never be rejected.
-	 * @param {shaka.net.NetworkingEngine.NumBytesRemainingClass}
+	 * @param {NetworkingEngine.NumBytesRemainingClass}
 	 *   numBytesRemainingObj
 	 */
 	constructor(promise, onAbort, numBytesRemainingObj) {
 		super(promise, onAbort);
 
-		/** @private {shaka.net.NetworkingEngine.NumBytesRemainingClass} */
+		/** @private {NetworkingEngine.NumBytesRemainingClass} */
 		this.bytesRemaining_ = numBytesRemainingObj;
 	}
 
@@ -660,7 +647,7 @@ NetworkingEngine.SchemeObject = {};
 /**
  * Contains the scheme plugins.
  *
- * @private {!Object.<string, shaka.net.NetworkingEngine.SchemeObject>}
+ * @private {!Object.<string, NetworkingEngine.SchemeObject>}
  */
 NetworkingEngine.schemes_ = {};
 

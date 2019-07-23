@@ -29,7 +29,7 @@ var shaka = window.shaka;
  * @implements {shaka.util.IReleasable}
  * @final
  */
-class RegionTimeline {
+export default class RegionTimeline {
 	constructor() {
 		/** @private {function(shaka.extern.TimelineRegionInfo)} */
 		this.onAddRegion_ = region => {};
