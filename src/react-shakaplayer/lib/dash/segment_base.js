@@ -28,6 +28,18 @@
 // goog.require('shaka.util.ManifestParserUtils');
 // goog.require('shaka.util.XmlUtils');
 
+import MpdUtils from '../dash/mpd_utils';
+import { InitSegmentReference } from '../media/segment_reference';
+import Mp4SegmentIndexParser from '../media/mp4_segment_index_parser';
+import SegmentIndex from '../media/segment_index';
+import WebmSegmentIndexParser from '../media/webm_segment_index_parser';
+
+import Error from '../util/error';
+import ManifestParserUtils from '../util/manifest_parser_utils';
+import XmlUtils from '../util/xml_utils';
+
+const ErrorUtils = new Error();
+
 var shaka = window.shaka;
 
 /**
@@ -39,12 +51,12 @@ export default class SegmentBase {
 	 *
 	 * @param {DashParser.Context} context
 	 * @param {function(?DashParser.InheritanceFrame):Element} callback
-	 * @return {shaka.media.InitSegmentReference}
+	 * @return {InitSegmentReference}
 	 */
 	static createInitSegment(context, callback) {
-		const MpdUtils = MpdUtils;
-		const XmlUtils = shaka.util.XmlUtils;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		// const MpdUtils = MpdUtils;
+		// const XmlUtils = XmlUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
 
 		const initialization = MpdUtils.inheritChild(context, callback, 'Initialization');
 		if (!initialization) {
@@ -66,7 +78,7 @@ export default class SegmentBase {
 		}
 
 		const getUris = () => resolvedUris;
-		return new shaka.media.InitSegmentReference(getUris, startByte, endByte);
+		return new InitSegmentReference(getUris, startByte, endByte);
 	}
 
 	/**
@@ -75,16 +87,16 @@ export default class SegmentBase {
 	 * @param {DashParser.Context} context
 	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
-	 * @throws shaka.util.Error When there is a parsing error.
+	 * @throws Error When there is a parsing error.
 	 * @return {DashParser.StreamInfo}
 	 */
 	static createStream(context, requestInitSegment) {
 		window.asserts.assert(context.representation.segmentBase, 'Should only be called with SegmentBase');
 		// Since SegmentBase does not need updates, simply treat any call as
 		// the initial parse.
-		const MpdUtils = MpdUtils;
-		const SegmentBase = SegmentBase;
-		const XmlUtils = shaka.util.XmlUtils;
+		// const MpdUtils = MpdUtils;
+		// const SegmentBase = SegmentBase;
+		// const XmlUtils = XmlUtils;
 
 		const unscaledPresentationTimeOffset =
 			Number(MpdUtils.inheritAttribute(context, SegmentBase.fromInheritance_, 'presentationTimeOffset')) || 0;
@@ -115,7 +127,7 @@ export default class SegmentBase {
 	 * @param {DashParser.Context} context
 	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
-	 * @param {shaka.media.InitSegmentReference} init
+	 * @param {InitSegmentReference} init
 	 * @param {!Array.<string>} uris
 	 * @param {number} startByte
 	 * @param {?number} endByte
@@ -152,24 +164,14 @@ export default class SegmentBase {
 			const results = await Promise.all(responses);
 			const indexData = results[0];
 			const initData = results[1] || null;
-			/** @type {Array.<!shaka.media.SegmentReference>} */
+			/** @type {Array.<!SegmentReference>} */
 			let references = null;
 
 			if (containerType == 'mp4') {
-				references = shaka.media.Mp4SegmentIndexParser.parse(
-					indexData,
-					startByte,
-					uris,
-					scaledPresentationTimeOffset
-				);
+				references = Mp4SegmentIndexParser.parse(indexData, startByte, uris, scaledPresentationTimeOffset);
 			} else {
 				window.asserts.assert(initData, 'WebM requires init data');
-				references = shaka.media.WebmSegmentIndexParser.parse(
-					indexData,
-					initData,
-					uris,
-					scaledPresentationTimeOffset
-				);
+				references = WebmSegmentIndexParser.parse(indexData, initData, uris, scaledPresentationTimeOffset);
 			}
 
 			presentationTimeline.notifySegments(references, periodStart);
@@ -178,7 +180,7 @@ export default class SegmentBase {
 			// segmentIndex in the map.
 			window.asserts.assert(!segmentIndex, 'Should not call createSegmentIndex twice');
 
-			segmentIndex = new shaka.media.SegmentIndex(references);
+			segmentIndex = new SegmentIndex(references);
 			if (fitLast) {
 				segmentIndex.fit(periodDuration);
 			}
@@ -219,27 +221,27 @@ export default class SegmentBase {
 	 * @param {DashParser.Context} context
 	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
-	 * @param {shaka.media.InitSegmentReference} init
+	 * @param {InitSegmentReference} init
 	 * @param {number} scaledPresentationTimeOffset
 	 * @return {DashParser.SegmentIndexFunctions}
-	 * @throws shaka.util.Error When there is a parsing error.
+	 * @throws Error When there is a parsing error.
 	 * @private
 	 */
 	static createSegmentIndex_(context, requestInitSegment, init, scaledPresentationTimeOffset) {
-		const MpdUtils = MpdUtils;
-		const SegmentBase = SegmentBase;
-		const XmlUtils = shaka.util.XmlUtils;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		// const MpdUtils = MpdUtils;
+		// const SegmentBase = SegmentBase;
+		// const XmlUtils = XmlUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
+		const ContentType = ManifestParserUtils.ContentType;
 
 		const contentType = context.representation.contentType;
 		const containerType = context.representation.mimeType.split('/')[1];
 		if (contentType != ContentType.TEXT && containerType != 'mp4' && containerType != 'webm') {
 			shaka.log.error('SegmentBase specifies an unsupported container type.', context.representation);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER
+			throw new Error(
+				ErrorUtils.severity.CRITICAL,
+				ErrorUtils.category.MANIFEST,
+				ErrorUtils.code.DASH_UNSUPPORTED_CONTAINER
 			);
 		}
 
@@ -250,10 +252,10 @@ export default class SegmentBase {
 				'but does not contain an Initialization element.',
 				context.representation
 			);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_WEBM_MISSING_INIT
+			throw new Error(
+				ErrorUtils.severity.CRITICAL,
+				ErrorUtils.category.MANIFEST,
+				ErrorUtils.code.DASH_WEBM_MISSING_INIT
 			);
 		}
 
@@ -278,10 +280,10 @@ export default class SegmentBase {
 				'or a RepresentationIndex element.',
 				context.representation
 			);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_NO_SEGMENT_INFO
+			throw new Error(
+				ErrorUtils.severity.CRITICAL,
+				ErrorUtils.category.MANIFEST,
+				ErrorUtils.code.DASH_NO_SEGMENT_INFO
 			);
 		}
 

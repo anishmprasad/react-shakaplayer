@@ -110,8 +110,8 @@ export default class SegmentList {
 	 * @private
 	 */
 	static parseSegmentListInfo_(context) {
-		const SegmentList = SegmentList;
-		const MpdUtils = MpdUtils;
+		// const SegmentList = SegmentList;
+		// const MpdUtils = MpdUtils;
 
 		const mediaSegments = SegmentList.parseMediaSegments_(context);
 		const segmentInfo = MpdUtils.parseSegmentInfo(context, SegmentList.fromInheritance_);

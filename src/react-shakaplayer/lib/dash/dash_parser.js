@@ -67,6 +67,8 @@ import StringUtils from '../util/string_utils'
 import XmlUtils from '../util/xml_utils'
 import Timer from '../util/timer'
 
+
+const ErrorUtils = new Error()
 const shaka  = window.shaka
 var goog = window.goog
 
@@ -157,9 +159,9 @@ export default class DashParser {
     // Make sure that the parser has not been destroyed.
     if (!this.playerInterface_) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.PLAYER,
-          Error.Code.OPERATION_ABORTED);
+          ErrorUtils.severity.CRITICAL,
+          ErrorUtils.category.PLAYER,
+          ErrorUtils.code.OPERATION_ABORTED);
     }
 
     window.asserts.assert(this.manifest_, 'Manifest should be non-null!');
@@ -263,8 +265,8 @@ export default class DashParser {
    * @private
    */
   async parseManifest_(data, finalManifestUri) {
-    const Error = Error;
-    const MpdUtils = MpdUtils;
+    // const Error = Error;
+    // const MpdUtils = MpdUtils;
 
     const mpd = XmlUtils.parseXml(data, 'MPD');
     if (!mpd) {

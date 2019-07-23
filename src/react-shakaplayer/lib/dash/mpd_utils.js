@@ -265,7 +265,7 @@ export default class MpdUtils {
     window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type.');
-    const MpdUtils = MpdUtils;
+    // const MpdUtils = MpdUtils;
     const XmlUtils = shaka.util.XmlUtils;
 
     const timescaleStr =
@@ -386,7 +386,7 @@ export default class MpdUtils {
   static handleXlinkInElement_(
       element, retryParameters, failGracefully, baseUri, networkingEngine,
       linkDepth) {
-    const MpdUtils = MpdUtils;
+    // const MpdUtils = MpdUtils;
     const XmlUtils = shaka.util.XmlUtils;
     const Error = shaka.util.Error;
     const ManifestParserUtils = shaka.util.ManifestParserUtils;
@@ -497,7 +497,7 @@ export default class MpdUtils {
   static processXlinks(
       element, retryParameters, failGracefully, baseUri, networkingEngine,
       linkDepth = 0) {
-    const MpdUtils = MpdUtils;
+    // const MpdUtils = MpdUtils;
     const XmlUtils = shaka.util.XmlUtils;
     const NS = MpdUtils.XlinkNamespaceUri_;
 

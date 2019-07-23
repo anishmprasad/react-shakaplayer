@@ -145,8 +145,8 @@ export default class SegmentTemplate {
 	 * @private
 	 */
 	static parseSegmentTemplateInfo_(context) {
-		const SegmentTemplate = SegmentTemplate;
-		const MpdUtils = MpdUtils;
+		// const SegmentTemplate = SegmentTemplate;
+		// const MpdUtils = MpdUtils;
 		const segmentInfo = MpdUtils.parseSegmentInfo(context, SegmentTemplate.fromInheritance_);
 
 		const media = MpdUtils.inheritAttribute(context, SegmentTemplate.fromInheritance_, 'media');
@@ -280,8 +280,8 @@ export default class SegmentTemplate {
 	 */
 	static createFromDuration_(context, info) {
 		window.asserts.assert(info.mediaTemplate, 'There should be a media template with duration');
-		const MpdUtils = MpdUtils;
-		const ManifestParserUtils = ManifestParserUtils;
+		// const MpdUtils = MpdUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
 
 		const periodDuration = context.periodInfo.duration;
 		const segmentDuration = info.segmentDuration;
@@ -348,8 +348,8 @@ export default class SegmentTemplate {
 	 * @private
 	 */
 	static createFromTimeline_(context, info) {
-		const MpdUtils = MpdUtils;
-		const ManifestParserUtils = ManifestParserUtils;
+		// const MpdUtils = MpdUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
 
 		/** @type {!Array.<!SegmentReference>} */
 		const references = [];
@@ -392,9 +392,9 @@ export default class SegmentTemplate {
 	 * @private
 	 */
 	static createInitSegment_(context) {
-		const MpdUtils = MpdUtils;
-		const ManifestParserUtils = ManifestParserUtils;
-		const SegmentTemplate = SegmentTemplate;
+		// const MpdUtils = MpdUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
+		// const SegmentTemplate = SegmentTemplate;
 
 		const initialization = MpdUtils.inheritAttribute(context, SegmentTemplate.fromInheritance_, 'initialization');
 		if (!initialization) {
