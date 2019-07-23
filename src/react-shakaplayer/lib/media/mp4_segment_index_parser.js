@@ -23,10 +23,14 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.Mp4Parser');
 
+import Mp4Parser from '../util/mp4_parser';
+import Error from '../util/error';
+import SegmentReference from '../media/segment_reference';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
-shaka.media.Mp4SegmentIndexParser = class {
+export default class Mp4SegmentIndexParser {
 	/**
 	 * Parses SegmentReferences from an ISO BMFF SIDX structure.
 	 * @param {!ArrayBuffer} sidxData The MP4's container's SIDX.
@@ -158,4 +162,4 @@ shaka.media.Mp4SegmentIndexParser = class {
 		box.parser.stop();
 		return references;
 	}
-};
+}

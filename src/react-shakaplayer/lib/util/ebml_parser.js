@@ -23,6 +23,12 @@
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.Uint8ArrayUtils');
 
+import DataViewReader from '../util/data_view_reader';
+import Error from '../util/error';
+import Uint8ArrayUtils from '../util/uint8array_utils';
+
+const ErrorUtil = new Error();
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -30,7 +36,7 @@ var goog = window.goog;
  * @summary
  * Extensible Binary Markup Language (EBML) parser.
  */
-shaka.util.EbmlParser = class {
+class EbmlParser {
 	/**
 	 * @param {!DataView} dataView The EBML data.
 	 */
@@ -38,8 +44,8 @@ shaka.util.EbmlParser = class {
 		/** @private {!DataView} */
 		this.dataView_ = dataView;
 
-		/** @private {!shaka.util.DataViewReader} */
-		this.reader_ = new shaka.util.DataViewReader(dataView, shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+		/** @private {!DataViewReader} */
+		this.reader_ = new DataViewReader(dataView, DataViewReader.Endianness.BIG_ENDIAN);
 	}
 
 	/**
@@ -52,8 +58,8 @@ shaka.util.EbmlParser = class {
 	/**
 	 * Parses an EBML element from the parser's current position, and advances
 	 * the parser.
-	 * @return {!shaka.util.EbmlElement} The EBML element.
-	 * @throws {shaka.util.Error}
+	 * @return {!EbmlElement} The EBML element.
+	 * @throws {Error}
 	 * @see http://matroska.org/technical/specs/rfc/index.html
 	 */
 	parseElement() {
@@ -62,12 +68,12 @@ shaka.util.EbmlParser = class {
 		// Parse the element's size.
 		const vint = this.parseVint_();
 		let size;
-		if (shaka.util.EbmlParser.isDynamicSizeValue_(vint)) {
+		if (EbmlParser.isDynamicSizeValue_(vint)) {
 			// If this has an unknown size, assume that it takes up the rest of the
 			// data.
 			size = this.dataView_.byteLength - this.reader_.getPosition();
 		} else {
-			size = shaka.util.EbmlParser.getVintValue_(vint);
+			size = EbmlParser.getVintValue_(vint);
 		}
 
 		// Note that if the element's size is larger than the buffer then we are
@@ -87,13 +93,13 @@ shaka.util.EbmlParser = class {
 
 		this.reader_.skip(elementSize);
 
-		return new shaka.util.EbmlElement(id, dataView);
+		return new EbmlElement(id, dataView);
 	}
 
 	/**
 	 * Parses an EBML ID from the parser's current position, and advances the
 	 * parser.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @return {number} The EBML ID.
 	 * @private
 	 */
@@ -101,11 +107,7 @@ shaka.util.EbmlParser = class {
 		const vint = this.parseVint_();
 
 		if (vint.length > 7) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.EBML_OVERFLOW
-			);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MEDIA, ErrorUtil.code.EBML_OVERFLOW);
 		}
 
 		let id = 0;
@@ -130,11 +132,7 @@ shaka.util.EbmlParser = class {
 	parseVint_() {
 		const firstByte = this.reader_.readUint8();
 		if (firstByte == 0) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.EBML_OVERFLOW
-			);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MEDIA, ErrorUtil.code.EBML_OVERFLOW);
 		}
 
 		// Determine the index of the highest bit set.
@@ -160,7 +158,7 @@ shaka.util.EbmlParser = class {
 	 *   14-bit value: 01xx xxxx xxxx xxxx
 	 *   21-bit value: 001x xxxx xxxx xxxx xxxx xxxx
 	 * @param {!Uint8Array} vint The variable sized integer.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @return {number} The value of the variable sized integer.
 	 * @private
 	 */
@@ -171,11 +169,7 @@ shaka.util.EbmlParser = class {
 		// 0000 0001 | xxxx xxxx ...
 		// Thus, the first 3 bits following the first byte of |vint| must be 0.
 		if (vint.length == 8 && vint[1] & 0xe0) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.JS_INTEGER_OVERFLOW
-			);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MEDIA, ErrorUtil.code.JS_INTEGER_OVERFLOW);
 		}
 
 		// Mask out the first few bits of |vint|'s first byte to get the most
@@ -201,8 +195,8 @@ shaka.util.EbmlParser = class {
 	 * @private
 	 */
 	static isDynamicSizeValue_(vint) {
-		const EbmlParser = shaka.util.EbmlParser;
-		const Uint8ArrayUtils = shaka.util.Uint8ArrayUtils;
+		// const EbmlParser = EbmlParser;
+		// const Uint8ArrayUtils = Uint8ArrayUtils;
 
 		for (const dynamicSizeConst of EbmlParser.DYNAMIC_SIZES) {
 			if (Uint8ArrayUtils.equal(vint, dynamicSizeConst)) {
@@ -212,13 +206,13 @@ shaka.util.EbmlParser = class {
 
 		return false;
 	}
-};
+}
 
 /**
  * A list of EBML dynamic size constants.
  * @const {!Array.<!Array.<number>>}
  */
-shaka.util.EbmlParser.DYNAMIC_SIZES = [
+EbmlParser.DYNAMIC_SIZES = [
 	[0xff],
 	[0x7f, 0xff],
 	[0x3f, 0xff, 0xff],
@@ -229,7 +223,7 @@ shaka.util.EbmlParser.DYNAMIC_SIZES = [
 	[0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
 ];
 
-shaka.util.EbmlElement = class {
+class EbmlElement {
 	/**
 	 * @param {number} id The ID.
 	 * @param {!DataView} dataView The DataView.
@@ -252,34 +246,26 @@ shaka.util.EbmlElement = class {
 
 	/**
 	 * Interpret the element's data as a list of sub-elements.
-	 * @throws {shaka.util.Error}
-	 * @return {!shaka.util.EbmlParser} A parser over the sub-elements.
+	 * @throws {Error}
+	 * @return {!EbmlParser} A parser over the sub-elements.
 	 */
 	createParser() {
-		return new shaka.util.EbmlParser(this.dataView_);
+		return new EbmlParser(this.dataView_);
 	}
 
 	/**
 	 * Interpret the element's data as an unsigned integer.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @return {number}
 	 */
 	getUint() {
 		if (this.dataView_.byteLength > 8) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.EBML_OVERFLOW
-			);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MEDIA, ErrorUtil.code.EBML_OVERFLOW);
 		}
 
 		// Ensure we have at most 53 meaningful bits.
 		if (this.dataView_.byteLength == 8 && this.dataView_.getUint8(0) & 0xe0) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.JS_INTEGER_OVERFLOW
-			);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MEDIA, ErrorUtil.code.JS_INTEGER_OVERFLOW);
 		}
 
 		let value = 0;
@@ -295,7 +281,7 @@ shaka.util.EbmlElement = class {
 	/**
 	 * Interpret the element's data as a floating point number
 	 * (32 bits or 64 bits). 80-bit floating point numbers are not supported.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @return {number}
 	 */
 	getFloat() {
@@ -304,11 +290,13 @@ shaka.util.EbmlElement = class {
 		} else if (this.dataView_.byteLength == 8) {
 			return this.dataView_.getFloat64(0);
 		} else {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.EBML_BAD_FLOATING_POINT_SIZE
+			throw new Error(
+				ErrorUtil.severity.CRITICAL,
+				ErrorUtil.category.MEDIA,
+				ErrorUtil.code.EBML_BAD_FLOATING_POINT_SIZE
 			);
 		}
 	}
-};
+}
+
+export { EbmlElement, EbmlParser };

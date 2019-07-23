@@ -24,10 +24,14 @@
 // goog.require('shaka.util.EbmlParser');
 // goog.require('shaka.util.Error');
 
+import SegmentReference from '../media/segment_reference';
+import { EbmlElement, EbmlParser } from '../util/ebml_parser';
+import Error from '../util/error';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
-shaka.media.WebmSegmentIndexParser = class {
+export default class WebmSegmentIndexParser {
 	/**
    * Parses SegmentReferences from a WebM container.
    * @param {!ArrayBuffer} cuesData The WebM container's "Cueing Data" section.
@@ -316,7 +320,7 @@ shaka.media.WebmSegmentIndexParser = class {
 
 		return { unscaledTime: unscaledTime, relativeOffset: relativeOffset };
 	}
-};
+}
 
 /** @const {number} */
 shaka.media.WebmSegmentIndexParser.EBML_ID = 0x1a45dfa3;
