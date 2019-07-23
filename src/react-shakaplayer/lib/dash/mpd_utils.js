@@ -28,6 +28,13 @@
 // goog.require('shaka.util.ManifestParserUtils');
 // goog.require('shaka.util.XmlUtils');
 
+import AbortableOperation from '../util/abortable_operation'
+import Error from '../util/error'
+import Functional from '../util/functional'
+import ManifestParserUtils from '../util/manifest_parser_utils'
+import XmlUtils from '../util/xml_utils'
+import NetworkingEngine from '../net/networking_engine'
+
 const shaka  = window.shaka
 
 /**
@@ -144,7 +151,7 @@ export default class MpdUtils {
         periodDuration > 0, 'period duration must be a positive integer');
 
     // Alias.
-    const XmlUtils = shaka.util.XmlUtils;
+    // const XmlUtils = XmlUtils;
 
     const timePoints = XmlUtils.findChildren(segmentTimeline, 'S');
 
@@ -227,7 +234,7 @@ export default class MpdUtils {
         const delta = startTime - lastEndTime;
 
         if (Math.abs(delta / timescale) >=
-            shaka.util.ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS) {
+            ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS) {
           shaka.log.warning(
               'SegmentTimeline contains a large gap/overlap:',
               'the content may have errors in it.', timePoint);
@@ -266,7 +273,7 @@ export default class MpdUtils {
         callback(context.representation),
         'There must be at least one element of the given type.');
     // const MpdUtils = MpdUtils;
-    const XmlUtils = shaka.util.XmlUtils;
+    // const XmlUtils = XmlUtils;
 
     const timescaleStr =
         MpdUtils.inheritAttribute(context, callback, 'timescale');
@@ -324,7 +331,7 @@ export default class MpdUtils {
    * @return {?string}
    */
   static inheritAttribute(context, callback, attribute) {
-    const Functional = shaka.util.Functional;
+    const Functional = Functional;
     window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type');
@@ -351,7 +358,7 @@ export default class MpdUtils {
    * @return {Element}
    */
   static inheritChild(context, callback, child) {
-    const Functional = shaka.util.Functional;
+    const Functional = Functional;
     window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type');
@@ -363,7 +370,7 @@ export default class MpdUtils {
       callback(context.period),
     ].filter(Functional.isNotNull);
 
-    const XmlUtils = shaka.util.XmlUtils;
+    // const XmlUtils = XmlUtils;
     return nodes
         .map((s) => { return XmlUtils.findChild(s, child); })
         .reduce((all, part) => { return all || part; });
@@ -380,16 +387,16 @@ export default class MpdUtils {
    * @param {string} baseUri
    * @param {!shaka.net.NetworkingEngine} networkingEngine
    * @param {number} linkDepth
-   * @return {!shaka.util.AbortableOperation.<!Element>}
+   * @return {!AbortableOperation.<!Element>}
    * @private
    */
   static handleXlinkInElement_(
       element, retryParameters, failGracefully, baseUri, networkingEngine,
       linkDepth) {
     // const MpdUtils = MpdUtils;
-    const XmlUtils = shaka.util.XmlUtils;
-    const Error = shaka.util.Error;
-    const ManifestParserUtils = shaka.util.ManifestParserUtils;
+    // const XmlUtils = XmlUtils;
+    // const Error = Error;
+    // const ManifestParserUtils = ManifestParserUtils;
     const NS = MpdUtils.XlinkNamespaceUri_;
 
     const xlinkHref = XmlUtils.getAttributeNS(element, NS, 'href');
@@ -407,7 +414,7 @@ export default class MpdUtils {
     }
 
     if (linkDepth >= 5) {
-      return shaka.util.AbortableOperation.failed(new Error(
+      return AbortableOperation.failed(new Error(
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_XLINK_DEPTH_LIMIT));
     }
@@ -415,7 +422,7 @@ export default class MpdUtils {
     if (xlinkActuate != 'onLoad') {
       // Only xlink:actuate="onLoad" is supported.
       // When no value is specified, the assumed value is "onRequest".
-      return shaka.util.AbortableOperation.failed(new Error(
+      return AbortableOperation.failed(new Error(
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
           Error.Code.DASH_UNSUPPORTED_XLINK_ACTUATE));
     }
@@ -432,11 +439,11 @@ export default class MpdUtils {
     // The interface is abstract, but we know it was implemented with the
     // more capable internal class.
     window.asserts.assert(
-        requestOperation instanceof shaka.util.AbortableOperation,
+        requestOperation instanceof AbortableOperation,
         'Unexpected implementation of IAbortableOperation!');
     // Satisfy the compiler with a cast.
     const networkOperation =
-    /** @type {!shaka.util.AbortableOperation.<shaka.extern.Response>} */ (
+    /** @type {!AbortableOperation.<shaka.extern.Response>} */ (
         requestOperation);
 
     // Chain onto that operation.
@@ -446,10 +453,10 @@ export default class MpdUtils {
           // top-level element.  If there are multiple roots, it will be
           // rejected.
           const rootElem =
-          shaka.util.XmlUtils.parseXml(response.data, element.tagName);
+          XmlUtils.parseXml(response.data, element.tagName);
           if (!rootElem) {
             // It was not valid XML.
-            return shaka.util.AbortableOperation.failed(new Error(
+            return AbortableOperation.failed(new Error(
                 Error.Severity.CRITICAL, Error.Category.MANIFEST,
                 Error.Code.DASH_INVALID_XML, xlinkHref));
           }
@@ -492,13 +499,13 @@ export default class MpdUtils {
    * @param {string} baseUri
    * @param {!shaka.net.NetworkingEngine} networkingEngine
    * @param {number=} linkDepth, default set to 0
-   * @return {!shaka.util.AbortableOperation.<!Element>}
+   * @return {!AbortableOperation.<!Element>}
    */
   static processXlinks(
       element, retryParameters, failGracefully, baseUri, networkingEngine,
       linkDepth = 0) {
     // const MpdUtils = MpdUtils;
-    const XmlUtils = shaka.util.XmlUtils;
+    // const XmlUtils = XmlUtils;
     const NS = MpdUtils.XlinkNamespaceUri_;
 
     if (XmlUtils.getAttributeNS(element, NS, 'href')) {
@@ -542,7 +549,7 @@ export default class MpdUtils {
       }
     }
 
-    return shaka.util.AbortableOperation.all(childOperations).chain(() => {
+    return AbortableOperation.all(childOperations).chain(() => {
       return element;
     });
   }
