@@ -23,6 +23,8 @@
 import PublicPromise from '../util/public_promise';
 import Error from '../util/error';
 
+const ErrorUtil = new Error();
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -77,7 +79,7 @@ class AbortableOperation {
 	 */
 	static aborted() {
 		const p = Promise.reject(
-			new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED)
+			new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.PLAYER, ErrorUtil.code.OPERATION_ABORTED)
 		);
 		// Silence uncaught rejection errors, which may otherwise occur any place
 		// we don't explicitly handle aborted operations.
@@ -167,7 +169,9 @@ class AbortableOperation {
 
 		// If called before "this" completes, just abort "this".
 		let abort = () => {
-			newPromise.reject(new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED));
+			newPromise.reject(
+				new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.PLAYER, ErrorUtil.code.OPERATION_ABORTED)
+			);
 			return this.abort();
 		};
 
@@ -178,7 +182,11 @@ class AbortableOperation {
 					// is complete but before the next stage in the chain begins, we should
 					// stop right away.
 					newPromise.reject(
-						new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.OPERATION_ABORTED)
+						new Error(
+							ErrorUtil.severity.CRITICAL,
+							ErrorUtil.category.PLAYER,
+							ErrorUtil.code.OPERATION_ABORTED
+						)
 					);
 					return;
 				}

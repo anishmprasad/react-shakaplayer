@@ -25,7 +25,7 @@
 
 import Mp4Parser from '../util/mp4_parser';
 import Error from '../util/error';
-import SegmentReference from '../media/segment_reference';
+import { SegmentReference } from '../media/segment_reference';
 
 var shaka = window.shaka;
 var goog = window.goog;

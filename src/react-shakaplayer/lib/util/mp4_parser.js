@@ -50,8 +50,8 @@ class Mp4Parser {
 	 * @export
 	 */
 	box(type, definition) {
-		const typeCode = shaka.util.Mp4Parser.typeFromString_(type);
-		this.headers_[typeCode] = shaka.util.Mp4Parser.BoxType_.BASIC_BOX;
+		const typeCode = Mp4Parser.typeFromString_(type);
+		this.headers_[typeCode] = Mp4Parser.BoxType_.BASIC_BOX;
 		this.boxDefinitions_[typeCode] = definition;
 		return this;
 	}
@@ -65,8 +65,8 @@ class Mp4Parser {
 	 * @export
 	 */
 	fullBox(type, definition) {
-		const typeCode = shaka.util.Mp4Parser.typeFromString_(type);
-		this.headers_[typeCode] = shaka.util.Mp4Parser.BoxType_.FULL_BOX;
+		const typeCode = Mp4Parser.typeFromString_(type);
+		this.headers_[typeCode] = Mp4Parser.BoxType_.FULL_BOX;
 		this.boxDefinitions_[typeCode] = definition;
 		return this;
 	}
@@ -119,7 +119,7 @@ class Mp4Parser {
 
 		let size = reader.readUint32();
 		const type = reader.readUint32();
-		const name = shaka.util.Mp4Parser.typeToString(type);
+		const name = Mp4Parser.typeToString(type);
 		shaka.log.v2('Parsing MP4 box', name);
 
 		switch (size) {
@@ -137,7 +137,7 @@ class Mp4Parser {
 			let version = null;
 			let flags = null;
 
-			if (this.headers_[type] == shaka.util.Mp4Parser.BoxType_.FULL_BOX) {
+			if (this.headers_[type] === Mp4Parser.BoxType_.FULL_BOX) {
 				const versionAndFlags = reader.readUint32();
 				version = versionAndFlags >>> 24;
 				flags = versionAndFlags & 0xffffff;

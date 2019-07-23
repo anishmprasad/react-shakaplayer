@@ -41,7 +41,7 @@ class DataViewReader {
 		this.dataView_ = dataView;
 
 		/** @private {boolean} */
-		this.littleEndian_ = endianness == shaka.util.DataViewReader.Endianness.LITTLE_ENDIAN;
+		this.littleEndian_ = endianness === DataViewReader.Endianness.LITTLE_ENDIAN;
 
 		/** @private {number} */
 		this.position_ = 0;
