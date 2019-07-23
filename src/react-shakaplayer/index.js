@@ -32,7 +32,7 @@ import 'tippy.js/umd/index.min.js';
 // import '../dist/demo.compiled.debug.js';
 
 // Bootstrap the Shaka Player library through the Closure library.
-// import './third_party/closure/goog/base.js';
+import './third_party/closure/goog/base.js';
 // import './dist/deps.js';
 // This is required for goog.asserts.
 import './lib/debug/asserts.js';

@@ -27,9 +27,9 @@ var goog = window.goog;
  */
 class ErrorUtils {
 	/**
-	 * @param {shaka.util.Error.Severity} severity
-	 * @param {shaka.util.Error.Category} category
-	 * @param {shaka.util.Error.Code} code
+	 * @param {ErrorUtils.Severity} severity
+	 * @param {ErrorUtils.Category} category
+	 * @param {ErrorUtils.Code} code
 	 * @param {...*} varArgs
 	 */
 	constructor(severity, category, code, ...varArgs) {
@@ -64,13 +64,13 @@ class ErrorUtils {
 			let categoryName = 'UNKNOWN';
 			let codeName = 'UNKNOWN';
 
-			for (const k in shaka.util.Error.Category) {
-				if (shaka.util.Error.Category[k] == this.category) {
+			for (const k in ErrorUtils.Category) {
+				if (ErrorUtils.Category[k] == this.category) {
 					categoryName = k;
 				}
 			}
-			for (const k in shaka.util.Error.Code) {
-				if (shaka.util.Error.Code[k] == this.code) {
+			for (const k in ErrorUtils.Code) {
+				if (ErrorUtils.Code[k] == this.code) {
 					codeName = k;
 				}
 			}
@@ -84,7 +84,7 @@ class ErrorUtils {
 			 */
 			this.message = 'Shaka Error ' + categoryName + '.' + codeName + ' (' + this.data.toString() + ')';
 
-			if (shaka.util.Error.createStack) {
+			if (ErrorUtils.createStack) {
 				try {
 					throw new Error(this.message);
 				} catch (e) {
@@ -106,7 +106,7 @@ class ErrorUtils {
 	 * @override
 	 */
 	toString() {
-		return 'shaka.util.Error ' + JSON.stringify(this, null, '  ');
+		return 'Error ' + JSON.stringify(this, null, '  ');
 	}
 	/**
 	 * @enum {number}
@@ -881,7 +881,7 @@ if (goog.DEBUG) {
 	 *
 	 * @type {boolean}
 	 */
-	shaka.util.Error.createStack = true;
+	ErrorUtils.createStack = true;
 }
 
 export default ErrorUtils;

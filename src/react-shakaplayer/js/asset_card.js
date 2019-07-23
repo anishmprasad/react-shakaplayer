@@ -7,6 +7,7 @@ import ShakaDemoTooltips from './tooltip';
 import shakaAssets from './common/assets';
 import shakaDemoMain from './main';
 import { dialogPolyfill } from '../externs/dialog_polyfill';
+import Dom from '../lib/util/dom_utils';
 
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -20,7 +21,7 @@ export default class AssetCard {
 	 * @param {function(!AssetCard)} remakeButtonsFn
 	 */
 	constructor(parentDiv, asset, isFeatured, remakeButtonsFn) {
-		console.log(parentDiv, asset, isFeatured, remakeButtonsFn);
+		// console.log(parentDiv, asset, isFeatured, remakeButtonsFn);
 		/** @private {!Element} */
 		this.card_ = document.createElement('div');
 		/** @private {!ShakaDemoAssetInfo} */
@@ -206,7 +207,7 @@ export default class AssetCard {
 
 	/** Remake the buttons of the card. */
 	remakeButtons() {
-		shaka.util.Dom.removeAllChildren(this.actions_);
+		Dom.removeAllChildren(this.actions_);
 		this.remakeButtonsFn_(this);
 	}
 

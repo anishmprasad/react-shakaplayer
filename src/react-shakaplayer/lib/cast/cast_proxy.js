@@ -52,7 +52,7 @@ var goog = window.goog;
  * @summary A proxy to switch between local and remote playback for Chromecast
  * in a way that is transparent to the app's controls.
  *
- * @implements {shaka.util.IDestroyable}
+ * @implements {IDestroyable}
  * @export
  */
 export default class CastProxy extends FakeEventTarget {
@@ -79,13 +79,13 @@ export default class CastProxy extends FakeEventTarget {
 		/** @private {Object} */
 		this.playerProxy_ = null;
 
-		/** @private {shaka.util.FakeEventTarget} */
+		/** @private {FakeEventTarget} */
 		this.videoEventTarget_ = null;
 
-		/** @private {shaka.util.FakeEventTarget} */
+		/** @private {FakeEventTarget} */
 		this.playerEventTarget_ = null;
 
-		/** @private {shaka.util.EventManager} */
+		/** @private {EventManager} */
 		this.eventManager_ = null;
 
 		/** @private {string} */
@@ -207,11 +207,7 @@ export default class CastProxy extends FakeEventTarget {
 	 */
 	async cast() {
 		if (!this.sender_) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.RECOVERABLE,
-				shaka.util.Error.Category.CAST,
-				shaka.util.Error.Code.CAST_RECEIVER_APP_ID_MISSING
-			);
+			throw new Error(Error.Severity.RECOVERABLE, Error.Category.CAST, Error.Code.CAST_RECEIVER_APP_ID_MISSING);
 		}
 
 		const initState = this.getInitState_();
@@ -444,7 +440,7 @@ export default class CastProxy extends FakeEventTarget {
 	 * @private
 	 */
 	onCastStatusChanged_() {
-		const event = new shaka.util.FakeEvent('caststatuschanged');
+		const event = new FakeEvent('caststatuschanged');
 		this.dispatchEvent(event);
 	}
 
@@ -455,7 +451,7 @@ export default class CastProxy extends FakeEventTarget {
 	 */
 	onFirstCastStateUpdate_() {
 		const type = this.videoProxy_.paused ? 'pause' : 'play';
-		const fakeEvent = new shaka.util.FakeEvent(type);
+		const fakeEvent = new FakeEvent(type);
 		this.videoEventTarget_.dispatchEvent(fakeEvent);
 	}
 
@@ -530,8 +526,8 @@ export default class CastProxy extends FakeEventTarget {
 			},
 			error => {
 				// Pass any errors through to the app.
-				window.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
-				const event = new shaka.util.FakeEvent('error', { detail: error });
+				window.asserts.assert(error instanceof Error, 'Wrong error type!');
+				const event = new FakeEvent('error', { detail: error });
 				this.localPlayer_.dispatchEvent(event);
 			}
 		);
@@ -604,7 +600,7 @@ export default class CastProxy extends FakeEventTarget {
 
 		// Convert this real Event into a FakeEvent for dispatch from our
 		// FakeEventListener.
-		const fakeEvent = new shaka.util.FakeEvent(event.type, event);
+		const fakeEvent = new FakeEvent(event.type, event);
 		this.videoEventTarget_.dispatchEvent(fakeEvent);
 	}
 
@@ -704,7 +700,7 @@ export default class CastProxy extends FakeEventTarget {
 
 	/**
 	 * @param {string} targetName
-	 * @param {!shaka.util.FakeEvent} event
+	 * @param {!FakeEvent} event
 	 * @private
 	 */
 	onRemoteEvent_(targetName, event) {

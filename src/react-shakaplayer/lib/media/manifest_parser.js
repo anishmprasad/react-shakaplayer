@@ -26,6 +26,10 @@
 
 import Platform from '../util/platform';
 import NetworkingEngine from '../net/networking_engine';
+import Uri from '../../third_party/closure/goog/uri/uri';
+import Error from '../util/error';
+
+const ErrorUtil = new Error();
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -65,7 +69,7 @@ class ManifestParser {
 	 * @return {!Object.<string, boolean>}
 	 */
 	static probeSupport() {
-		// const ManifestParser = shaka.media.ManifestParser;
+		// const ManifestParser = ManifestParser;
 		const support = {};
 
 		// Make sure all registered parsers are shown, but only for MSE-enabled
@@ -135,15 +139,15 @@ class ManifestParser {
 	 */
 	static async create(uri, netEngine, retryParams, mimeType) {
 		try {
-			const Factory = await shaka.media.ManifestParser.getFactory_(uri, netEngine, retryParams, mimeType);
+			const Factory = await ManifestParser.getFactory_(uri, netEngine, retryParams, mimeType);
 
 			return new Factory();
 		} catch (error) {
 			window.asserts.assert(error instanceof Error, 'Incorrect error type');
 
 			// Regardless of what the error was, we need to upgrade it to a critical
-			// error. We can't do anything if we can't create a manifest parser.
-			error.severity = Error.Severity.CRITICAL;
+			// ErrorUtil. We can't do anything if we can't create a manifest parser.
+			error.severity = ErrorUtil.severity.CRITICAL;
 
 			throw error;
 		}
@@ -161,7 +165,7 @@ class ManifestParser {
 	 * @private
 	 */
 	static async getFactory_(uri, netEngine, retryParams, mimeType) {
-		// const ManifestParser = shaka.media.ManifestParser;
+		// const ManifestParser = ManifestParser;
 
 		// Try using the MIME type we were given.
 		if (mimeType) {
@@ -189,7 +193,7 @@ class ManifestParser {
 			mimeType = await ManifestParser.getMimeType(uri, netEngine, retryParams);
 
 			if (mimeType) {
-				const factory = shaka.media.ManifestParser.parsersByMime[mimeType];
+				const factory = ManifestParser.parsersByMime[mimeType];
 				if (factory) {
 					return factory;
 				}
@@ -198,10 +202,10 @@ class ManifestParser {
 			}
 		}
 
-		throw new Error(
-			Error.Severity.CRITICAL,
-			Error.Category.MANIFEST,
-			Error.Code.UNABLE_TO_GUESS_MANIFEST_TYPE,
+		throw new ErrorUtil(
+			ErrorUtil.severity.CRITICAL,
+			ErrorUtil.category.MANIFEST,
+			ErrorUtil.code.UNABLE_TO_GUESS_MANIFEST_TYPE,
 			uri
 		);
 	}
@@ -231,7 +235,7 @@ class ManifestParser {
 	 * @return {string}
 	 */
 	static getExtension(uri) {
-		const uriObj = new goog.Uri(uri);
+		const uriObj = new Uri(uri);
 		const uriPieces = uriObj.getPath().split('/');
 		const uriFilename = uriPieces.pop();
 		const filenamePieces = uriFilename.split('.');

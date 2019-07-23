@@ -1019,7 +1019,7 @@ export default class Player extends FakeEventTarget {
 	 * @private
 	 */
 	shouldUseSrcEquals_(payload) {
-		const Platform = Platform;
+		// const Platform = Platform;
 
 		// If an explicit ManifestParser factory has been given, we can't do src=.
 		if (payload.factory) {

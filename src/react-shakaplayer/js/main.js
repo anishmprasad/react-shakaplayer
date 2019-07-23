@@ -34,6 +34,8 @@ import PlayerConfiguration from '../lib/util/player_configuration'
 import Localization from '../ui/localization'
 import Storage from '../lib/offline/storage'
 import Player from '../lib/player'
+import SimpleTextDisplayer from '../lib/text/simple_text_displayer'
+import TextDisplayer from '../ui/text_displayer'
 import localeJson from '../ui/locales/en-GB.json'
 
 // console.log({ localeJson})
@@ -43,7 +45,7 @@ import localeJson from '../ui/locales/en-GB.json'
 
 const errorUtils = new error()
 
-// console.log(errorUtils)
+console.log({errorUtils})
 
 const shaka  = window.shaka
 
@@ -953,7 +955,7 @@ class ShakaDemoMain {
       // eslint-disable-next-line no-restricted-syntax
       const textDisplayer = function() {
         if (self.nativeControlsEnabled_) {
-          return new shaka.text.SimpleTextDisplayer(self.video_);
+          return new SimpleTextDisplayer(self.video_);
         } else {
           return new TextDisplayer(self.video_, self.container_);
         }
@@ -970,7 +972,7 @@ class ShakaDemoMain {
       }
     } catch (reason) {
       const error = /** @type {!Error} */ (reason);
-      if (error.code == Error.Code.LOAD_INTERRUPTED) {
+      if (error.code == errorUtils.code.LOAD_INTERRUPTED) {
         // Don't use shaka.log, which is not present in compiled builds.
         console.debug('load() interrupted');
       } else {

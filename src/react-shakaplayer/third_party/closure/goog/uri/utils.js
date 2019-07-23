@@ -22,9 +22,8 @@
  * @author msamuel@google.com (Mike Samuel) - Domain knowledge and regexes.
  */
 
-goog.provide('goog.uri.utils');
-goog.provide('goog.uri.utils.ComponentIndex');
-
+// goog.provide('goog.uri.utils');
+// goog.provide('goog.uri.utils.ComponentIndex');
 
 /**
  * A regular expression for breaking a URI into its component parts.
@@ -88,39 +87,38 @@ goog.provide('goog.uri.utils.ComponentIndex');
  * @type {!RegExp}
  * @private
  */
-goog.uri.utils.splitRe_ = new RegExp(
-    '^' +
-    '(?:' +
-        '([^:/?#.]+)' +                  // scheme - ignore special characters
-                                         // used by other URL parts such as :,
-                                         // ?, /, #, and .
-    ':)?' +
-    '(?://' +
-        '(?:([^/?#]*)@)?' +              // userInfo
-        '([^/#?]*?)' +                   // domain
-        '(?::([0-9]+))?' +               // port
-        '(?=[/#?]|$)' +                  // authority-terminating character
-    ')?' +
-    '([^?#]+)?' +                        // path
-    '(?:\\?([^#]*))?' +                  // query
-    '(?:#(.*))?' +                       // fragment
-    '$');
-
+const splitRe_ = new RegExp(
+	'^' +
+	'(?:' +
+	'([^:/?#.]+)' + // scheme - ignore special characters
+	// used by other URL parts such as :,
+	// ?, /, #, and .
+	':)?' +
+	'(?://' +
+	'(?:([^/?#]*)@)?' + // userInfo
+	'([^/#?]*?)' + // domain
+	'(?::([0-9]+))?' + // port
+	'(?=[/#?]|$)' + // authority-terminating character
+	')?' +
+	'([^?#]+)?' + // path
+	'(?:\\?([^#]*))?' + // query
+	'(?:#(.*))?' + // fragment
+		'$'
+);
 
 /**
  * The index of each URI component in the return value of goog.uri.utils.split.
  * @enum {number}
  */
-goog.uri.utils.ComponentIndex = {
-  SCHEME: 1,
-  USER_INFO: 2,
-  DOMAIN: 3,
-  PORT: 4,
-  PATH: 5,
-  QUERY_DATA: 6,
-  FRAGMENT: 7
+const ComponentIndex = {
+	SCHEME: 1,
+	USER_INFO: 2,
+	DOMAIN: 3,
+	PORT: 4,
+	PATH: 5,
+	QUERY_DATA: 6,
+	FRAGMENT: 7
 };
-
 
 /**
  * Splits a URI into its component parts.
@@ -137,8 +135,9 @@ goog.uri.utils.ComponentIndex = {
  *     on the browser's regular expression implementation.  Never null, since
  *     arbitrary strings may still look like path names.
  */
-goog.uri.utils.split = function(uri) {
-  // See @return comment -- never null.
-  return /** @type {!Array.<string|undefined>} */ (
-      uri.match(goog.uri.utils.splitRe_));
+const split = function(uri) {
+	// See @return comment -- never null.
+	return /** @type {!Array.<string|undefined>} */ (uri.match(splitRe_));
 };
+
+export { split, ComponentIndex, splitRe_ };

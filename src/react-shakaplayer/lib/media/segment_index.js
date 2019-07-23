@@ -35,7 +35,7 @@ var goog = window.goog;
  */
 export default class SegmentIndex {
 	/**
-	 * @param {!Array.<!shaka.media.SegmentReference>} references The list of
+	 * @param {!Array.<!SegmentReference>} references The list of
 	 *   SegmentReferences, which must be sorted first by their start times
 	 *   (ascending) and second by their end times (ascending).  They must have
 	 *   continuous, increasing positions.
@@ -45,7 +45,7 @@ export default class SegmentIndex {
 			SegmentIndex.assertCorrectReferences_(references);
 		}
 
-		/** @private {Array.<!shaka.media.SegmentReference>} */
+		/** @private {Array.<!SegmentReference>} */
 		this.references_ = references;
 	}
 
@@ -91,7 +91,7 @@ export default class SegmentIndex {
 	 * Gets the SegmentReference for the segment at the given position.
 	 *
 	 * @param {number} position The position of the segment.
-	 * @return {shaka.media.SegmentReference} The SegmentReference, or null if
+	 * @return {SegmentReference} The SegmentReference, or null if
 	 *   no such SegmentReference exists.
 	 * @export
 	 */
@@ -126,7 +126,7 @@ export default class SegmentIndex {
 	 * Merges the given SegmentReferences.  Supports extending the original
 	 * references only.  Will not replace old references or interleave new ones.
 	 *
-	 * @param {!Array.<!shaka.media.SegmentReference>} references The list of
+	 * @param {!Array.<!SegmentReference>} references The list of
 	 *   SegmentReferences, which must be sorted first by their start times
 	 *   (ascending) and second by their end times (ascending).  They must have
 	 *   continuous, increasing positions.
@@ -134,7 +134,7 @@ export default class SegmentIndex {
 	 */
 	merge(references) {
 		if (goog.DEBUG) {
-			shaka.media.SegmentIndex.assertCorrectReferences_(references);
+			SegmentIndex.assertCorrectReferences_(references);
 		}
 
 		let newReferences = [];
@@ -212,7 +212,7 @@ export default class SegmentIndex {
 		}
 
 		if (goog.DEBUG) {
-			shaka.media.SegmentIndex.assertCorrectReferences_(newReferences);
+			SegmentIndex.assertCorrectReferences_(newReferences);
 		}
 
 		this.references_ = newReferences;
@@ -221,11 +221,11 @@ export default class SegmentIndex {
 	/**
 	 * Replace existing references with new ones, without merging.
 	 *
-	 * @param {!Array.<!shaka.media.SegmentReference>} newReferences
+	 * @param {!Array.<!SegmentReference>} newReferences
 	 */
 	replace(newReferences) {
 		if (goog.DEBUG) {
-			shaka.media.SegmentIndex.assertCorrectReferences_(newReferences);
+			SegmentIndex.assertCorrectReferences_(newReferences);
 		}
 		this.references_ = newReferences;
 	}
@@ -303,10 +303,10 @@ if (goog.DEBUG) {
 	 * Asserts that the given SegmentReferences are sorted and have continuous,
 	 * increasing positions.
 	 *
-	 * @param {!Array.<shaka.media.SegmentReference>} references
+	 * @param {!Array.<SegmentReference>} references
 	 * @private
 	 */
-	shaka.media.SegmentIndex.assertCorrectReferences_ = references => {
+	SegmentIndex.assertCorrectReferences_ = references => {
 		window.asserts.assert(
 			references.every((r2, i) => {
 				if (i == 0) {
