@@ -54,6 +54,8 @@ import Networking from '../util/networking'
 import Periods from '../util/periods'
 import PublicPromise from '../util/public_promise'
 
+const ErrorUtil = new Error()
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -276,9 +278,9 @@ class StreamingEngine {
     if (!initialStreams.variant && !initialStreams.text) {
       shaka.log.error('init: no Streams chosen');
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.STREAMING,
-          Error.Code.INVALID_STREAMS_CHOSEN);
+        ErrorUtil.severity.CRITICAL,
+        ErrorUtil.category.STREAMING,
+        ErrorUtil.code.INVALID_STREAMS_CHOSEN);
     }
 
     // Setup the initial set of Streams and then begin each update cycle. After
@@ -1600,7 +1602,7 @@ class StreamingEngine {
 
       if (mediaState.type == ContentType.TEXT &&
           this.config_.ignoreTextStreamFailures) {
-        if (error.code == Error.Code.BAD_HTTP_STATUS) {
+        if (error.code == ErrorUtil.code.BAD_HTTP_STATUS) {
           shaka.log.warning(logPrefix,
               'Text stream failed to download. Proceeding without it.');
         } else {
@@ -1608,20 +1610,20 @@ class StreamingEngine {
               'Text stream failed to parse. Proceeding without it.');
         }
         this.mediaStates_.delete(ContentType.TEXT);
-      } else if (error.code == Error.Code.OPERATION_ABORTED) {
+      } else if (error.code == ErrorUtil.code.OPERATION_ABORTED) {
         // If the network slows down, abort the current fetch request and start
         // a new one, and ignore the error message.
         mediaState.performingUpdate = false;
         mediaState.updateTimer = null;
         this.scheduleUpdate_(mediaState, 0);
-      } else if (error.code == Error.Code.QUOTA_EXCEEDED_ERROR) {
+      } else if (error.code == ErrorUtil.code.QUOTA_EXCEEDED_ERROR) {
         this.handleQuotaExceeded_(mediaState, error);
       } else {
         shaka.log.error(logPrefix, 'failed fetch and append: code=' +
             error.code);
         mediaState.hasError = true;
 
-        error.severity = Error.Severity.CRITICAL;
+        error.severity = ErrorUtil.severity.CRITICAL;
         this.handleStreamingError_(error);
       }
     }
@@ -2135,9 +2137,9 @@ class StreamingEngine {
         shaka.log.error(logPrefix,
             'invalid Streams chosen: missing ' + type + ' Stream');
         this.playerInterface_.onError(new Error(
-            Error.Severity.CRITICAL,
-            Error.Category.STREAMING,
-            Error.Code.INVALID_STREAMS_CHOSEN));
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.STREAMING,
+          ErrorUtil.code.INVALID_STREAMS_CHOSEN));
         return;
       }
 
@@ -2162,9 +2164,9 @@ class StreamingEngine {
         shaka.log.error(logPrefix,
             'invalid Streams chosen: unusable ' + type + ' Stream');
         this.playerInterface_.onError(new Error(
-            Error.Severity.CRITICAL,
-            Error.Category.STREAMING,
-            Error.Code.INVALID_STREAMS_CHOSEN));
+            ErrorUtil.severity.CRITICAL,
+            ErrorUtil.category.STREAMING,
+            ErrorUtil.code.INVALID_STREAMS_CHOSEN));
         return;
       }
 
@@ -2214,7 +2216,7 @@ class StreamingEngine {
    * @private
    */
   findPeriodForTime_(time) {
-    const ManifestParserUtils = ManifestParserUtils;
+    // const ManifestParserUtils = ManifestParserUtils;
     const threshold = ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS;
 
     // The last segment may end right before the end of the Period because of

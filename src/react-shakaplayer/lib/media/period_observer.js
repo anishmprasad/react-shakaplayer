@@ -20,6 +20,8 @@
 // goog.require('shaka.media.IPlayheadObserver');
 // goog.require('shaka.util.Periods');
 
+import Periods from '../util/periods';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -104,7 +106,7 @@ export default class PeriodObserver {
 	findCurrentPeriod_(currentTimeSeconds) {
 		const periods = this.manifest_.periods;
 
-		const found = shaka.util.Periods.findPeriodForTime(periods, currentTimeSeconds);
+		const found = Periods.findPeriodForTime(periods, currentTimeSeconds);
 
 		// Fallback to periods[0] so that it can never be null. If we join a live
 		// stream, periods[0].startTime may be non-zero. We can't guarantee that
@@ -112,4 +114,4 @@ export default class PeriodObserver {
 		// possible to call findCurrentPeriod_(beforeFirstPeriod).
 		return found || periods[0];
 	}
-};
+}

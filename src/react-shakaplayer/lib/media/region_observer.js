@@ -128,7 +128,7 @@ export default class RegionObserver {
 
 	/** @override */
 	poll(positionInSeconds, wasSeeking) {
-		const RegionObserver = shaka.media.RegionObserver;
+		// const RegionObserver = shaka.media.RegionObserver;
 
 		for (const region of this.timeline_.regions()) {
 			const previousPosition = this.oldPosition_.get(region);

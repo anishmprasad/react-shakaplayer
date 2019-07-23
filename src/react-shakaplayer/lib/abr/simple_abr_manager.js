@@ -111,7 +111,7 @@ export default class SimpleAbrManager {
 	 * @export
 	 */
 	chooseVariant() {
-		const SimpleAbrManager = shaka.abr.SimpleAbrManager;
+		// const SimpleAbrManager = shaka.abr.SimpleAbrManager;
 
 		// Get sorted Variants.
 		let sortedVariants = SimpleAbrManager.filterAndSortVariants_(this.config_.restrictions, this.variants_);
@@ -263,7 +263,7 @@ export default class SimpleAbrManager {
 				// seem to understand that.
 				window.asserts.assert(restrictions, 'Restrictions should exist!');
 
-				return shaka.util.StreamUtils.meetsRestrictions(
+				return StreamUtils.meetsRestrictions(
 					variant,
 					restrictions,
 					/* maxHwRes */ { width: Infinity, height: Infinity }

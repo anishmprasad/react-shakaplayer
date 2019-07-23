@@ -21,6 +21,10 @@
 
 // goog.require('shaka.media.AdaptationSet');
 
+import AdaptationSet from '../media/adaptation_set';
+import StreamUtils from '../util/stream_utils';
+import LanguageUtils from '../util/language_utils';
+
 var shaka = window.shaka;
 // var goog = window.goog;
 
@@ -37,13 +41,13 @@ class AdaptationSetCriteria {
 	 * adapted between.
 	 *
 	 * @param {!Array.<shaka.extern.Variant>} variants
-	 * @return {!shaka.media.AdaptationSet}
+	 * @return {!AdaptationSet}
 	 */
 	create(variants) {}
 }
 
 /**
- * @implements {shaka.media.AdaptationSetCriteria}
+ * @implements {AdaptationSetCriteria}
  * @final
  */
 class ExampleBasedCriteria {
@@ -59,7 +63,7 @@ class ExampleBasedCriteria {
 		const role = '';
 		const channelCount = example.audio && example.audio.channelsCount ? example.audio.channelsCount : 0;
 
-		/** @private {!shaka.media.AdaptationSetCriteria} */
+		/** @private {!AdaptationSetCriteria} */
 		this.fallback_ = new PreferenceBasedCriteria(example.language, role, channelCount);
 	}
 
@@ -68,14 +72,14 @@ class ExampleBasedCriteria {
 		// We can't assume that the example is |variants| because it could actually
 		// be from another period.
 		const shortList = variants.filter(variant => {
-			return shaka.media.AdaptationSet.areAdaptable(this.example_, variant);
+			return AdaptationSet.areAdaptable(this.example_, variant);
 		});
 
 		if (shortList.length) {
 			// Use the first item in the short list as the root. It should not matter
 			// which element we use as all items in the short list should already be
 			// compatible.
-			return new shaka.media.AdaptationSet(shortList[0], shortList);
+			return new AdaptationSet(shortList[0], shortList);
 		} else {
 			return this.fallback_.create(variants);
 		}
@@ -83,7 +87,7 @@ class ExampleBasedCriteria {
 }
 
 /**
- * @implements {shaka.media.AdaptationSetCriteria}
+ * @implements {AdaptationSetCriteria}
  * @final
  */
 class PreferenceBasedCriteria {
@@ -103,8 +107,8 @@ class PreferenceBasedCriteria {
 
 	/** @override */
 	create(variants) {
-		const Class = shaka.media.PreferenceBasedCriteria;
-		const StreamUtils = shaka.util.StreamUtils;
+		const Class = PreferenceBasedCriteria;
+		// const StreamUtils = shaka.util.StreamUtils;
 
 		let current = [];
 
@@ -139,7 +143,7 @@ class PreferenceBasedCriteria {
 		}
 
 		// Make sure we only return a valid adaptation set.
-		const set = new shaka.media.AdaptationSet(current[0]);
+		const set = new AdaptationSet(current[0]);
 		for (const variant of current) {
 			if (set.canInclude(variant)) {
 				set.add(variant);
@@ -156,7 +160,7 @@ class PreferenceBasedCriteria {
 	 * @private
 	 */
 	static filterByLanguage_(variants, preferredLanguage) {
-		const LanguageUtils = shaka.util.LanguageUtils;
+		// const LanguageUtils = shaka.util.LanguageUtils;
 
 		/** @type {string} */
 		const preferredLocale = LanguageUtils.normalize(preferredLanguage);

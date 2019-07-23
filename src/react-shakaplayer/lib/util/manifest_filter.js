@@ -19,6 +19,9 @@
 
 // goog.require('goog.asserts');
 
+import MediaSourceEngine from '../media/media_source_engine';
+import StreamUtils from '../util/stream_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -38,7 +41,7 @@ class ManifestFilter {
 	static filterByRestrictions(manifest, restrictions, maxHwResolution) {
 		for (const period of manifest.periods) {
 			period.variants = period.variants.filter(variant => {
-				return shaka.util.StreamUtils.meetsRestrictions(variant, restrictions, maxHwResolution);
+				return StreamUtils.meetsRestrictions(variant, restrictions, maxHwResolution);
 			});
 		}
 	}
@@ -50,7 +53,7 @@ class ManifestFilter {
 	 * @param {shaka.extern.Manifest} manifest
 	 */
 	static filterByMediaSourceSupport(manifest) {
-		const MediaSourceEngine = shaka.media.MediaSourceEngine;
+		// const MediaSourceEngine = MediaSourceEngine;
 
 		for (const period of manifest.periods) {
 			period.variants = period.variants.filter(variant => {
@@ -71,7 +74,7 @@ class ManifestFilter {
 	 * by |drm|.
 	 *
 	 * @param {shaka.extern.Manifest} manifest
-	 * @param {!shaka.media.DrmEngine} drmEngine
+	 * @param {!DrmEngine} drmEngine
 	 */
 	static filterByDrmSupport(manifest, drmEngine) {
 		for (const period of manifest.periods) {

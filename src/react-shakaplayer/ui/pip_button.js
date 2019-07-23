@@ -32,6 +32,7 @@ import Enums from './enums';
 import OverflowMenu from './overflow_menu';
 import Locales from '../dist/locales';
 import Constants from '../ui/constants';
+import Utils from '../ui/ui_utils';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

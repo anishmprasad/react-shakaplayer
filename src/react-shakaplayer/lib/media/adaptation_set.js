@@ -20,6 +20,8 @@
 // goog.require('goog.asserts');
 // goog.require('shaka.util.MimeUtils');
 
+import MimeUtils from '../util/mime_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -28,7 +30,7 @@ var goog = window.goog;
  *
  * @final
  */
-shaka.media.AdaptationSet = class {
+export default class AdaptationSet {
 	/**
 	 * @param {shaka.extern.Variant} root
 	 *    The variant that all other variants will be tested against when being
@@ -77,7 +79,7 @@ shaka.media.AdaptationSet = class {
 	 * @return {boolean}
 	 */
 	canInclude(variant) {
-		return shaka.media.AdaptationSet.areAdaptable(this.root_, variant);
+		return AdaptationSet.areAdaptable(this.root_, variant);
 	}
 
 	/**
@@ -86,7 +88,7 @@ shaka.media.AdaptationSet = class {
 	 * @return {boolean}
 	 */
 	static areAdaptable(a, b) {
-		const AdaptationSet = shaka.media.AdaptationSet;
+		// const AdaptationSet = AdaptationSet;
 
 		// All variants should have audio or should all not have audio.
 		if (!!a.audio != !!b.audio) {
@@ -132,7 +134,7 @@ shaka.media.AdaptationSet = class {
 	 * @private
 	 */
 	static areAudiosCompatible_(a, b) {
-		const AdaptationSet = shaka.media.AdaptationSet;
+		// const AdaptationSet = AdaptationSet;
 
 		// Audio channel counts must not change between adaptations.
 		if (a.channelsCount != b.channelsCount) {
@@ -161,7 +163,7 @@ shaka.media.AdaptationSet = class {
 	 * @private
 	 */
 	static areVideosCompatible_(a, b) {
-		const AdaptationSet = shaka.media.AdaptationSet;
+		// const AdaptationSet = AdaptationSet;
 
 		// We can only adapt between base-codecs.
 		if (!AdaptationSet.canTransitionBetween_(a, b)) {
@@ -191,11 +193,11 @@ shaka.media.AdaptationSet = class {
 		}
 
 		// Get the base codec of each codec in each stream.
-		const codecsA = shaka.util.MimeUtils.splitCodecs(a.codecs).map(codec => {
-			return shaka.util.MimeUtils.getCodecBase(codec);
+		const codecsA = MimeUtils.splitCodecs(a.codecs).map(codec => {
+			return MimeUtils.getCodecBase(codec);
 		});
-		const codecsB = shaka.util.MimeUtils.splitCodecs(b.codecs).map(codec => {
-			return shaka.util.MimeUtils.getCodecBase(codec);
+		const codecsB = MimeUtils.splitCodecs(b.codecs).map(codec => {
+			return MimeUtils.getCodecBase(codec);
 		});
 
 		// We don't want to allow switching between transmuxed and non-transmuxed
@@ -258,4 +260,4 @@ shaka.media.AdaptationSet = class {
 
 		return true;
 	}
-};
+}

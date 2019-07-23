@@ -905,7 +905,7 @@ class HlsParser {
       window.asserts.assert(type == 'CLOSED-CAPTIONS',
           'Should only be called on tags with TYPE="CLOSED-CAPTIONS"!');
 
-      const LanguageUtils = shaka.util.LanguageUtils;
+      // const LanguageUtils = shaka.util.LanguageUtils;
       const languageValue = tag.getAttributeValue('LANGUAGE') || 'und';
       const language = LanguageUtils.normalize(languageValue);
 
@@ -957,7 +957,7 @@ class HlsParser {
       type = ContentType.TEXT;
     }
 
-    const LanguageUtils = shaka.util.LanguageUtils;
+    // const LanguageUtils = shaka.util.LanguageUtils;
     const language = LanguageUtils.normalize(/** @type {string} */(
       tag.getAttributeValue('LANGUAGE', 'und')));
     const name = tag.getAttributeValue('NAME');

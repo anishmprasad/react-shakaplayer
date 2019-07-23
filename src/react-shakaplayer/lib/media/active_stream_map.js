@@ -30,7 +30,7 @@ class ActiveStreamMap {
 		/**
 		 * A mapping between a period and the content last streamed in that period.
 		 *
-		 * @private {!Map.<shaka.extern.Period, !shaka.media.ActiveStreamMap.Frame>}
+		 * @private {!Map.<shaka.extern.Period, !ActiveStreamMap.Frame>}
 		 */
 		this.history_ = new Map();
 	}
@@ -95,12 +95,12 @@ class ActiveStreamMap {
 	 * given period.
 	 *
 	 * @param {shaka.extern.Period} period
-	 * @return {!shaka.media.ActiveStreamMap.Frame}
+	 * @return {!ActiveStreamMap.Frame}
 	 * @private
 	 */
 	getFrameFor_(period) {
 		if (!this.history_.has(period)) {
-			const frame = new shaka.media.ActiveStreamMap.Frame();
+			const frame = new ActiveStreamMap.Frame();
 			this.history_.set(period, frame);
 		}
 
