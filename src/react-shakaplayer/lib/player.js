@@ -99,6 +99,7 @@ import AbortableOperation from '../lib/util/abortable_operation';
 import Deprecate from '../lib/deprecate/deprecate';
 
 import Timer from '../lib/util/timer'
+import TimeRangesUtils from '../lib/media/time_ranges_utils'
 
 // console.log('Deprecate', Deprecate);
 

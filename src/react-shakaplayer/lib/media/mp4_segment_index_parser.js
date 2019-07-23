@@ -39,15 +39,15 @@ export default class Mp4SegmentIndexParser {
 	 * @param {!Array.<string>} uris The possible locations of the MP4 file that
 	 *   contains the segments.
 	 * @param {number} scaledPresentationTimeOffset
-	 * @return {!Array.<!shaka.media.SegmentReference>}
+	 * @return {!Array.<!SegmentReference>}
 	 * @throws {shaka.util.Error}
 	 */
 	static parse(sidxData, sidxOffset, uris, scaledPresentationTimeOffset) {
-		const Mp4SegmentIndexParser = shaka.media.Mp4SegmentIndexParser;
+		// const Mp4SegmentIndexParser = Mp4SegmentIndexParser;
 
 		let references;
 
-		const parser = new shaka.util.Mp4Parser().fullBox('sidx', box => {
+		const parser = new Mp4Parser().fullBox('sidx', box => {
 			references = Mp4SegmentIndexParser.parseSIDX_(sidxOffset, scaledPresentationTimeOffset, uris, box);
 		});
 
@@ -59,11 +59,7 @@ export default class Mp4SegmentIndexParser {
 			return references;
 		} else {
 			shaka.log.error('Invalid box type, expected "sidx".');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.MP4_SIDX_WRONG_BOX_TYPE
-			);
+			throw new Error(Error.severity.CRITICAL, Error.category.MEDIA, Error.code.MP4_SIDX_WRONG_BOX_TYPE);
 		}
 	}
 
@@ -75,7 +71,7 @@ export default class Mp4SegmentIndexParser {
 	 * @param {!Array.<string>} uris The possible locations of the MP4 file that
 	 *   contains the segments.
 	 * @param {!shaka.extern.ParsedBox} box
-	 * @return {!Array.<!shaka.media.SegmentReference>}
+	 * @return {!Array.<!SegmentReference>}
 	 * @private
 	 */
 	static parseSIDX_(sidxOffset, scaledPresentationTimeOffset, uris, box) {
@@ -91,11 +87,7 @@ export default class Mp4SegmentIndexParser {
 
 		if (timescale == 0) {
 			shaka.log.error('Invalid timescale.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.MP4_SIDX_INVALID_TIMESCALE
-			);
+			throw new Error(Error.severity.CRITICAL, Error.category.MEDIA, Error.code.MP4_SIDX_INVALID_TIMESCALE);
 		}
 
 		let earliestPresentationTime;
@@ -135,15 +127,11 @@ export default class Mp4SegmentIndexParser {
 			// We do not support this.
 			if (referenceType == 1) {
 				shaka.log.error('Heirarchical SIDXs are not supported.');
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.MEDIA,
-					shaka.util.Error.Code.MP4_SIDX_TYPE_NOT_SUPPORTED
-				);
+				throw new Error(Error.severity.CRITICAL, Error.category.MEDIA, Error.code.MP4_SIDX_TYPE_NOT_SUPPORTED);
 			}
 
 			references.push(
-				new shaka.media.SegmentReference(
+				new SegmentReference(
 					references.length,
 					unscaledStartTime / timescale - scaledPresentationTimeOffset,
 					(unscaledStartTime + subsegmentDuration) / timescale - scaledPresentationTimeOffset,
