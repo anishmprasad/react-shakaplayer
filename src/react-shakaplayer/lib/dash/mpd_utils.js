@@ -331,7 +331,7 @@ export default class MpdUtils {
    * @return {?string}
    */
   static inheritAttribute(context, callback, attribute) {
-    const Functional = Functional;
+    // const Functional = Functional;
     window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type');
@@ -358,7 +358,7 @@ export default class MpdUtils {
    * @return {Element}
    */
   static inheritChild(context, callback, child) {
-    const Functional = Functional;
+    // const Functional = Functional;
     window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type');

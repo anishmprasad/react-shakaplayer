@@ -27,6 +27,15 @@
 // goog.require('shaka.util.ManifestParserUtils');
 // goog.require('shaka.util.MimeUtils');
 
+
+import DrmEngine from '../media/drm_engine'
+import MediaSourceEngine from '../media/media_source_engine'
+import TextEngine from '../text/text_engine'
+import Functional from '../util/functional'
+import LanguageUtils from '../util/language_utils'
+import ManifestParserUtils from '../util/manifest_parser_utils'
+import MimeUtils from '../util/mime_utils'
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -96,7 +105,7 @@ class StreamUtils {
 
     for (const variant of variants) {
       const originalAllowed = variant.allowedByApplication;
-      variant.allowedByApplication = shaka.util.StreamUtils.meetsRestrictions(
+      variant.allowedByApplication = StreamUtils.meetsRestrictions(
           variant, restrictions, maxHwRes);
 
       if (originalAllowed != variant.allowedByApplication) {
@@ -111,13 +120,13 @@ class StreamUtils {
   /**
    * Alters the given Period to filter out any unplayable streams.
    *
-   * @param {shaka.media.DrmEngine} drmEngine
+   * @param {DrmEngine} drmEngine
    * @param {?shaka.extern.Stream} activeAudio
    * @param {?shaka.extern.Stream} activeVideo
    * @param {shaka.extern.Period} period
    */
   static filterNewPeriod(drmEngine, activeAudio, activeVideo, period) {
-    const StreamUtils = shaka.util.StreamUtils;
+    const StreamUtils = StreamUtils;
 
     if (activeAudio) {
       window.asserts.assert(StreamUtils.isAudio(activeAudio),
@@ -142,13 +151,13 @@ class StreamUtils {
       const audio = variant.audio;
       const video = variant.video;
 
-      if (audio && !shaka.media.MediaSourceEngine.isStreamSupported(audio)) {
+      if (audio && !MediaSourceEngine.isStreamSupported(audio)) {
         shaka.log.debug('Dropping variant - audio not compatible with platform',
             StreamUtils.getStreamSummaryString_(audio));
         return false;
       }
 
-      if (video && !shaka.media.MediaSourceEngine.isStreamSupported(video)) {
+      if (video && !MediaSourceEngine.isStreamSupported(video)) {
         shaka.log.debug('Dropping variant - video not compatible with platform',
             StreamUtils.getStreamSummaryString_(video));
         return false;
@@ -181,9 +190,9 @@ class StreamUtils {
 
     // Filter text streams.
     period.textStreams = period.textStreams.filter((stream) => {
-      const fullMimeType = shaka.util.MimeUtils.getFullType(
+      const fullMimeType = MimeUtils.getFullType(
           stream.mimeType, stream.codecs);
-      const keep = shaka.text.TextEngine.isTypeSupported(fullMimeType);
+      const keep = TextEngine.isTypeSupported(fullMimeType);
 
       if (!keep) {
         shaka.log.debug('Dropping text stream. Is not supported by the ' +
@@ -334,7 +343,7 @@ class StreamUtils {
    * @return {shaka.extern.Track}
    */
   static textStreamToTrack(stream) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     /** @type {shaka.extern.Track} */
     const track = {
@@ -377,7 +386,7 @@ class StreamUtils {
    */
   static html5TrackId(html5Track) {
     if (!html5Track['__shaka_id']) {
-      html5Track['__shaka_id'] = shaka.util.StreamUtils.nextTrackId_++;
+      html5Track['__shaka_id'] = StreamUtils.nextTrackId_++;
     }
     return html5Track['__shaka_id'];
   }
@@ -389,8 +398,8 @@ class StreamUtils {
    */
   static html5TextTrackToTrack(textTrack) {
     const CLOSED_CAPTION_MIMETYPE =
-        shaka.util.MimeUtils.CLOSED_CAPTION_MIMETYPE;
-    const StreamUtils = shaka.util.StreamUtils;
+        MimeUtils.CLOSED_CAPTION_MIMETYPE;
+    const StreamUtils = StreamUtils;
 
     /** @type {shaka.extern.Track} */
     const track = StreamUtils.html5TrackToGenericShakaTrack_(textTrack);
@@ -410,7 +419,7 @@ class StreamUtils {
    * @return {shaka.extern.Track}
    */
   static html5AudioTrackToTrack(audioTrack) {
-    const StreamUtils = shaka.util.StreamUtils;
+    const StreamUtils = StreamUtils;
 
     /** @type {shaka.extern.Track} */
     const track = StreamUtils.html5TrackToGenericShakaTrack_(audioTrack);
@@ -446,7 +455,7 @@ class StreamUtils {
       active: false,
       type: '',
       bandwidth: 0,
-      language: shaka.util.LanguageUtils.normalize(html5Track.language),
+      language: LanguageUtils.normalize(html5Track.language),
       label: html5Track.label,
       kind: html5Track.kind,
       width: null,
@@ -490,7 +499,7 @@ class StreamUtils {
    */
   static getPlayableVariants(variants) {
     return variants.filter((variant) => {
-      return shaka.util.StreamUtils.isPlayable(variant);
+      return StreamUtils.isPlayable(variant);
     });
   }
 
@@ -551,7 +560,7 @@ class StreamUtils {
    */
   static filterStreamsByLanguageAndRole(
       streams, preferredLanguage, preferredRole) {
-    const LanguageUtils = shaka.util.LanguageUtils;
+    // const LanguageUtils = LanguageUtils;
 
     /** @type {!Array.<!shaka.extern.Stream>} */
     let chosen = streams;
@@ -592,7 +601,7 @@ class StreamUtils {
 
     // Now refine the choice based on role preference.
     if (preferredRole) {
-      const roleMatches = shaka.util.StreamUtils.filterTextStreamsByRole_(
+      const roleMatches = StreamUtils.filterTextStreamsByRole_(
           chosen, preferredRole);
       if (roleMatches.length) {
         return roleMatches;
@@ -615,12 +624,12 @@ class StreamUtils {
 
     const allRoles = chosen.map((stream) => {
       return stream.roles;
-    }).reduce(shaka.util.Functional.collapseArrays, []);
+    }).reduce(Functional.collapseArrays, []);
 
     if (!allRoles.length) {
       return chosen;
     }
-    return shaka.util.StreamUtils.filterTextStreamsByRole_(chosen, allRoles[0]);
+    return StreamUtils.filterTextStreamsByRole_(chosen, allRoles[0]);
   }
 
 
@@ -651,13 +660,13 @@ class StreamUtils {
   static getVariantByStreams(audio, video, variants) {
     if (audio) {
       window.asserts.assert(
-          shaka.util.StreamUtils.isAudio(audio),
+          StreamUtils.isAudio(audio),
           'Audio streams must have the audio type.');
     }
 
     if (video) {
       window.asserts.assert(
-          shaka.util.StreamUtils.isVideo(video),
+          StreamUtils.isVideo(video),
           'Video streams must have the video type.');
     }
 
@@ -678,7 +687,7 @@ class StreamUtils {
    * @return {boolean}
    */
   static isAudio(stream) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     return stream.type == ContentType.AUDIO;
   }
 
@@ -690,7 +699,7 @@ class StreamUtils {
    * @return {boolean}
    */
   static isVideo(stream) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     return stream.type == ContentType.VIDEO;
   }
 
@@ -721,14 +730,14 @@ class StreamUtils {
    * @private
    */
   static getStreamSummaryString_(stream) {
-    if (shaka.util.StreamUtils.isAudio(stream)) {
+    if (StreamUtils.isAudio(stream)) {
       return 'type=audio' +
              ' codecs=' + stream.codecs +
              ' bandwidth='+ stream.bandwidth +
              ' channelsCount=' + stream.channelsCount;
     }
 
-    if (shaka.util.StreamUtils.isVideo(stream)) {
+    if (StreamUtils.isVideo(stream)) {
       return 'type=video' +
              ' codecs=' + stream.codecs +
              ' bandwidth=' + stream.bandwidth +

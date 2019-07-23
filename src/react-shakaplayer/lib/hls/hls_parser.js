@@ -774,7 +774,7 @@ class HlsParser {
    * @private
    */
   createVariants_(audioInfos, videoInfos, bandwidth, width, height, frameRate) {
-    const DrmEngine = shaka.media.DrmEngine;
+    // const DrmEngine = shaka.media.DrmEngine;
 
     for (const info of videoInfos) {
       this.addVideoAttributes_(info.stream, width, height, frameRate);
@@ -1303,11 +1303,11 @@ class HlsParser {
       // We accomplish this in our DASH-y model by setting a presentation
       // delay of 3 segments.  This will be the "live edge" of the
       // presentation.
-      this.presentationTimeline_ = new shaka.media.PresentationTimeline(
+      this.presentationTimeline_ = new PresentationTimeline(
       /* presentationStartTime */ 0, /* delay */ this.maxTargetDuration_ * 3);
       this.presentationTimeline_.setStatic(false);
     } else {
-      this.presentationTimeline_ = new shaka.media.PresentationTimeline(
+      this.presentationTimeline_ = new PresentationTimeline(
       /* presentationStartTime */ null, /* delay */ 0);
       this.presentationTimeline_.setStatic(true);
     }
@@ -1850,13 +1850,13 @@ class HlsParser {
    */
   getStartTimeFromTextSegment_(mimeType, codecs, data) {
     const fullMimeType = shaka.util.MimeUtils.getFullType(mimeType, codecs);
-    if (!shaka.text.TextEngine.isTypeSupported(fullMimeType)) {
+    if (!TextEngine.isTypeSupported(fullMimeType)) {
       // We won't be able to parse this, but it will be filtered out anyway.
       // So we don't have to care about the start time.
       return 0;
     }
 
-    const textEngine = new shaka.text.TextEngine(/* displayer */ null);
+    const textEngine = new TextEngine(/* displayer */ null);
     textEngine.initParser(fullMimeType);
     return textEngine.getStartTime(data);
   }

@@ -137,7 +137,7 @@ class TextEngine {
 			return;
 		}
 
-		const Factory = shaka.text.TextEngine.parserMap_[mimeType];
+		const Factory = TextEngine.parserMap_[mimeType];
 		window.asserts.assert(Factory, 'Text type negotiation should have happened already');
 		this.parser_ = new Factory();
 	}

@@ -4100,7 +4100,7 @@ export default class Player extends FakeEventTarget {
 	 * @private
 	 */
 	shouldShowText_(audioStream, textStream) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		/** @type {string} */
 		const preferredTextLocale = LanguageUtils.normalize(this.config_.preferredTextLanguage);

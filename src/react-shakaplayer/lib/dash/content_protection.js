@@ -42,8 +42,8 @@ export default class ContentProtection {
 	 * @return {ContentProtection.Context}
 	 */
 	static parseFromAdaptationSet(elems, callback, ignoreDrmInfo) {
-		const ContentProtection = ContentProtection;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		// const ContentProtection = ContentProtection;
+		// const ManifestParserUtils = shaka.util.ManifestParserUtils;
 		const parsed = ContentProtection.parseElements_(elems);
 		/** @type {Array.<shaka.extern.InitDataOverride>} */
 		let defaultInit = null;
@@ -135,7 +135,7 @@ export default class ContentProtection {
 	 * @return {?string} The parsed key ID
 	 */
 	static parseFromRepresentation(elems, callback, context, ignoreDrmInfo) {
-		const ContentProtection = ContentProtection;
+		// const ContentProtection = ContentProtection;
 		const repContext = ContentProtection.parseFromAdaptationSet(elems, callback, ignoreDrmInfo);
 
 		if (context.firstRepresentation) {
@@ -256,7 +256,7 @@ export default class ContentProtection {
 		byteOffset += 2;
 
 		// Rest of the data contains the PRO Records
-		const ContentProtection = ContentProtection;
+		// const ContentProtection = ContentProtection;
 		return ContentProtection.parseMsProRecords_(data, byteOffset);
 	}
 
@@ -294,7 +294,7 @@ export default class ContentProtection {
 			return '';
 		}
 
-		const ContentProtection = ContentProtection;
+		// const ContentProtection = ContentProtection;
 		const PLAYREADY_RECORD_TYPES = ContentProtection.PLAYREADY_RECORD_TYPES;
 
 		const bytes = shaka.util.Uint8ArrayUtils.fromBase64(proNode.textContent);
@@ -326,8 +326,8 @@ export default class ContentProtection {
 	 * @private
 	 */
 	static convertElements_(defaultInit, callback, elements) {
-		const ContentProtection = ContentProtection;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		// const ContentProtection = ContentProtection;
+		// const ManifestParserUtils = shaka.util.ManifestParserUtils;
 		const defaultKeySystems = ContentProtection.defaultKeySystems_;
 		const licenseUrlParsers = ContentProtection.licenseUrlParsers_;
 

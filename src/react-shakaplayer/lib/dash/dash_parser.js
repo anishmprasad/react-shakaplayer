@@ -297,8 +297,8 @@ export default class DashParser {
    * @private
    */
   async processManifest_(mpd, finalManifestUri) {
-    const Functional = Functional;
-    const XmlUtils = XmlUtils;
+    // const Functional = Functional;
+    // const XmlUtils = XmlUtils;
 
     // Get any Location elements.  This will update the manifest location and
     // the base URI.
@@ -361,7 +361,7 @@ export default class DashParser {
           minBufferTime * 1.5);
       const presentationDelay = suggestedPresentationDelay != null ?
       suggestedPresentationDelay : defaultPresentationDelay;
-      presentationTimeline = new shaka.media.PresentationTimeline(
+      presentationTimeline = new PresentationTimeline(
           presentationStartTime, presentationDelay,
           this.config_.dash.autoCorrectDrift);
     }
@@ -452,7 +452,7 @@ export default class DashParser {
    * @private
    */
   parsePeriods_(context, baseUris, mpd) {
-    const XmlUtils = XmlUtils;
+    // const XmlUtils = XmlUtils;
     const presentationDuration = XmlUtils.parseAttr(
         mpd, 'mediaPresentationDuration', XmlUtils.parseDuration);
 
@@ -583,8 +583,8 @@ export default class DashParser {
    * @private
    */
   parsePeriod_(context, baseUris, periodInfo) {
-    const Functional = Functional;
-    const XmlUtils = XmlUtils;
+    // const Functional = Functional;
+    // const XmlUtils = XmlUtils;
     const ContentType = ManifestParserUtils.ContentType;
 
     context.period = this.createFrame_(periodInfo.node, null, baseUris);
@@ -738,7 +738,7 @@ export default class DashParser {
 
     if (audio && video) {
       // Audio+video variants.
-      const DrmEngine = shaka.media.DrmEngine;
+      // const DrmEngine = shaka.media.DrmEngine;
       if (DrmEngine.areDrmCompatible(audio.drmInfos, video.drmInfos)) {
         const drmInfos = DrmEngine.getCommonDrmInfos(audio.drmInfos,
             video.drmInfos);
@@ -796,11 +796,11 @@ export default class DashParser {
    * @private
    */
   parseAdaptationSet_(context, elem) {
-    const XmlUtils = XmlUtils;
-    const Functional = Functional;
-    const ManifestParserUtils = ManifestParserUtils;
+    // const XmlUtils = XmlUtils;
+    // const Functional = Functional;
+    // const ManifestParserUtils = ManifestParserUtils;
     const ContentType = ManifestParserUtils.ContentType;
-    const ContentProtection = ContentProtection;
+    // const ContentProtection = ContentProtection;
 
     context.adaptationSet = this.createFrame_(elem, context.period, null);
 
@@ -852,7 +852,7 @@ export default class DashParser {
     }
 
     const accessibilities = XmlUtils.findChildren(elem, 'Accessibility');
-    const LanguageUtils = LanguageUtils;
+    // const LanguageUtils = LanguageUtils;
     const closedCaptions = new Map();
     for (const prop of accessibilities) {
       const schemeId = prop.getAttribute('schemeIdUri');
@@ -1000,7 +1000,7 @@ export default class DashParser {
    */
   parseRepresentation_(context, contentProtection, kind, language, label,
       isPrimary, roles, closedCaptions, node) {
-    const XmlUtils = XmlUtils;
+    // const XmlUtils = XmlUtils;
     const ContentType = ManifestParserUtils.ContentType;
 
     context.representation =
@@ -1186,8 +1186,8 @@ export default class DashParser {
   createFrame_(elem, parent, baseUris) {
     window.asserts.assert(parent || baseUris,
         'Must provide either parent or baseUris');
-    const ManifestParserUtils = ManifestParserUtils;
-    const XmlUtils = XmlUtils;
+    // const ManifestParserUtils = ManifestParserUtils;
+    // const XmlUtils = XmlUtils;
     parent = parent || /** @type {DashParser.InheritanceFrame} */ ({
       contentType: '',
       mimeType: '',
@@ -1504,7 +1504,7 @@ export default class DashParser {
    * @private
    */
   parseEventStream_(periodStart, periodDuration, elem) {
-    const XmlUtils = XmlUtils;
+    // const XmlUtils = XmlUtils;
     const parseNumber = XmlUtils.parseNonNegativeInt;
 
     const schemeIdUri = elem.getAttribute('schemeIdUri') || '';
@@ -1576,7 +1576,7 @@ export default class DashParser {
   static guessContentType_(mimeType, codecs) {
     const fullMimeType = MimeUtils.getFullType(mimeType, codecs);
 
-    if (shaka.text.TextEngine.isTypeSupported(fullMimeType)) {
+    if (TextEngine.isTypeSupported(fullMimeType)) {
       // If it's supported by TextEngine, it's definitely text.
       // We don't check MediaSourceEngine, because that would report support
       // for platform-supported video and audio types as well.

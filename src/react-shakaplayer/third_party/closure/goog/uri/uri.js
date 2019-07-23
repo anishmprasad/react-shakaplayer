@@ -37,6 +37,7 @@
 // goog.require('ComponentIndex');
 
 import { ComponentIndex, split } from './utils';
+import goog from '../base';
 
 /**
  * This class contains setters and getters for the parts of the URI.
@@ -583,7 +584,7 @@ Uri.decodeOrEmpty_ = function(val, preserveReserved) {
  * @private
  */
 Uri.encodeSpecialChars_ = function(unescapedPart, extra, removeDoubleEncoding) {
-	if (isString(unescapedPart)) {
+	if (goog.isString(unescapedPart)) {
 		var encoded = encodeURI(unescapedPart).replace(extra, Uri.encodeChar_);
 		if (removeDoubleEncoding) {
 			// encodeURI double-escapes %XX sequences used to represent restricted

@@ -20,13 +20,16 @@
 // goog.require('goog.Uri');
 // goog.require('shaka.util.Functional');
 
+import Functional from '../util/functional';
+import Uri from '../../third_party/closure/goog/uri/uri';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
 /**
  * @summary Utility functions for manifest parsing.
  */
-class ManifestParserUtils {
+export default class ManifestParserUtils {
 	/**
 	 * Resolves an array of relative URIs to the given base URIs. This will result
 	 * in M*N number of URIs.
@@ -36,16 +39,16 @@ class ManifestParserUtils {
 	 * @return {!Array.<string>}
 	 */
 	static resolveUris(baseUris, relativeUris) {
-		const Functional = shaka.util.Functional;
+		// const Functional = shaka.util.Functional;
 		if (relativeUris.length == 0) {
 			return baseUris;
 		}
 
-		const relativeAsGoog = relativeUris.map(uri => new goog.Uri(uri));
+		const relativeAsGoog = relativeUris.map(uri => new Uri(uri));
 		// Resolve each URI relative to each base URI, creating an Array of Arrays.
 		// Then flatten the Arrays into a single Array.
 		return baseUris
-			.map(uri => new goog.Uri(uri))
+			.map(uri => new Uri(uri))
 			.map(base => relativeAsGoog.map(i => base.resolve(i)))
 			.reduce(Functional.collapseArrays, [])
 			.map(uri => uri.toString());

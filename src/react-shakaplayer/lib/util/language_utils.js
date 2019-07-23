@@ -47,7 +47,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static areLocaleCompatible(locale1, locale2) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -77,7 +77,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static areLanguageCompatible(locale1, locale2) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -117,7 +117,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static isParentOf(possibleParent, possibleChild) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -161,7 +161,7 @@ export default class LanguageUtils {
 	 * @return {boolean}
 	 */
 	static isSiblingOf(localeA, localeB) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		// Even through they SHOULD already be normalized, let's just be safe and
 		// do it again.
@@ -296,7 +296,7 @@ export default class LanguageUtils {
 	 * @return {string}
 	 */
 	static getLocaleForVariant(variant) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		// Our preference order is:
 		//  1. Variant
@@ -330,7 +330,7 @@ export default class LanguageUtils {
 	 * @return {?string}
 	 */
 	static findClosestLocale(target, searchSpace) {
-		const LanguageUtils = LanguageUtils;
+		// const LanguageUtils = LanguageUtils;
 
 		/** @type {string} */
 		const safeTarget = LanguageUtils.normalize(target);

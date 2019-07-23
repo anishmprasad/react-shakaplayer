@@ -1956,7 +1956,7 @@ class StreamingEngine {
    * @private
    */
   handleStartup_(mediaState, stream) {
-    const Functional = Functional;
+    // const Functional = Functional;
     const ContentType = ManifestParserUtils.ContentType;
     if (this.startupComplete_) {
       return;

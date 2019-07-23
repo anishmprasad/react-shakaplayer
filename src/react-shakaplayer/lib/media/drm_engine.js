@@ -1935,7 +1935,7 @@ class DrmEngine {
    * @private
    */
   static async closeSession_(session) {
-    const DrmEngine = shaka.media.DrmEngine;
+    // const DrmEngine = shaka.media.DrmEngine;
 
     const timeout = new Promise((resolve) => {
       const timer = new Timer(resolve);

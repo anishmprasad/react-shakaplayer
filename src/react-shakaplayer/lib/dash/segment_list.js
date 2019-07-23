@@ -269,7 +269,7 @@ export default class SegmentList {
 	 * @private
 	 */
 	static parseMediaSegments_(context) {
-		const Functional = shaka.util.Functional;
+		// const Functional = shaka.util.Functional;
 		/** @type {!Array.<!Element>} */
 		const segmentLists = [
 			context.representation.segmentList,
@@ -277,7 +277,7 @@ export default class SegmentList {
 			context.period.segmentList
 		].filter(Functional.isNotNull);
 
-		const XmlUtils = shaka.util.XmlUtils;
+		// const XmlUtils = shaka.util.XmlUtils;
 		// Search each SegmentList for one with at least one SegmentURL element,
 		// select the first one, and convert each SegmentURL element to a tuple.
 		return segmentLists

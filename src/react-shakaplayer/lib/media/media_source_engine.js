@@ -220,7 +220,7 @@ class MediaSourceEngine {
 
   /** @private */
   async doDestroy_() {
-    const Functional = Functional;
+    // const Functional = Functional;
 
     const cleanup = [];
 
