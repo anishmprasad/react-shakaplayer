@@ -126,7 +126,7 @@ class StreamUtils {
    * @param {shaka.extern.Period} period
    */
   static filterNewPeriod(drmEngine, activeAudio, activeVideo, period) {
-    const StreamUtils = StreamUtils;
+    // const StreamUtils = StreamUtils;
 
     if (activeAudio) {
       window.asserts.assert(StreamUtils.isAudio(activeAudio),
@@ -399,7 +399,7 @@ class StreamUtils {
   static html5TextTrackToTrack(textTrack) {
     const CLOSED_CAPTION_MIMETYPE =
         MimeUtils.CLOSED_CAPTION_MIMETYPE;
-    const StreamUtils = StreamUtils;
+    // const StreamUtils = StreamUtils;
 
     /** @type {shaka.extern.Track} */
     const track = StreamUtils.html5TrackToGenericShakaTrack_(textTrack);
@@ -419,7 +419,7 @@ class StreamUtils {
    * @return {shaka.extern.Track}
    */
   static html5AudioTrackToTrack(audioTrack) {
-    const StreamUtils = StreamUtils;
+    // const StreamUtils = StreamUtils;
 
     /** @type {shaka.extern.Track} */
     const track = StreamUtils.html5TrackToGenericShakaTrack_(audioTrack);

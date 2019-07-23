@@ -65,7 +65,7 @@ import MediaSourceEngine from '../lib/media/media_source_engine';
 import { MuxJSClosedCaptionParser, NoopCaptionParser } from '../lib/media/closed_caption_parser';
 import PeriodObserver from '../lib/media/period_observer';
 import PlayRateController from '../lib/media/play_rate_controller';
-import Playhead from '../lib/media/playhead';
+import { Playhead, MediaSourcePlayhead} from '../lib/media/playhead';
 import { PlayheadObserverManager } from '../lib/media/playhead_observer';
 import { PreferenceBasedCriteria } from '../lib/media/adaptation_set_criteria';
 import RegionObserver from '../lib/media/region_observer';
@@ -97,6 +97,8 @@ import ConfigUtils from '../lib/util/config_utils';
 import AbortableOperation from '../lib/util/abortable_operation';
 
 import Deprecate from '../lib/deprecate/deprecate';
+
+import Timer from '../lib/util/timer'
 
 // console.log('Deprecate', Deprecate);
 
@@ -1956,7 +1958,7 @@ export default class Player extends FakeEventTarget {
 	 * @private
 	 */
 	chooseCodecsAndFilterManifest_() {
-		const MimeUtils = MimeUtils;
+		// const MimeUtils = MimeUtils;
 
 		// Collect a list of variants for all periods.
 		/** @type {!Array.<shaka.extern.Variant>} */

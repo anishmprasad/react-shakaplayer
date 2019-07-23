@@ -55,9 +55,9 @@ var goog = window.goog;
 
 /** @implements {IDestroyable} */
 class DrmEngine {
-  /** @param {shaka.media.DrmEngine.PlayerInterface} playerInterface */
+  /** @param {DrmEngine.PlayerInterface} playerInterface */
   constructor(playerInterface) {
-    /** @private {?shaka.media.DrmEngine.PlayerInterface} */
+    /** @private {?DrmEngine.PlayerInterface} */
     this.playerInterface_ = playerInterface;
 
     /** @private {!Set.<string>} */
@@ -80,7 +80,7 @@ class DrmEngine {
 
     /**
      * @private {!Map.<MediaKeySession,
-     *           shaka.media.DrmEngine.SessionMetaData>}
+     *           DrmEngine.SessionMetaData>}
      */
     this.activeSessions_ = new Map();
 
@@ -181,7 +181,7 @@ class DrmEngine {
         shaka.log.v1('Closing session', session.sessionId);
 
         try {
-          await shaka.media.DrmEngine.closeSession_(session);
+          await DrmEngine.closeSession_(session);
         } catch (error) {
           // Ignore errors when closing the sessions. Closing a session that
           // generated no key requests will throw an error.
@@ -329,7 +329,7 @@ class DrmEngine {
     // systems as possible so that we will be ready.
     if (!hadDrmInfo) {
       const servers = MapUtils.asMap(this.config_.servers);
-      shaka.media.DrmEngine.replaceDrmInfo_(variants, servers);
+      DrmEngine.replaceDrmInfo_(variants, servers);
     }
 
     // ClearKey config overrides the manifest DrmInfo if present. The variants
@@ -345,7 +345,7 @@ class DrmEngine {
     // Make sure all the drm infos are valid and filled in correctly.
     for (const variant of variants) {
       for (const info of variant.drmInfos) {
-        shaka.media.DrmEngine.fillInDrmInfoDefaults_(
+        DrmEngine.fillInDrmInfoDefaults_(
             info,
             MapUtils.asMap(this.config_.servers),
             MapUtils.asMap(this.config_.advanced || {}));
@@ -654,7 +654,7 @@ class DrmEngine {
 
     // Make sure all the drm infos are valid and filled in correctly.
     for (const info of allDrmInfo) {
-      shaka.media.DrmEngine.fillInDrmInfoDefaults_(
+      DrmEngine.fillInDrmInfoDefaults_(
           info,
           MapUtils.asMap(this.config_.servers),
           MapUtils.asMap(this.config_.advanced || {}));
@@ -830,7 +830,7 @@ class DrmEngine {
       window.asserts.assert(this.supportedTypes_.size,
           'We should get at least one supported MIME type');
 
-      this.currentDrmInfo_ = shaka.media.DrmEngine.createDrmInfoFor_(
+      this.currentDrmInfo_ = DrmEngine.createDrmInfoFor_(
           mediaKeySystemAccess.keySystem,
           configsByKeySystem.get(mediaKeySystemAccess.keySystem));
 
@@ -1174,7 +1174,7 @@ class DrmEngine {
       });
 
       timer.tickAfter(
-          /* seconds= */ shaka.media.DrmEngine.SESSION_LOAD_TIMEOUT_);
+          /* seconds= */ DrmEngine.SESSION_LOAD_TIMEOUT_);
     }
   }
 
@@ -1412,7 +1412,7 @@ class DrmEngine {
     // each of them.  By batching these up, we only send one status change event
     // and at most one EXPIRED error on expiration.
     this.keyStatusTimer_.tickAfter(
-        /* seconds= */ shaka.media.DrmEngine.KEY_STATUS_BATCH_TIME);
+        /* seconds= */ DrmEngine.KEY_STATUS_BATCH_TIME);
   }
 
   /** @private */
@@ -1594,7 +1594,7 @@ class DrmEngine {
       return true;
     }
 
-    return shaka.media.DrmEngine.getCommonDrmInfos(
+    return DrmEngine.getCommonDrmInfos(
         drms1, drms2).length > 0;
   }
 
@@ -1734,7 +1734,7 @@ class DrmEngine {
     /** @type {!Array.<string>} */
     const keyIds = [];
 
-    shaka.media.DrmEngine.processDrmInfos_(
+    DrmEngine.processDrmInfos_(
         config.drmInfos, licenseServers, serverCerts, initDatas, keyIds);
 
     if (serverCerts.length > 1) {
@@ -1935,7 +1935,7 @@ class DrmEngine {
    * @private
    */
   static async closeSession_(session) {
-    // const DrmEngine = shaka.media.DrmEngine;
+    // const DrmEngine = DrmEngine;
 
     const timeout = new Promise((resolve) => {
       const timer = new Timer(resolve);

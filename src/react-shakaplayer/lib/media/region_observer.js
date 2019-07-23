@@ -31,7 +31,7 @@ var shaka = window.shaka;
  * @implements {shaka.media.IPlayheadObserver}
  * @final
  */
-class RegionObserver {
+export default class RegionObserver {
 	/**
 	 * Create a region observer for the given timeline. The observer does not
 	 * own the timeline, only uses it. This means that the observer should NOT
@@ -61,7 +61,7 @@ class RegionObserver {
 		this.onSkip_ = (region, seeking) => {};
 
 		// To make the rules easier to read, alias all the relative positions.
-		const RelativePosition = shaka.media.RegionObserver.RelativePosition_;
+		const RelativePosition = RegionObserver.RelativePosition_;
 		const BEFORE_THE_REGION = RelativePosition.BEFORE_THE_REGION;
 		const IN_THE_REGION = RelativePosition.IN_THE_REGION;
 		const AFTER_THE_REGION = RelativePosition.AFTER_THE_REGION;
@@ -174,7 +174,7 @@ class RegionObserver {
 	 * @private
 	 */
 	static determinePositionRelativeTo_(region, seconds) {
-		const RelativePosition = shaka.media.RegionObserver.RelativePosition_;
+		const RelativePosition = RegionObserver.RelativePosition_;
 
 		if (seconds < region.startTime) {
 			return RelativePosition.BEFORE_THE_REGION;

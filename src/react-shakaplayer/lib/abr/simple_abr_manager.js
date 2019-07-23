@@ -24,6 +24,9 @@
 // goog.require('shaka.log');
 // goog.require('shaka.util.StreamUtils');
 
+import EwmaBandwidthEstimator from '../abr/ewma_bandwidth_estimator';
+import StreamUtils from '../util/stream_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -56,8 +59,8 @@ export default class SimpleAbrManager {
 		/** @private {boolean} */
 		this.enabled_ = false;
 
-		/** @private {shaka.abr.EwmaBandwidthEstimator} */
-		this.bandwidthEstimator_ = new shaka.abr.EwmaBandwidthEstimator();
+		/** @private {EwmaBandwidthEstimator} */
+		this.bandwidthEstimator_ = new EwmaBandwidthEstimator();
 		// TODO: Consider using NetworkInformation's change event to throw out an
 		// old estimate based on changing network types, such as wifi => 3g.
 

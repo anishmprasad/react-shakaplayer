@@ -19,6 +19,7 @@
 
 // goog.require('shaka.abr.Ewma');
 
+import Ewma from './ewma';
 var shaka = window.shaka;
 
 /**
@@ -28,21 +29,21 @@ var shaka = window.shaka;
  * different half-lives.
  *
  */
-window.shaka.abr.EwmaBandwidthEstimator = class {
+export default class EwmaBandwidthEstimator {
 	constructor() {
 		/**
 		 * A fast-moving average.
 		 * Half of the estimate is based on the last 2 seconds of sample history.
-		 * @private {!shaka.abr.Ewma}
+		 * @private {!Ewma}
 		 */
-		this.fast_ = new shaka.abr.Ewma(2);
+		this.fast_ = new Ewma(2);
 
 		/**
 		 * A slow-moving average.
 		 * Half of the estimate is based on the last 5 seconds of sample history.
-		 * @private {!shaka.abr.Ewma}
+		 * @private {!Ewma}
 		 */
-		this.slow_ = new shaka.abr.Ewma(5);
+		this.slow_ = new Ewma(5);
 
 		/**
 		 * Number of bytes sampled.
@@ -119,4 +120,4 @@ window.shaka.abr.EwmaBandwidthEstimator = class {
 	hasGoodEstimate() {
 		return this.bytesSampled_ >= this.minTotalBytes_;
 	}
-};
+}

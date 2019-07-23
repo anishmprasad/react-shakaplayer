@@ -33,6 +33,7 @@ import Timer from '../util/timer';
 import { VideoWrapper } from '../media/video_wrapper';
 import TimeRangesUtils from '../media/time_ranges_utils';
 import GapJumpingController from '../media/gap_jumping_controller';
+import { StallDetector, MediaElementImplementation } from '../media/stall_detector';
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -488,7 +489,7 @@ class MediaSourcePlayhead {
 
 		// When we see a stall, we will try to "jump-start" playback by moving the
 		// playhead forward.
-		const detector = new StallDetector(new StallDetector.MediaElementImplementation(mediaElement), threshold);
+		const detector = new StallDetector(new MediaElementImplementation(mediaElement), threshold);
 
 		detector.onStall((at, duration) => {
 			shaka.log.debug(

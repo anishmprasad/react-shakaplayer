@@ -57,8 +57,8 @@ class VideoWrapper {
 		/** @private {shaka.util.EventManager} */
 		this.eventManager_ = new EventManager();
 
-		/** @private {shaka.media.VideoWrapper.PlayheadMover} */
-		this.mover_ = new shaka.media.VideoWrapper.PlayheadMover(/* mediaElement= */ video, /* maxAttempts= */ 10);
+		/** @private {PlayheadMover} */
+		this.mover_ = new PlayheadMover(/* mediaElement= */ video, /* maxAttempts= */ 10);
 
 		// Before we can set the start time, we must check if the video element is
 		// ready. If the video element is not ready, we cannot set the time. To work
@@ -232,8 +232,8 @@ class PlayheadMover {
 		/** @private {number} */
 		this.targetTime_ = 0;
 
-		/** @private {shaka.util.Timer} */
-		this.timer_ = new shaka.util.Timer(() => this.onTick_());
+		/** @private {Timer} */
+		this.timer_ = new Timer(() => this.onTick_());
 	}
 
 	/** @override */

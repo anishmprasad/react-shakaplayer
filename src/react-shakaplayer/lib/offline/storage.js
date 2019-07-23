@@ -64,6 +64,7 @@ import PlayerConfiguration from '../util/player_configuration'
 import StreamUtil from '../util/stream_utils'
 import ConfigUtils from '../util/config_utils'
 import Player from '../player'
+import MimeUtils from '../util/mime_utils'
 
 
 var shaka = window.shaka;
@@ -622,7 +623,7 @@ class Storage {
    * @private
    */
   static getCapabilities_(manifestDb, isVideo) {
-    const MimeUtils = MimeUtils;
+    // const MimeUtils = MimeUtils;
 
     const ret = [];
     for (const period of manifestDb.periods) {

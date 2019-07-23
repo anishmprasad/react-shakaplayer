@@ -32,12 +32,12 @@ class BufferingObserver {
 	 * @param {number} thresholdWhenSatisfied
 	 */
 	constructor(thresholdWhenStarving, thresholdWhenSatisfied) {
-		const State = shaka.media.BufferingObserver.State;
+		const State = BufferingObserver.State;
 
-		/** @private {shaka.media.BufferingObserver.State} */
+		/** @private {BufferingObserver.State} */
 		this.previousState_ = State.SATISFIED;
 
-		/** @private {!Map.<shaka.media.BufferingObserver.State, number>} */
+		/** @private {!Map.<BufferingObserver.State, number>} */
 		this.thresholds_ = new Map()
 			.set(State.SATISFIED, thresholdWhenSatisfied)
 			.set(State.STARVING, thresholdWhenStarving);
@@ -53,7 +53,7 @@ class BufferingObserver {
 	 * @return {boolean}
 	 */
 	update(bufferLead, bufferedToEnd) {
-		const State = shaka.media.BufferingObserver.State;
+		const State = BufferingObserver.State;
 
 		/**
 		 * Our threshold for how much we need before we declare ourselves as
@@ -79,7 +79,7 @@ class BufferingObserver {
 	/**
 	 * Set which state that the observer should think playback was in.
 	 *
-	 * @param {shaka.media.BufferingObserver.State} state
+	 * @param {BufferingObserver.State} state
 	 */
 	setState(state) {
 		this.previousState_ = state;
@@ -88,12 +88,12 @@ class BufferingObserver {
 	/**
 	 * Get the state that the observer last thought playback was in.
 	 *
-	 * @return {shaka.media.BufferingObserver.State}
+	 * @return {BufferingObserver.State}
 	 */
 	getState() {
 		return this.previousState_;
 	}
-};
+}
 
 /**
  * Rather than using booleans to communicate what state we are in, we have this
@@ -106,4 +106,4 @@ BufferingObserver.State = {
 	SATISFIED: 1
 };
 
-export default BufferingObserver
+export default BufferingObserver;
