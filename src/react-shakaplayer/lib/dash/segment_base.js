@@ -17,7 +17,7 @@
 
 // goog.provide('shaka.dash.SegmentBase');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.dash.MpdUtils');
 // goog.require('shaka.log');
 // goog.require('shaka.media.InitSegmentReference');
@@ -33,16 +33,16 @@ var shaka = window.shaka;
 /**
  * @summary A set of functions for parsing SegmentBase elements.
  */
-shaka.dash.SegmentBase = class {
+export default class SegmentBase {
 	/**
 	 * Creates an init segment reference from a Context object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {function(?shaka.dash.DashParser.InheritanceFrame):Element} callback
+	 * @param {DashParser.Context} context
+	 * @param {function(?DashParser.InheritanceFrame):Element} callback
 	 * @return {shaka.media.InitSegmentReference}
 	 */
 	static createInitSegment(context, callback) {
-		const MpdUtils = shaka.dash.MpdUtils;
+		const MpdUtils = MpdUtils;
 		const XmlUtils = shaka.util.XmlUtils;
 		const ManifestParserUtils = shaka.util.ManifestParserUtils;
 
@@ -72,18 +72,18 @@ shaka.dash.SegmentBase = class {
 	/**
 	 * Creates a new Stream object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.DashParser.RequestInitSegmentCallback}
+	 * @param {DashParser.Context} context
+	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
 	 * @throws shaka.util.Error When there is a parsing error.
-	 * @return {shaka.dash.DashParser.StreamInfo}
+	 * @return {DashParser.StreamInfo}
 	 */
 	static createStream(context, requestInitSegment) {
 		window.asserts.assert(context.representation.segmentBase, 'Should only be called with SegmentBase');
 		// Since SegmentBase does not need updates, simply treat any call as
 		// the initial parse.
-		const MpdUtils = shaka.dash.MpdUtils;
-		const SegmentBase = shaka.dash.SegmentBase;
+		const MpdUtils = MpdUtils;
+		const SegmentBase = SegmentBase;
 		const XmlUtils = shaka.util.XmlUtils;
 
 		const unscaledPresentationTimeOffset =
@@ -112,8 +112,8 @@ shaka.dash.SegmentBase = class {
 	/**
 	 * Creates segment index info for the given info.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.DashParser.RequestInitSegmentCallback}
+	 * @param {DashParser.Context} context
+	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
 	 * @param {shaka.media.InitSegmentReference} init
 	 * @param {!Array.<string>} uris
@@ -121,7 +121,7 @@ shaka.dash.SegmentBase = class {
 	 * @param {?number} endByte
 	 * @param {string} containerType
 	 * @param {number} scaledPresentationTimeOffset
-	 * @return {shaka.dash.DashParser.SegmentIndexFunctions}
+	 * @return {DashParser.SegmentIndexFunctions}
 	 */
 	static createSegmentIndexFromUris(
 		context,
@@ -205,7 +205,7 @@ shaka.dash.SegmentBase = class {
 	}
 
 	/**
-	 * @param {?shaka.dash.DashParser.InheritanceFrame} frame
+	 * @param {?DashParser.InheritanceFrame} frame
 	 * @return {Element}
 	 * @private
 	 */
@@ -216,18 +216,18 @@ shaka.dash.SegmentBase = class {
 	/**
 	 * Creates segment index info from a Context object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.DashParser.RequestInitSegmentCallback}
+	 * @param {DashParser.Context} context
+	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
 	 * @param {shaka.media.InitSegmentReference} init
 	 * @param {number} scaledPresentationTimeOffset
-	 * @return {shaka.dash.DashParser.SegmentIndexFunctions}
+	 * @return {DashParser.SegmentIndexFunctions}
 	 * @throws shaka.util.Error When there is a parsing error.
 	 * @private
 	 */
 	static createSegmentIndex_(context, requestInitSegment, init, scaledPresentationTimeOffset) {
-		const MpdUtils = shaka.dash.MpdUtils;
-		const SegmentBase = shaka.dash.SegmentBase;
+		const MpdUtils = MpdUtils;
+		const SegmentBase = SegmentBase;
 		const XmlUtils = shaka.util.XmlUtils;
 		const ManifestParserUtils = shaka.util.ManifestParserUtils;
 		const ContentType = shaka.util.ManifestParserUtils.ContentType;
@@ -285,7 +285,7 @@ shaka.dash.SegmentBase = class {
 			);
 		}
 
-		return shaka.dash.SegmentBase.createSegmentIndexFromUris(
+		return SegmentBase.createSegmentIndexFromUris(
 			context,
 			requestInitSegment,
 			init,
@@ -296,4 +296,4 @@ shaka.dash.SegmentBase = class {
 			scaledPresentationTimeOffset
 		);
 	}
-};
+}

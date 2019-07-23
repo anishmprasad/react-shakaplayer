@@ -15,45 +15,53 @@
  * limitations under the License.
  */
 
-// goog.provide('shaka.dash.SegmentTemplate');
+// goog.provide('SegmentTemplate');
 
-goog.require('goog.asserts');
-// goog.require('shaka.dash.MpdUtils');
+// goog.require('goog.asserts');
+// goog.require('MpdUtils');
 // goog.require('shaka.dash.SegmentBase');
 // goog.require('shaka.log');
 // goog.require('shaka.media.InitSegmentReference');
 // goog.require('shaka.media.SegmentIndex');
 // goog.require('shaka.media.SegmentReference');
 // goog.require('shaka.util.Error');
-// goog.require('shaka.util.ManifestParserUtils');
+// goog.require('ManifestParserUtils');
+
+/* eslint-disable */
+
+import ManifestParserUtils from '../util/manifest_parser_utils';
+import { SegmentReference, InitSegmentReference } from '../media/segment_reference';
+import SegmentIndex from '../media/segment_index';
+import SegmentBase from '../dash/segment_base';
+import MpdUtils from '../dash/mpd_utils';
 
 var shaka = window.shaka;
 
 /**
  * @summary A set of functions for parsing SegmentTemplate elements.
  */
-shaka.dash.SegmentTemplate = class {
+export default class SegmentTemplate {
 	/**
 	 * Creates a new Stream object or updates the Stream in the manifest.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.DashParser.RequestInitSegmentCallback}
+	 * @param {DashParser.Context} context
+	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
-	 * @param {!Object.<string, !shaka.media.SegmentIndex>} segmentIndexMap
+	 * @param {!Object.<string, !SegmentIndex>} segmentIndexMap
 	 * @param {boolean} isUpdate True if the manifest is being updated.
-	 * @throws shaka.util.Error When there is a parsing error.
-	 * @return {shaka.dash.DashParser.StreamInfo}
+	 * @throws Error When there is a parsing error.
+	 * @return {DashParser.StreamInfo}
 	 */
 	static createStream(context, requestInitSegment, segmentIndexMap, isUpdate) {
 		window.asserts.assert(context.representation.segmentTemplate, 'Should only be called with SegmentTemplate');
-		const SegmentTemplate = shaka.dash.SegmentTemplate;
+		// const SegmentTemplate = SegmentTemplate;
 
 		const init = SegmentTemplate.createInitSegment_(context);
 		const info = SegmentTemplate.parseSegmentTemplateInfo_(context);
 
 		SegmentTemplate.checkSegmentTemplateInfo_(context, info);
 
-		/** @type {?shaka.dash.DashParser.SegmentIndexFunctions} */
+		/** @type {?DashParser.SegmentIndexFunctions} */
 		let segmentIndexFunctions = null;
 		if (info.indexTemplate) {
 			segmentIndexFunctions = SegmentTemplate.createFromIndexTemplate_(context, requestInitSegment, init, info);
@@ -64,7 +72,7 @@ shaka.dash.SegmentTemplate = class {
 			}
 			segmentIndexFunctions = SegmentTemplate.createFromDuration_(context, info);
 		} else {
-			/** @type {shaka.media.SegmentIndex} */
+			/** @type {SegmentIndex} */
 			let segmentIndex = null;
 			let id = null;
 			if (context.period.id && context.representation.id) {
@@ -85,7 +93,7 @@ shaka.dash.SegmentTemplate = class {
 				if (shouldFit) {
 					// Fit the new references before merging them, so that the merge
 					// algorithm has a more accurate view of their start and end times.
-					const wrapper = new shaka.media.SegmentIndex(references);
+					const wrapper = new SegmentIndex(references);
 					wrapper.fit(context.periodInfo.duration);
 				}
 
@@ -94,7 +102,7 @@ shaka.dash.SegmentTemplate = class {
 				segmentIndex.evict(start - context.periodInfo.start);
 			} else {
 				context.presentationTimeline.notifySegments(references, context.periodInfo.start);
-				segmentIndex = new shaka.media.SegmentIndex(references);
+				segmentIndex = new SegmentIndex(references);
 				if (id && context.dynamic) {
 					segmentIndexMap[id] = segmentIndex;
 				}
@@ -121,7 +129,7 @@ shaka.dash.SegmentTemplate = class {
 	}
 
 	/**
-	 * @param {?shaka.dash.DashParser.InheritanceFrame} frame
+	 * @param {?DashParser.InheritanceFrame} frame
 	 * @return {Element}
 	 * @private
 	 */
@@ -132,13 +140,13 @@ shaka.dash.SegmentTemplate = class {
 	/**
 	 * Parses a SegmentTemplate element into an info object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @return {shaka.dash.SegmentTemplate.SegmentTemplateInfo}
+	 * @param {DashParser.Context} context
+	 * @return {SegmentTemplate.SegmentTemplateInfo}
 	 * @private
 	 */
 	static parseSegmentTemplateInfo_(context) {
-		const SegmentTemplate = shaka.dash.SegmentTemplate;
-		const MpdUtils = shaka.dash.MpdUtils;
+		const SegmentTemplate = SegmentTemplate;
+		const MpdUtils = MpdUtils;
 		const segmentInfo = MpdUtils.parseSegmentInfo(context, SegmentTemplate.fromInheritance_);
 
 		const media = MpdUtils.inheritAttribute(context, SegmentTemplate.fromInheritance_, 'media');
@@ -159,9 +167,9 @@ shaka.dash.SegmentTemplate = class {
 	/**
 	 * Verifies a SegmentTemplate info object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
-	 * @throws shaka.util.Error When there is a parsing error.
+	 * @param {DashParser.Context} context
+	 * @param {SegmentTemplate.SegmentTemplateInfo} info
+	 * @throws Error When there is a parsing error.
 	 * @private
 	 */
 	static checkSegmentTemplateInfo_(context, info) {
@@ -177,11 +185,7 @@ shaka.dash.SegmentTemplate = class {
 				'a SegmentTimeline, or a segment duration.',
 				context.representation
 			);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_NO_SEGMENT_INFO
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.DASH_NO_SEGMENT_INFO);
 		} else if (n != 1) {
 			shaka.log.warning(
 				'SegmentTemplate containes multiple segment information sources:',
@@ -206,39 +210,31 @@ shaka.dash.SegmentTemplate = class {
 				"the SegmentTemplate's media URL template is missing.",
 				context.representation
 			);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_NO_SEGMENT_INFO
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.DASH_NO_SEGMENT_INFO);
 		}
 	}
 
 	/**
 	 * Creates segment index functions from a index URL template.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.DashParser.RequestInitSegmentCallback}
+	 * @param {DashParser.Context} context
+	 * @param {DashParser.RequestInitSegmentCallback}
 	 *     requestInitSegment
-	 * @param {shaka.media.InitSegmentReference} init
-	 * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
-	 * @throws shaka.util.Error When there is a parsing error.
-	 * @return {shaka.dash.DashParser.SegmentIndexFunctions}
+	 * @param {InitSegmentReference} init
+	 * @param {SegmentTemplate.SegmentTemplateInfo} info
+	 * @throws Error When there is a parsing error.
+	 * @return {DashParser.SegmentIndexFunctions}
 	 * @private
 	 */
 	static createFromIndexTemplate_(context, requestInitSegment, init, info) {
-		const MpdUtils = shaka.dash.MpdUtils;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		// const MpdUtils = MpdUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
 
 		// Determine the container type.
 		const containerType = context.representation.mimeType.split('/')[1];
 		if (containerType != 'mp4' && containerType != 'webm') {
 			shaka.log.error('SegmentTemplate specifies an unsupported container type.', context.representation);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_UNSUPPORTED_CONTAINER
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.DASH_UNSUPPORTED_CONTAINER);
 		}
 
 		if (containerType == 'webm' && !init) {
@@ -248,11 +244,7 @@ shaka.dash.SegmentTemplate = class {
 				'but does not contain an initialization URL template.',
 				context.representation
 			);
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_WEBM_MISSING_INIT
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.DASH_WEBM_MISSING_INIT);
 		}
 
 		window.asserts.assert(info.indexTemplate, 'must be using index template');
@@ -266,7 +258,7 @@ shaka.dash.SegmentTemplate = class {
 
 		const resolvedUris = ManifestParserUtils.resolveUris(context.representation.baseUris, [filledTemplate]);
 
-		return shaka.dash.SegmentBase.createSegmentIndexFromUris(
+		return SegmentBase.createSegmentIndexFromUris(
 			context,
 			requestInitSegment,
 			init,
@@ -281,15 +273,15 @@ shaka.dash.SegmentTemplate = class {
 	/**
 	 * Creates segment index functions from a segment duration.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
-	 * @return {shaka.dash.DashParser.SegmentIndexFunctions}
+	 * @param {DashParser.Context} context
+	 * @param {SegmentTemplate.SegmentTemplateInfo} info
+	 * @return {DashParser.SegmentIndexFunctions}
 	 * @private
 	 */
 	static createFromDuration_(context, info) {
 		window.asserts.assert(info.mediaTemplate, 'There should be a media template with duration');
-		const MpdUtils = shaka.dash.MpdUtils;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		const MpdUtils = MpdUtils;
+		const ManifestParserUtils = ManifestParserUtils;
 
 		const periodDuration = context.periodInfo.duration;
 		const segmentDuration = info.segmentDuration;
@@ -337,7 +329,7 @@ shaka.dash.SegmentTemplate = class {
 				return ManifestParserUtils.resolveUris(baseUris, [mediaUri]);
 			};
 
-			return new shaka.media.SegmentReference(position, segmentStart, segmentEnd, getUris, 0, null);
+			return new SegmentReference(position, segmentStart, segmentEnd, getUris, 0, null);
 		};
 
 		return {
@@ -350,16 +342,16 @@ shaka.dash.SegmentTemplate = class {
 	/**
 	 * Creates segment references from a timeline.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.SegmentTemplate.SegmentTemplateInfo} info
-	 * @return {!Array.<!shaka.media.SegmentReference>}
+	 * @param {DashParser.Context} context
+	 * @param {SegmentTemplate.SegmentTemplateInfo} info
+	 * @return {!Array.<!SegmentReference>}
 	 * @private
 	 */
 	static createFromTimeline_(context, info) {
-		const MpdUtils = shaka.dash.MpdUtils;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		const MpdUtils = MpdUtils;
+		const ManifestParserUtils = ManifestParserUtils;
 
-		/** @type {!Array.<!shaka.media.SegmentReference>} */
+		/** @type {!Array.<!SegmentReference>} */
 		const references = [];
 		for (let i = 0; i < info.timeline.length; i++) {
 			const start = info.timeline[i].start;
@@ -386,7 +378,7 @@ shaka.dash.SegmentTemplate = class {
 				});
 			};
 
-			references.push(new shaka.media.SegmentReference(segmentReplacement, start, end, createUris, 0, null));
+			references.push(new SegmentReference(segmentReplacement, start, end, createUris, 0, null));
 		}
 
 		return references;
@@ -395,14 +387,14 @@ shaka.dash.SegmentTemplate = class {
 	/**
 	 * Creates an init segment reference from a context object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @return {shaka.media.InitSegmentReference}
+	 * @param {DashParser.Context} context
+	 * @return {InitSegmentReference}
 	 * @private
 	 */
 	static createInitSegment_(context) {
-		const MpdUtils = shaka.dash.MpdUtils;
-		const ManifestParserUtils = shaka.util.ManifestParserUtils;
-		const SegmentTemplate = shaka.dash.SegmentTemplate;
+		const MpdUtils = MpdUtils;
+		const ManifestParserUtils = ManifestParserUtils;
+		const SegmentTemplate = SegmentTemplate;
 
 		const initialization = MpdUtils.inheritAttribute(context, SegmentTemplate.fromInheritance_, 'initialization');
 		if (!initialization) {
@@ -419,9 +411,9 @@ shaka.dash.SegmentTemplate = class {
 			return resolvedUris;
 		};
 
-		return new shaka.media.InitSegmentReference(getUris, 0, null);
+		return new InitSegmentReference(getUris, 0, null);
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -430,7 +422,7 @@ shaka.dash.SegmentTemplate = class {
  *   startNumber: number,
  *   scaledPresentationTimeOffset: number,
  *   unscaledPresentationTimeOffset: number,
- *   timeline: Array.<shaka.dash.MpdUtils.TimeRange>,
+ *   timeline: Array.<MpdUtils.TimeRange>,
  *   mediaTemplate: ?string,
  *   indexTemplate: ?string
  * }}
@@ -449,11 +441,11 @@ shaka.dash.SegmentTemplate = class {
  *   The presentation time offset of the representation, in seconds.
  * @property {number} unscaledPresentationTimeOffset
  *   The presentation time offset of the representation, in timescale units.
- * @property {Array.<shaka.dash.MpdUtils.TimeRange>} timeline
+ * @property {Array.<MpdUtils.TimeRange>} timeline
  *   The timeline of the representation, if given.  Times in seconds.
  * @property {?string} mediaTemplate
  *   The media URI template, if given.
  * @property {?string} indexTemplate
  *   The index URI template, if given.
  */
-shaka.dash.SegmentTemplate.SegmentTemplateInfo;
+SegmentTemplate.SegmentTemplateInfo;

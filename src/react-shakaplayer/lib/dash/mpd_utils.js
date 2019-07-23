@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+ /* eslint-disable */
+
 // goog.provide('shaka.dash.MpdUtils');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.log');
 // goog.require('shaka.net.NetworkingEngine');
 // goog.require('shaka.util.AbortableOperation');
@@ -31,7 +33,7 @@ const shaka  = window.shaka
 /**
  * @summary MPD processing utility functions.
  */
-shaka.dash.MpdUtils = class {
+export default class MpdUtils {
   /**
    * Fills a SegmentTemplate URI template.  This function does not validate the
    * resulting URI.
@@ -130,7 +132,7 @@ shaka.dash.MpdUtils = class {
    * @param {number} unscaledPresentationTimeOffset
    * @param {number} periodDuration The Period's duration in seconds.
    *   Infinity indicates that the Period continues indefinitely.
-   * @return {!Array.<shaka.dash.MpdUtils.TimeRange>}
+   * @return {!Array.<MpdUtils.TimeRange>}
    */
   static createTimeline(
       segmentTimeline, timescale, unscaledPresentationTimeOffset,
@@ -146,7 +148,7 @@ shaka.dash.MpdUtils = class {
 
     const timePoints = XmlUtils.findChildren(segmentTimeline, 'S');
 
-    /** @type {!Array.<shaka.dash.MpdUtils.TimeRange>} */
+    /** @type {!Array.<MpdUtils.TimeRange>} */
     const timeline = [];
     let lastEndTime = 0;
 
@@ -254,16 +256,16 @@ shaka.dash.MpdUtils = class {
   /**
    * Parses common segment info for SegmentList and SegmentTemplate.
    *
-   * @param {shaka.dash.DashParser.Context} context
-   * @param {function(?shaka.dash.DashParser.InheritanceFrame):Element} callback
+   * @param {DashParser.Context} context
+   * @param {function(?DashParser.InheritanceFrame):Element} callback
    *   Gets the element that contains the segment info.
-   * @return {shaka.dash.MpdUtils.SegmentInfo}
+   * @return {MpdUtils.SegmentInfo}
    */
   static parseSegmentInfo(context, callback) {
     window.asserts.assert(
         callback(context.representation),
         'There must be at least one element of the given type.');
-    const MpdUtils = shaka.dash.MpdUtils;
+    const MpdUtils = MpdUtils;
     const XmlUtils = shaka.util.XmlUtils;
 
     const timescaleStr =
@@ -292,7 +294,7 @@ shaka.dash.MpdUtils = class {
 
     const timelineNode =
         MpdUtils.inheritChild(context, callback, 'SegmentTimeline');
-    /** @type {Array.<shaka.dash.MpdUtils.TimeRange>} */
+    /** @type {Array.<MpdUtils.TimeRange>} */
     let timeline = null;
     if (timelineNode) {
       timeline = MpdUtils.createTimeline(
@@ -315,8 +317,8 @@ shaka.dash.MpdUtils = class {
   /**
    * Searches the inheritance for a Segment* with the given attribute.
    *
-   * @param {shaka.dash.DashParser.Context} context
-   * @param {function(?shaka.dash.DashParser.InheritanceFrame):Element} callback
+   * @param {DashParser.Context} context
+   * @param {function(?DashParser.InheritanceFrame):Element} callback
    *   Gets the Element that contains the attribute to inherit.
    * @param {string} attribute
    * @return {?string}
@@ -342,8 +344,8 @@ shaka.dash.MpdUtils = class {
   /**
    * Searches the inheritance for a Segment* with the given child.
    *
-   * @param {shaka.dash.DashParser.Context} context
-   * @param {function(?shaka.dash.DashParser.InheritanceFrame):Element} callback
+   * @param {DashParser.Context} context
+   * @param {function(?DashParser.InheritanceFrame):Element} callback
    *   Gets the Element that contains the child to inherit.
    * @param {string} child
    * @return {Element}
@@ -384,7 +386,7 @@ shaka.dash.MpdUtils = class {
   static handleXlinkInElement_(
       element, retryParameters, failGracefully, baseUri, networkingEngine,
       linkDepth) {
-    const MpdUtils = shaka.dash.MpdUtils;
+    const MpdUtils = MpdUtils;
     const XmlUtils = shaka.util.XmlUtils;
     const Error = shaka.util.Error;
     const ManifestParserUtils = shaka.util.ManifestParserUtils;
@@ -474,7 +476,7 @@ shaka.dash.MpdUtils = class {
             element.setAttribute(attribute, attributeValue);
           }
 
-          return shaka.dash.MpdUtils.processXlinks(
+          return MpdUtils.processXlinks(
               element, retryParameters, failGracefully, uris[0],
               networkingEngine, linkDepth + 1);
         });
@@ -495,7 +497,7 @@ shaka.dash.MpdUtils = class {
   static processXlinks(
       element, retryParameters, failGracefully, baseUri, networkingEngine,
       linkDepth = 0) {
-    const MpdUtils = shaka.dash.MpdUtils;
+    const MpdUtils = MpdUtils;
     const XmlUtils = shaka.util.XmlUtils;
     const NS = MpdUtils.XlinkNamespaceUri_;
 
@@ -533,7 +535,7 @@ shaka.dash.MpdUtils = class {
           // time with larger manifests.
 
           // Replace the child with its processed form.
-          childOperations.push(shaka.dash.MpdUtils.processXlinks(
+          childOperations.push(MpdUtils.processXlinks(
               /** @type {!Element} */ (child), retryParameters, failGracefully,
               baseUri, networkingEngine, linkDepth));
         }
@@ -564,7 +566,7 @@ shaka.dash.MpdUtils = class {
  * @property {number} end
  *   The end time (exclusive) of the range.
  */
-shaka.dash.MpdUtils.TimeRange;
+MpdUtils.TimeRange;
 
 
 /**
@@ -574,7 +576,7 @@ shaka.dash.MpdUtils.TimeRange;
  *   startNumber: number,
  *   scaledPresentationTimeOffset: number,
  *   unscaledPresentationTimeOffset: number,
- *   timeline: Array.<shaka.dash.MpdUtils.TimeRange>
+ *   timeline: Array.<MpdUtils.TimeRange>
  * }}
  *
  * @description
@@ -590,14 +592,14 @@ shaka.dash.MpdUtils.TimeRange;
  *   The presentation time offset of the representation, in seconds.
  * @property {number} unscaledPresentationTimeOffset
  *   The presentation time offset of the representation, in timescale units.
- * @property {Array.<shaka.dash.MpdUtils.TimeRange>} timeline
+ * @property {Array.<MpdUtils.TimeRange>} timeline
  *   The timeline of the representation, if given.  Times in seconds.
  */
-shaka.dash.MpdUtils.SegmentInfo;
+MpdUtils.SegmentInfo;
 
 
 /**
  * @const {string}
  * @private
  */
-shaka.dash.MpdUtils.XlinkNamespaceUri_ = 'http://www.w3.org/1999/xlink';
+MpdUtils.XlinkNamespaceUri_ = 'http://www.w3.org/1999/xlink';

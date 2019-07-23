@@ -17,7 +17,7 @@
 
 // goog.provide('shaka.dash.SegmentList');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.dash.MpdUtils');
 // goog.require('shaka.dash.SegmentBase');
 // goog.require('shaka.log');
@@ -28,24 +28,26 @@ goog.require('goog.asserts');
 // goog.require('shaka.util.ManifestParserUtils');
 // goog.require('shaka.util.XmlUtils');
 
+/* eslint-disable */
+
 var shaka = window.shaka;
 
 /**
  * @summary A set of functions for parsing SegmentList elements.
  */
-shaka.dash.SegmentList = class {
+export default class SegmentList {
 	/**
 	 * Creates a new Stream object or updates the Stream in the manifest.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
+	 * @param {DashParser.Context} context
 	 * @param {!Object.<string, !shaka.media.SegmentIndex>} segmentIndexMap
-	 * @return {shaka.dash.DashParser.StreamInfo}
+	 * @return {DashParser.StreamInfo}
 	 */
 	static createStream(context, segmentIndexMap) {
 		window.asserts.assert(context.representation.segmentList, 'Should only be called with SegmentList');
-		const SegmentList = shaka.dash.SegmentList;
+		const SegmentList = SegmentList;
 
-		const init = shaka.dash.SegmentBase.createInitSegment(context, SegmentList.fromInheritance_);
+		const init = SegmentBase.createInitSegment(context, SegmentList.fromInheritance_);
 		const info = SegmentList.parseSegmentListInfo_(context);
 
 		SegmentList.checkSegmentListInfo_(context, info);
@@ -92,7 +94,7 @@ shaka.dash.SegmentList = class {
 	}
 
 	/**
-	 * @param {?shaka.dash.DashParser.InheritanceFrame} frame
+	 * @param {?DashParser.InheritanceFrame} frame
 	 * @return {Element}
 	 * @private
 	 */
@@ -103,13 +105,13 @@ shaka.dash.SegmentList = class {
 	/**
 	 * Parses the SegmentList items to create an info object.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @return {shaka.dash.SegmentList.SegmentListInfo}
+	 * @param {DashParser.Context} context
+	 * @return {SegmentList.SegmentListInfo}
 	 * @private
 	 */
 	static parseSegmentListInfo_(context) {
-		const SegmentList = shaka.dash.SegmentList;
-		const MpdUtils = shaka.dash.MpdUtils;
+		const SegmentList = SegmentList;
+		const MpdUtils = MpdUtils;
 
 		const mediaSegments = SegmentList.parseMediaSegments_(context);
 		const segmentInfo = MpdUtils.parseSegmentInfo(context, SegmentList.fromInheritance_);
@@ -143,8 +145,8 @@ shaka.dash.SegmentList = class {
 	/**
 	 * Checks whether a SegmentListInfo object is valid.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @param {shaka.dash.SegmentList.SegmentListInfo} info
+	 * @param {DashParser.Context} context
+	 * @param {SegmentList.SegmentListInfo} info
 	 * @throws shaka.util.Error When there is a parsing error.
 	 * @private
 	 */
@@ -198,7 +200,7 @@ shaka.dash.SegmentList = class {
 	 * @param {?number} periodDuration in seconds.
 	 * @param {number} startNumber
 	 * @param {!Array.<string>} baseUris
-	 * @param {shaka.dash.SegmentList.SegmentListInfo} info
+	 * @param {SegmentList.SegmentListInfo} info
 	 * @return {!Array.<!shaka.media.SegmentReference>}
 	 * @private
 	 */
@@ -262,8 +264,8 @@ shaka.dash.SegmentList = class {
 	/**
 	 * Parses the media URIs from the context.
 	 *
-	 * @param {shaka.dash.DashParser.Context} context
-	 * @return {!Array.<shaka.dash.SegmentList.MediaSegment>}
+	 * @param {DashParser.Context} context
+	 * @return {!Array.<SegmentList.MediaSegment>}
 	 * @private
 	 */
 	static parseMediaSegments_(context) {
@@ -300,7 +302,7 @@ shaka.dash.SegmentList = class {
 				return { mediaUri: uri, start: range.start, end: range.end };
 			});
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -316,7 +318,7 @@ shaka.dash.SegmentList = class {
  * @property {?number} end
  *   The end byte of the segment, or null.
  */
-shaka.dash.SegmentList.MediaSegment;
+SegmentList.MediaSegment;
 
 /**
  * @typedef {{
@@ -324,8 +326,8 @@ shaka.dash.SegmentList.MediaSegment;
  *   startTime: number,
  *   startNumber: number,
  *   scaledPresentationTimeOffset: number,
- *   timeline: Array.<shaka.dash.MpdUtils.TimeRange>,
- *   mediaSegments: !Array.<shaka.dash.SegmentList.MediaSegment>
+ *   timeline: Array.<MpdUtils.TimeRange>,
+ *   mediaSegments: !Array.<SegmentList.MediaSegment>
  * }}
  * @private
  *
@@ -340,9 +342,9 @@ shaka.dash.SegmentList.MediaSegment;
  *   The start number of the segments; 1 or greater.
  * @property {number} scaledPresentationTimeOffset
  *   The scaledPresentationTimeOffset of the representation, in seconds.
- * @property {Array.<shaka.dash.MpdUtils.TimeRange>} timeline
+ * @property {Array.<MpdUtils.TimeRange>} timeline
  *   The timeline of the representation, if given.  Times in seconds.
- * @property {!Array.<shaka.dash.SegmentList.MediaSegment>} mediaSegments
+ * @property {!Array.<SegmentList.MediaSegment>} mediaSegments
  *   The URI and byte-ranges of the media segments.
  */
-shaka.dash.SegmentList.SegmentListInfo;
+SegmentList.SegmentListInfo;

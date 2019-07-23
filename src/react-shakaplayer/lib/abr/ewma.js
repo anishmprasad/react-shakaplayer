@@ -23,7 +23,7 @@
  * @summary
  * This class computes an exponentionally-weighted moving average.
  */
-window.shaka.abr.Ewma = class {
+export default class Ewma {
 	/**
 	 * @param {number} halfLife The quantity of prior samples (by weight) used
 	 *   when creating a new estimate.  Those prior samples make up half of the
@@ -68,4 +68,4 @@ window.shaka.abr.Ewma = class {
 		const zeroFactor = 1 - Math.pow(this.alpha_, this.totalWeight_);
 		return this.estimate_ / zeroFactor;
 	}
-};
+}

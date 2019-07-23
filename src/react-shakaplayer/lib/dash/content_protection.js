@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
+/* eslint-disable */
+
 // goog.provide('shaka.dash.ContentProtection');
 
-goog.require('goog.asserts');
+// goog.require('goog.asserts');
 // goog.require('shaka.log');
 // goog.require('shaka.util.Error');
 // goog.require('shaka.util.ManifestParserUtils');
@@ -30,17 +32,17 @@ var shaka = window.shaka;
  * @summary A set of functions for parsing and interpreting ContentProtection
  *   elements.
  */
-window.shaka.dash.ContentProtection = class {
+export default class ContentProtection {
 	/**
 	 * Parses info from the ContentProtection elements at the AdaptationSet level.
 	 *
 	 * @param {!Array.<!Element>} elems
 	 * @param {shaka.extern.DashContentProtectionCallback} callback
 	 * @param {boolean} ignoreDrmInfo
-	 * @return {shaka.dash.ContentProtection.Context}
+	 * @return {ContentProtection.Context}
 	 */
 	static parseFromAdaptationSet(elems, callback, ignoreDrmInfo) {
-		const ContentProtection = shaka.dash.ContentProtection;
+		const ContentProtection = ContentProtection;
 		const ManifestParserUtils = shaka.util.ManifestParserUtils;
 		const parsed = ContentProtection.parseElements_(elems);
 		/** @type {Array.<shaka.extern.InitDataOverride>} */
@@ -128,12 +130,12 @@ window.shaka.dash.ContentProtection = class {
 	 *
 	 * @param {!Array.<!Element>} elems
 	 * @param {shaka.extern.DashContentProtectionCallback} callback
-	 * @param {shaka.dash.ContentProtection.Context} context
+	 * @param {ContentProtection.Context} context
 	 * @param {boolean} ignoreDrmInfo
 	 * @return {?string} The parsed key ID
 	 */
 	static parseFromRepresentation(elems, callback, context, ignoreDrmInfo) {
-		const ContentProtection = shaka.dash.ContentProtection;
+		const ContentProtection = ContentProtection;
 		const repContext = ContentProtection.parseFromAdaptationSet(elems, callback, ignoreDrmInfo);
 
 		if (context.firstRepresentation) {
@@ -174,7 +176,7 @@ window.shaka.dash.ContentProtection = class {
 	 * Gets a Widevine license URL from a content protection element
 	 * containing a custom `ms:laurl` element
 	 *
-	 * @param {shaka.dash.ContentProtection.Element} element
+	 * @param {ContentProtection.Element} element
 	 * @return {string}
 	 */
 	static getWidevineLicenseUrl(element) {
@@ -194,7 +196,7 @@ window.shaka.dash.ContentProtection = class {
 	 *
 	 * @param {!ArrayBuffer} recordData
 	 * @param {number} byteOffset
-	 * @return {!Array.<shaka.dash.ContentProtection.PlayReadyRecord>}
+	 * @return {!Array.<ContentProtection.PlayReadyRecord>}
 	 * @private
 	 */
 	static parseMsProRecords_(recordData, byteOffset) {
@@ -233,7 +235,7 @@ window.shaka.dash.ContentProtection = class {
 	 * PlayReady Object format: https://goo.gl/W8yAN4
 	 *
 	 * @param {!ArrayBuffer} data
-	 * @return {!Array.<shaka.dash.ContentProtection.PlayReadyRecord>}
+	 * @return {!Array.<ContentProtection.PlayReadyRecord>}
 	 * @private
 	 */
 	static parseMsPro_(data) {
@@ -254,7 +256,7 @@ window.shaka.dash.ContentProtection = class {
 		byteOffset += 2;
 
 		// Rest of the data contains the PRO Records
-		const ContentProtection = shaka.dash.ContentProtection;
+		const ContentProtection = ContentProtection;
 		return ContentProtection.parseMsProRecords_(data, byteOffset);
 	}
 
@@ -282,7 +284,7 @@ window.shaka.dash.ContentProtection = class {
 	 * Gets a PlayReady license URL from a content protection element
 	 * containing a PlayReady Header Object
 	 *
-	 * @param {shaka.dash.ContentProtection.Element} element
+	 * @param {ContentProtection.Element} element
 	 * @return {string}
 	 */
 	static getPlayReadyLicenseUrl(element) {
@@ -292,7 +294,7 @@ window.shaka.dash.ContentProtection = class {
 			return '';
 		}
 
-		const ContentProtection = shaka.dash.ContentProtection;
+		const ContentProtection = ContentProtection;
 		const PLAYREADY_RECORD_TYPES = ContentProtection.PLAYREADY_RECORD_TYPES;
 
 		const bytes = shaka.util.Uint8ArrayUtils.fromBase64(proNode.textContent);
@@ -319,12 +321,12 @@ window.shaka.dash.ContentProtection = class {
 	 *
 	 * @param {Array.<shaka.extern.InitDataOverride>} defaultInit
 	 * @param {shaka.extern.DashContentProtectionCallback} callback
-	 * @param {!Array.<shaka.dash.ContentProtection.Element>} elements
+	 * @param {!Array.<ContentProtection.Element>} elements
 	 * @return {!Array.<shaka.extern.DrmInfo>}
 	 * @private
 	 */
 	static convertElements_(defaultInit, callback, elements) {
-		const ContentProtection = shaka.dash.ContentProtection;
+		const ContentProtection = ContentProtection;
 		const ManifestParserUtils = shaka.util.ManifestParserUtils;
 		const defaultKeySystems = ContentProtection.defaultKeySystems_;
 		const licenseUrlParsers = ContentProtection.licenseUrlParsers_;
@@ -362,15 +364,15 @@ window.shaka.dash.ContentProtection = class {
 	 * removes those elements.
 	 *
 	 * @param {!Array.<!Element>} elems
-	 * @return {!Array.<shaka.dash.ContentProtection.Element>}
+	 * @return {!Array.<ContentProtection.Element>}
 	 * @private
 	 */
 	static parseElements_(elems) {
-		/** @type {!Array.<shaka.dash.ContentProtection.Element>} */
+		/** @type {!Array.<ContentProtection.Element>} */
 		const out = [];
 
 		for (const elem of elems) {
-			const parsed = shaka.dash.ContentProtection.parseElement_(elem);
+			const parsed = ContentProtection.parseElement_(elem);
 			if (parsed) {
 				out.push(parsed);
 			}
@@ -383,11 +385,11 @@ window.shaka.dash.ContentProtection = class {
 	 * Parses the given ContentProtection element.
 	 *
 	 * @param {!Element} elem
-	 * @return {?shaka.dash.ContentProtection.Element}
+	 * @return {?ContentProtection.Element}
 	 * @private
 	 */
 	static parseElement_(elem) {
-		const NS = shaka.dash.ContentProtection.CencNamespaceUri_;
+		const NS = ContentProtection.CencNamespaceUri_;
 
 		/** @type {?string} */
 		let schemeUri = elem.getAttribute('schemeIdUri');
@@ -439,7 +441,7 @@ window.shaka.dash.ContentProtection = class {
 			init: init.length > 0 ? init : null
 		};
 	}
-};
+}
 
 /**
  * @typedef {{
@@ -455,13 +457,13 @@ window.shaka.dash.ContentProtection = class {
  * @property {!Uint8Array} value
  *   Record content.
  */
-shaka.dash.ContentProtection.PlayReadyRecord;
+ContentProtection.PlayReadyRecord;
 
 /**
  * Enum for PlayReady record types.
  * @enum {number}
  */
-shaka.dash.ContentProtection.PLAYREADY_RECORD_TYPES = {
+ContentProtection.PLAYREADY_RECORD_TYPES = {
 	RIGHTS_MANAGEMENT: 0x001,
 	RESERVED: 0x002,
 	EMBEDDED_LICENSE: 0x003
@@ -493,7 +495,7 @@ shaka.dash.ContentProtection.PLAYREADY_RECORD_TYPES = {
  *   overwritten; namely that the first representation can replace the dummy
  *   from the AdaptationSet.
  */
-shaka.dash.ContentProtection.Context;
+ContentProtection.Context;
 
 /**
  * @typedef {{
@@ -516,7 +518,7 @@ shaka.dash.ContentProtection.Context;
  *   The init data, if present.  If there is no init data, it will be null.  If
  *   this is non-null, there is at least one element.
  */
-shaka.dash.ContentProtection.Element;
+ContentProtection.Element;
 
 /**
  * A map of scheme URI to key system name.
@@ -524,7 +526,7 @@ shaka.dash.ContentProtection.Element;
  * @const {!Map.<string, string>}
  * @private
  */
-shaka.dash.ContentProtection.defaultKeySystems_ = new Map()
+ContentProtection.defaultKeySystems_ = new Map()
 	.set('urn:uuid:1077efec-c0b2-4d02-ace3-3c1e52e2fb4b', 'org.w3.clearkey')
 	.set('urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed', 'com.widevine.alpha')
 	.set('urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95', 'com.microsoft.playready')
@@ -533,21 +535,21 @@ shaka.dash.ContentProtection.defaultKeySystems_ = new Map()
 /**
  * A map of key system name to license server url parser.
  *
- * @const {!Map.<string, function(shaka.dash.ContentProtection.Element)>}
+ * @const {!Map.<string, function(ContentProtection.Element)>}
  * @private
  */
-shaka.dash.ContentProtection.licenseUrlParsers_ = new Map()
-	.set('com.widevine.alpha', shaka.dash.ContentProtection.getWidevineLicenseUrl)
-	.set('com.microsoft.playready', shaka.dash.ContentProtection.getPlayReadyLicenseUrl);
+ContentProtection.licenseUrlParsers_ = new Map()
+	.set('com.widevine.alpha', ContentProtection.getWidevineLicenseUrl)
+	.set('com.microsoft.playready', ContentProtection.getPlayReadyLicenseUrl);
 
 /**
  * @const {string}
  * @private
  */
-shaka.dash.ContentProtection.MP4Protection_ = 'urn:mpeg:dash:mp4protection:2011';
+ContentProtection.MP4Protection_ = 'urn:mpeg:dash:mp4protection:2011';
 
 /**
  * @const {string}
  * @private
  */
-shaka.dash.ContentProtection.CencNamespaceUri_ = 'urn:mpeg:cenc:2013';
+ContentProtection.CencNamespaceUri_ = 'urn:mpeg:cenc:2013';

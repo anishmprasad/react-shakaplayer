@@ -44,7 +44,29 @@
 // goog.require('shaka.util.StringUtils');
 // goog.require('shaka.util.XmlUtils');
 
+import Ewma from '../abr/ewma'
+import ContentProtection from '../dash/content_protection'
+import MpdUtils from '../dash/mpd_utils'
+import SegmentBase from '../dash/segment_base'
+import SegmentList from '../dash/segment_list'
+import SegmentTemplate from '../dash/segment_template'
+import DrmEngine from '../media/drm_engine'
 import ManifestParser from '../media/manifest_parser'
+import PresentationTimeline from '../media/presentation_timeline'
+import SegmentReference from '../media/segment_reference'
+import NetworkingEngine from '../net/networking_engine'
+import TextEngine from '../text/text_engine'
+import Error from '../util/error'
+import Functional from '../util/functional'
+import LanguageUtils from '../util/language_utils'
+import ManifestParserUtils from '../util/manifest_parser_utils'
+import MimeUtils from '../util/mime_utils'
+import Networking from '../util/networking'
+import OperationManager from '../util/operation_manager'
+import StringUtils from '../util/string_utils'
+import XmlUtils from '../util/xml_utils'
+import Timer from '../util/timer'
+
 const shaka  = window.shaka
 var goog = window.goog
 
@@ -93,17 +115,17 @@ export default class DashParser {
     /**
      * An ewma that tracks how long updates take.
      * This is to mitigate issues caused by slow parsing on embedded devices.
-     * @private {!shaka.abr.Ewma}
+     * @private {!Ewma}
      */
-    this.averageUpdateDuration_ = new shaka.abr.Ewma(5);
+    this.averageUpdateDuration_ = new Ewma(5);
 
-    /** @private {shaka.util.Timer} */
-    this.updateTimer_ = new shaka.util.Timer(() => {
+    /** @private {Timer} */
+    this.updateTimer_ = new Timer(() => {
       this.onUpdate_();
     });
 
-    /** @private {!shaka.util.OperationManager} */
-    this.operationManager_ = new shaka.util.OperationManager();
+    /** @private {!OperationManager} */
+    this.operationManager_ = new OperationManager();
   }
 
   /**
@@ -134,10 +156,10 @@ export default class DashParser {
 
     // Make sure that the parser has not been destroyed.
     if (!this.playerInterface_) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.PLAYER,
-          shaka.util.Error.Code.OPERATION_ABORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.PLAYER,
+          Error.Code.OPERATION_ABORTED);
     }
 
     window.asserts.assert(this.manifest_, 'Manifest should be non-null!');
@@ -175,7 +197,7 @@ export default class DashParser {
       if (!this.playerInterface_ || !error) {
         return;
       }
-      window.asserts.assert(error instanceof shaka.util.Error, 'Bad error type');
+      window.asserts.assert(error instanceof Error, 'Bad error type');
       this.playerInterface_.onError(error);
     }
   }
@@ -237,14 +259,14 @@ export default class DashParser {
    * @param {string} finalManifestUri The final manifest URI, which may
    *   differ from this.manifestUri_ if there has been a redirect.
    * @return {!Promise}
-   * @throws shaka.util.Error When there is a parsing error.
+   * @throws Error When there is a parsing error.
    * @private
    */
   async parseManifest_(data, finalManifestUri) {
-    const Error = shaka.util.Error;
-    const MpdUtils = shaka.dash.MpdUtils;
+    const Error = Error;
+    const MpdUtils = MpdUtils;
 
-    const mpd = shaka.util.XmlUtils.parseXml(data, 'MPD');
+    const mpd = XmlUtils.parseXml(data, 'MPD');
     if (!mpd) {
       throw new Error(
           Error.Severity.CRITICAL, Error.Category.MANIFEST,
@@ -269,12 +291,12 @@ export default class DashParser {
    * @param {string} finalManifestUri The final manifest URI, which may
    *   differ from this.manifestUri_ if there has been a redirect.
    * @return {!Promise}
-   * @throws shaka.util.Error When there is a parsing error.
+   * @throws Error When there is a parsing error.
    * @private
    */
   async processManifest_(mpd, finalManifestUri) {
-    const Functional = shaka.util.Functional;
-    const XmlUtils = shaka.util.XmlUtils;
+    const Functional = Functional;
+    const XmlUtils = XmlUtils;
 
     // Get any Location elements.  This will update the manifest location and
     // the base URI.
@@ -285,7 +307,7 @@ export default class DashParser {
         .map(XmlUtils.getContents)
         .filter(Functional.isNotNull);
     if (locations.length > 0) {
-      const absoluteLocations = shaka.util.ManifestParserUtils.resolveUris(
+      const absoluteLocations = ManifestParserUtils.resolveUris(
           manifestBaseUris, locations);
       this.manifestUris_ = absoluteLocations;
       manifestBaseUris = absoluteLocations;
@@ -293,7 +315,7 @@ export default class DashParser {
 
     const uris =
         XmlUtils.findChildren(mpd, 'BaseURL').map(XmlUtils.getContents);
-    const baseUris = shaka.util.ManifestParserUtils.resolveUris(
+    const baseUris = ManifestParserUtils.resolveUris(
         manifestBaseUris, uris);
 
     const ignoreMinBufferTime = this.config_.dash.ignoreMinBufferTime;
@@ -342,7 +364,7 @@ export default class DashParser {
           this.config_.dash.autoCorrectDrift);
     }
 
-    /** @type {shaka.dash.DashParser.Context} */
+    /** @type {DashParser.Context} */
     const context = {
       // Don't base on updatePeriod_ since emsg boxes can cause manifest
       // updates.
@@ -417,7 +439,7 @@ export default class DashParser {
    * partial parsing so the start and duration is available when parsing
    * children.
    *
-   * @param {shaka.dash.DashParser.Context} context
+   * @param {DashParser.Context} context
    * @param {!Array.<string>} baseUris
    * @param {!Element} mpd
    * @return {{
@@ -428,7 +450,7 @@ export default class DashParser {
    * @private
    */
   parsePeriods_(context, baseUris, mpd) {
-    const XmlUtils = shaka.util.XmlUtils;
+    const XmlUtils = XmlUtils;
     const presentationDuration = XmlUtils.parseAttr(
         mpd, 'mediaPresentationDuration', XmlUtils.parseDuration);
 
@@ -463,7 +485,7 @@ export default class DashParser {
       }
 
       const threshold =
-          shaka.util.ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS;
+          ManifestParserUtils.GAP_OVERLAP_TOLERANCE_SECONDS;
       if (periodDuration && givenDuration &&
           Math.abs(periodDuration - givenDuration) > threshold) {
         shaka.log.warning('There is a gap/overlap between Periods', elem);
@@ -551,17 +573,17 @@ export default class DashParser {
    * given the Node; it is given a PeriodInfo structure.  Also, partial parsing
    * was done before this was called so start and duration are valid.
    *
-   * @param {shaka.dash.DashParser.Context} context
+   * @param {DashParser.Context} context
    * @param {!Array.<string>} baseUris
-   * @param {shaka.dash.DashParser.PeriodInfo} periodInfo
+   * @param {DashParser.PeriodInfo} periodInfo
    * @return {shaka.extern.Period}
-   * @throws shaka.util.Error When there is a parsing error.
+   * @throws Error When there is a parsing error.
    * @private
    */
   parsePeriod_(context, baseUris, periodInfo) {
-    const Functional = shaka.util.Functional;
-    const XmlUtils = shaka.util.XmlUtils;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const Functional = Functional;
+    const XmlUtils = XmlUtils;
+    const ContentType = ManifestParserUtils.ContentType;
 
     context.period = this.createFrame_(periodInfo.node, null, baseUris);
     context.periodInfo = periodInfo;
@@ -599,10 +621,10 @@ export default class DashParser {
       const uniqueIds = new Set(ids);
 
       if (ids.length != uniqueIds.size) {
-        throw new shaka.util.Error(
-            shaka.util.Error.Severity.CRITICAL,
-            shaka.util.Error.Category.MANIFEST,
-            shaka.util.Error.Code.DASH_DUPLICATE_REPRESENTATION_ID);
+        throw new Error(
+            Error.Severity.CRITICAL,
+            Error.Category.MANIFEST,
+            Error.Code.DASH_DUPLICATE_REPRESENTATION_ID);
       }
     }
 
@@ -633,10 +655,10 @@ export default class DashParser {
         this.getSetsOfType_(normalAdaptationSets, ContentType.AUDIO);
 
     if (!videoSets.length && !audioSets.length) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_EMPTY_PERIOD);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.DASH_EMPTY_PERIOD);
     }
 
     // In case of audio-only or video-only content, we create an array of one
@@ -673,9 +695,9 @@ export default class DashParser {
   }
 
   /**
-   * @param {!Array.<!shaka.dash.DashParser.AdaptationInfo>} adaptationSets
+   * @param {!Array.<!DashParser.AdaptationInfo>} adaptationSets
    * @param {string} type
-   * @return {!Array.<!shaka.dash.DashParser.AdaptationInfo>}
+   * @return {!Array.<!DashParser.AdaptationInfo>}
    * @private
    */
   getSetsOfType_(adaptationSets, type) {
@@ -687,14 +709,14 @@ export default class DashParser {
   /**
    * Combines Streams into Variants
    *
-   * @param {?shaka.dash.DashParser.AdaptationInfo} audio
-   * @param {?shaka.dash.DashParser.AdaptationInfo} video
+   * @param {?DashParser.AdaptationInfo} audio
+   * @param {?DashParser.AdaptationInfo} video
    * @param {!Array.<shaka.extern.Variant>} variants New variants are pushed
    *   onto this array.
    * @private
    */
   createVariants_(audio, video, variants) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     // Since both audio and video are of the same type, this assertion will
     // catch certain mistakes at runtime that the compiler would miss.
@@ -765,18 +787,18 @@ export default class DashParser {
   /**
    * Parses an AdaptationSet XML element.
    *
-   * @param {shaka.dash.DashParser.Context} context
+   * @param {DashParser.Context} context
    * @param {!Element} elem The AdaptationSet element.
-   * @return {?shaka.dash.DashParser.AdaptationInfo}
-   * @throws shaka.util.Error When there is a parsing error.
+   * @return {?DashParser.AdaptationInfo}
+   * @throws Error When there is a parsing error.
    * @private
    */
   parseAdaptationSet_(context, elem) {
-    const XmlUtils = shaka.util.XmlUtils;
-    const Functional = shaka.util.Functional;
-    const ManifestParserUtils = shaka.util.ManifestParserUtils;
+    const XmlUtils = XmlUtils;
+    const Functional = Functional;
+    const ManifestParserUtils = ManifestParserUtils;
     const ContentType = ManifestParserUtils.ContentType;
-    const ContentProtection = shaka.dash.ContentProtection;
+    const ContentProtection = ContentProtection;
 
     context.adaptationSet = this.createFrame_(elem, context.period, null);
 
@@ -828,7 +850,7 @@ export default class DashParser {
     }
 
     const accessibilities = XmlUtils.findChildren(elem, 'Accessibility');
-    const LanguageUtils = shaka.util.LanguageUtils;
+    const LanguageUtils = LanguageUtils;
     const closedCaptions = new Map();
     for (const prop of accessibilities) {
       const schemeId = prop.getAttribute('schemeIdUri');
@@ -890,7 +912,7 @@ export default class DashParser {
         this.config_.dash.ignoreDrmInfo);
 
     const language =
-        shaka.util.LanguageUtils.normalize(elem.getAttribute('lang') || 'und');
+        LanguageUtils.normalize(elem.getAttribute('lang') || 'und');
 
     // This attribute is currently non-standard, but it is supported by Kaltura.
     const label = elem.getAttribute('label');
@@ -907,10 +929,10 @@ export default class DashParser {
       if (isText) {
         return null;
       }
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.DASH_EMPTY_ADAPTATION_SET);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.DASH_EMPTY_ADAPTATION_SET);
     }
 
     // If AdaptationSet's type is unknown or is ambiguously "application",
@@ -923,7 +945,7 @@ export default class DashParser {
       const mimeType = streams[0].mimeType;
       const codecs = streams[0].codecs;
       context.adaptationSet.contentType =
-          shaka.dash.DashParser.guessContentType_(mimeType, codecs);
+          DashParser.guessContentType_(mimeType, codecs);
 
       for (const stream of streams) {
         stream.type = context.adaptationSet.contentType;
@@ -943,7 +965,7 @@ export default class DashParser {
 
     const repIds = representations
         .map((node) => { return node.getAttribute('id'); })
-        .filter(shaka.util.Functional.isNotNull);
+        .filter(Functional.isNotNull);
 
     return {
       id: context.adaptationSet.id || ('__fake__' + this.globalId_++),
@@ -960,8 +982,8 @@ export default class DashParser {
   /**
    * Parses a Representation XML element.
    *
-   * @param {shaka.dash.DashParser.Context} context
-   * @param {shaka.dash.ContentProtection.Context} contentProtection
+   * @param {DashParser.Context} context
+   * @param {ContentProtection.Context} contentProtection
    * @param {(string|undefined)} kind
    * @param {string} language
    * @param {string} label
@@ -971,13 +993,13 @@ export default class DashParser {
    * @param {!Element} node
    * @return {?shaka.extern.Stream} The Stream, or null when there is a
    *   non-critical parsing error.
-   * @throws shaka.util.Error When there is a parsing error.
+   * @throws Error When there is a parsing error.
    * @private
    */
   parseRepresentation_(context, contentProtection, kind, language, label,
       isPrimary, roles, closedCaptions, node) {
-    const XmlUtils = shaka.util.XmlUtils;
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const XmlUtils = XmlUtils;
+    const ContentType = ManifestParserUtils.ContentType;
 
     context.representation =
         this.createFrame_(node, context.adaptationSet, null);
@@ -994,7 +1016,7 @@ export default class DashParser {
     context.bandwidth =
         XmlUtils.parseAttr(node, 'bandwidth', XmlUtils.parsePositiveInt) || 0;
 
-    /** @type {?shaka.dash.DashParser.StreamInfo} */
+    /** @type {?DashParser.StreamInfo} */
     let streamInfo;
 
     const contentType = context.representation.contentType;
@@ -1006,14 +1028,14 @@ export default class DashParser {
         return this.requestInitSegment_(uris, startByte, endByte);
       };
       if (context.representation.segmentBase) {
-        streamInfo = shaka.dash.SegmentBase.createStream(
+        streamInfo = SegmentBase.createStream(
             context, requestInitSegment);
       } else if (context.representation.segmentList) {
-        streamInfo = shaka.dash.SegmentList.createStream(
+        streamInfo = SegmentList.createStream(
             context, this.segmentIndexMap_);
       } else if (context.representation.segmentTemplate) {
         const hasManifest = !!this.manifest_;
-        streamInfo = shaka.dash.SegmentTemplate.createStream(
+        streamInfo = SegmentTemplate.createStream(
             context, requestInitSegment, this.segmentIndexMap_, hasManifest);
       } else {
         window.asserts.assert(isText,
@@ -1040,7 +1062,7 @@ export default class DashParser {
         };
       }
     } catch (error) {
-      if (isText && error.code == shaka.util.Error.Code.DASH_NO_SEGMENT_INFO) {
+      if (isText && error.code == Error.Code.DASH_NO_SEGMENT_INFO) {
         // We will ignore any DASH_NO_SEGMENT_INFO errors for text streams.
         return null;
       }
@@ -1051,7 +1073,7 @@ export default class DashParser {
 
     const contentProtectionElems =
         XmlUtils.findChildren(node, 'ContentProtection');
-    const keyId = shaka.dash.ContentProtection.parseFromRepresentation(
+    const keyId = ContentProtection.parseFromRepresentation(
         contentProtectionElems, this.config_.dash.customScheme,
         contentProtection, this.config_.dash.ignoreDrmInfo);
 
@@ -1104,13 +1126,13 @@ export default class DashParser {
     try {
       updateDelay = await this.requestManifest_();
     } catch (error) {
-      window.asserts.assert(error instanceof shaka.util.Error,
+      window.asserts.assert(error instanceof Error,
           'Should only receive a Shaka error');
 
       // Try updating again, but ensure we haven't been destroyed.
       if (this.playerInterface_) {
         // We will retry updating, so override the severity of the error.
-        error.severity = shaka.util.Error.Severity.RECOVERABLE;
+        error.severity = Error.Severity.RECOVERABLE;
         this.playerInterface_.onError(error);
       }
     }
@@ -1141,7 +1163,7 @@ export default class DashParser {
     }
 
     const finalDelay = Math.max(
-        shaka.dash.DashParser.MIN_UPDATE_PERIOD_,
+        DashParser.MIN_UPDATE_PERIOD_,
         this.updatePeriod_ - offset,
         this.averageUpdateDuration_.getEstimate());
 
@@ -1154,17 +1176,17 @@ export default class DashParser {
    * Creates a new inheritance frame for the given element.
    *
    * @param {!Element} elem
-   * @param {?shaka.dash.DashParser.InheritanceFrame} parent
+   * @param {?DashParser.InheritanceFrame} parent
    * @param {Array.<string>} baseUris
-   * @return {shaka.dash.DashParser.InheritanceFrame}
+   * @return {DashParser.InheritanceFrame}
    * @private
    */
   createFrame_(elem, parent, baseUris) {
     window.asserts.assert(parent || baseUris,
         'Must provide either parent or baseUris');
-    const ManifestParserUtils = shaka.util.ManifestParserUtils;
-    const XmlUtils = shaka.util.XmlUtils;
-    parent = parent || /** @type {shaka.dash.DashParser.InheritanceFrame} */ ({
+    const ManifestParserUtils = ManifestParserUtils;
+    const XmlUtils = XmlUtils;
+    parent = parent || /** @type {DashParser.InheritanceFrame} */ ({
       contentType: '',
       mimeType: '',
       codecs: '',
@@ -1193,7 +1215,7 @@ export default class DashParser {
         this.parseAudioChannels_(audioChannelConfigs) || parent.numChannels;
 
     if (!contentType) {
-      contentType = shaka.dash.DashParser.guessContentType_(mimeType, codecs);
+      contentType = DashParser.guessContentType_(mimeType, codecs);
     }
 
     return {
@@ -1311,13 +1333,13 @@ export default class DashParser {
    * Verifies that a Representation has exactly one Segment* element.  Prints
    * warnings if there is a problem.
    *
-   * @param {shaka.dash.DashParser.InheritanceFrame} frame
+   * @param {DashParser.InheritanceFrame} frame
    * @return {boolean} True if the Representation is usable; otherwise return
    *   false.
    * @private
    */
   verifyRepresentation_(frame) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     let n = 0;
     n += frame.segmentBase ? 1 : 0;
@@ -1370,7 +1392,7 @@ export default class DashParser {
    */
   async requestForTiming_(baseUris, uri, method) {
     const requestUris =
-        shaka.util.ManifestParserUtils.resolveUris(baseUris, [uri]);
+        ManifestParserUtils.resolveUris(baseUris, [uri]);
     const request = shaka.net.NetworkingEngine.makeRequest(
         requestUris, this.config_.retryParameters);
     request.method = method;
@@ -1390,7 +1412,7 @@ export default class DashParser {
       }
       text = response.headers['date'];
     } else {
-      text = shaka.util.StringUtils.fromUTF8(response.data);
+      text = StringUtils.fromUTF8(response.data);
     }
     const date = Date.parse(text);
     if (isNaN(date)) {
@@ -1480,7 +1502,7 @@ export default class DashParser {
    * @private
    */
   parseEventStream_(periodStart, periodDuration, elem) {
-    const XmlUtils = shaka.util.XmlUtils;
+    const XmlUtils = XmlUtils;
     const parseNumber = XmlUtils.parseNonNegativeInt;
 
     const schemeIdUri = elem.getAttribute('schemeIdUri') || '';
@@ -1528,7 +1550,7 @@ export default class DashParser {
   async requestInitSegment_(uris, startByte, endByte) {
     const requestType = shaka.net.NetworkingEngine.RequestType.SEGMENT;
 
-    const request = shaka.util.Networking.createSegmentRequest(
+    const request = Networking.createSegmentRequest(
         uris,
         startByte,
         endByte,
@@ -1550,13 +1572,13 @@ export default class DashParser {
    * @private
    */
   static guessContentType_(mimeType, codecs) {
-    const fullMimeType = shaka.util.MimeUtils.getFullType(mimeType, codecs);
+    const fullMimeType = MimeUtils.getFullType(mimeType, codecs);
 
     if (shaka.text.TextEngine.isTypeSupported(fullMimeType)) {
       // If it's supported by TextEngine, it's definitely text.
       // We don't check MediaSourceEngine, because that would report support
       // for platform-supported video and audio types as well.
-      return shaka.util.ManifestParserUtils.ContentType.TEXT;
+      return ManifestParserUtils.ContentType.TEXT;
     }
 
     // Otherwise, just split the MIME type.  This handles video and audio
@@ -1639,10 +1661,10 @@ DashParser.InheritanceFrame={};
  * @typedef {{
  *   dynamic: boolean,
  *   presentationTimeline: !shaka.media.PresentationTimeline,
- *   period: ?shaka.dash.DashParser.InheritanceFrame,
- *   periodInfo: ?shaka.dash.DashParser.PeriodInfo,
- *   adaptationSet: ?shaka.dash.DashParser.InheritanceFrame,
- *   representation: ?shaka.dash.DashParser.InheritanceFrame,
+ *   period: ?DashParser.InheritanceFrame,
+ *   periodInfo: ?DashParser.PeriodInfo,
+ *   adaptationSet: ?DashParser.InheritanceFrame,
+ *   representation: ?DashParser.InheritanceFrame,
  *   bandwidth: number,
  *   indexRangeWarningGiven: boolean
  * }}
@@ -1654,13 +1676,13 @@ DashParser.InheritanceFrame={};
  *   True if the MPD is dynamic (not all segments available at once)
  * @property {!shaka.media.PresentationTimeline} presentationTimeline
  *   The PresentationTimeline.
- * @property {?shaka.dash.DashParser.InheritanceFrame} period
+ * @property {?DashParser.InheritanceFrame} period
  *   The inheritance from the Period element.
- * @property {?shaka.dash.DashParser.PeriodInfo} periodInfo
+ * @property {?DashParser.PeriodInfo} periodInfo
  *   The Period info for the current Period.
- * @property {?shaka.dash.DashParser.InheritanceFrame} adaptationSet
+ * @property {?DashParser.InheritanceFrame} adaptationSet
  *   The inheritance from the AdaptationSet element.
- * @property {?shaka.dash.DashParser.InheritanceFrame} representation
+ * @property {?DashParser.InheritanceFrame} representation
  *   The inheritance from the Representation element.
  * @property {number} bandwidth
  *   The bandwidth of the Representation, or zero if missing.
