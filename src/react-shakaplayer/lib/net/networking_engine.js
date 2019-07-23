@@ -450,15 +450,15 @@ class NetworkingEngine extends FakeEventTarget {
 						return AbortableOperation.aborted();
 					}
 
-					if (error.code == Error.Code.OPERATION_ABORTED) {
+					if (error.code == ErrorUtil.code.OPERATION_ABORTED) {
 						// Don't change anything if the operation was aborted.
 						throw error;
-					} else if (error.code == Error.Code.ATTEMPTS_EXHAUSTED) {
+					} else if (error.code == ErrorUtil.code.ATTEMPTS_EXHAUSTED) {
 						window.asserts.assert(lastError, 'Should have last error');
 						throw lastError;
 					}
 
-					if (error.severity == Error.Severity.RECOVERABLE) {
+					if (error.severity == ErrorUtil.severity.RECOVERABLE) {
 						// Don't pass in a non-shaka error, even if one is somehow thrown;
 						// instead, call the listener with a null error.
 						const errorOrNull = error instanceof Error ? error : null;

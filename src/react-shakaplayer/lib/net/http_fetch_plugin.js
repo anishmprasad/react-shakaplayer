@@ -28,8 +28,13 @@
 // goog.require('shaka.util.Timer');
 
 import NetworkingEngine from '../net/networking_engine';
-// import HttpPluginUtils from
-// import AbortableOperation from
+import MapUtils from '../util/map_utils';
+import Timer from '../util/timer';
+import AbortableOperation from '../util/abortable_operation';
+import HttpPluginUtils from '../net/http_plugin_utils';
+import Error from '../util/error';
+
+const ErrorUtils = new Error();
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -49,7 +54,7 @@ class HttpFetchPlugin {
 	 */
 	static parse(uri, request, requestType, progressUpdated) {
 		const headers = new HttpFetchPlugin.Headers_();
-		shaka.util.MapUtils.asMap(request.headers).forEach((value, key) => {
+		MapUtils.asMap(request.headers).forEach((value, key) => {
 			headers.append(key, value);
 		});
 
@@ -73,8 +78,8 @@ class HttpFetchPlugin {
 
 		const pendingRequest = HttpFetchPlugin.request_(uri, requestType, init, abortStatus, progressUpdated);
 
-		/** @type {!shaka.util.AbortableOperation} */
-		const op = new shaka.util.AbortableOperation(pendingRequest, () => {
+		/** @type {!AbortableOperation} */
+		const op = new AbortableOperation(pendingRequest, () => {
 			abortStatus.canceled = true;
 			controller.abort();
 			return Promise.resolve();
@@ -84,7 +89,7 @@ class HttpFetchPlugin {
 		// the AbortController.
 		const timeoutMs = request.retryParameters.timeout;
 		if (timeoutMs) {
-			const timer = new shaka.util.Timer(() => {
+			const timer = new Timer(() => {
 				abortStatus.timedOut = true;
 				controller.abort();
 			});
@@ -181,26 +186,26 @@ class HttpFetchPlugin {
 			arrayBuffer = await response.arrayBuffer();
 		} catch (error) {
 			if (abortStatus.canceled) {
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.RECOVERABLE,
-					shaka.util.Error.Category.NETWORK,
-					shaka.util.Error.Code.OPERATION_ABORTED,
+				throw new Error(
+					ErrorUtils.severity.RECOVERABLE,
+					ErrorUtils.category.NETWORK,
+					ErrorUtils.code.OPERATION_ABORTED,
 					uri,
 					requestType
 				);
 			} else if (abortStatus.timedOut) {
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.RECOVERABLE,
-					shaka.util.Error.Category.NETWORK,
-					shaka.util.Error.Code.TIMEOUT,
+				throw new Error(
+					ErrorUtils.severity.RECOVERABLE,
+					ErrorUtils.category.NETWORK,
+					ErrorUtils.code.TIMEOUT,
 					uri,
 					requestType
 				);
 			} else {
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.RECOVERABLE,
-					shaka.util.Error.Category.NETWORK,
-					shaka.util.Error.Code.HTTP_ERROR,
+				throw new Error(
+					ErrorUtils.severity.RECOVERABLE,
+					ErrorUtils.category.NETWORK,
+					ErrorUtils.code.HTTP_ERROR,
 					uri,
 					error,
 					requestType
@@ -217,14 +222,7 @@ class HttpFetchPlugin {
 			headers[key.trim()] = value;
 		});
 
-		return shaka.net.HttpPluginUtils.makeResponse(
-			headers,
-			arrayBuffer,
-			response.status,
-			uri,
-			response.url,
-			requestType
-		);
+		return HttpPluginUtils.makeResponse(headers, arrayBuffer, response.status, uri, response.url, requestType);
 	}
 
 	/**
