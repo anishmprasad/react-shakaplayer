@@ -22,6 +22,9 @@
 // goog.require('shaka.util.StringUtils');
 
 import StringUtils from '../util/string_utils';
+import Error from '../util/error';
+
+const ErrorUtil = new Error();
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -60,13 +63,11 @@ export default class HttpPluginUtils {
 			shaka.log.debug('HTTP error text:', responseText);
 
 			const severity =
-				status == 401 || status == 403
-					? shaka.util.Error.Severity.CRITICAL
-					: shaka.util.Error.Severity.RECOVERABLE;
-			throw new shaka.util.Error(
+				status === 401 || status === 403 ? ErrorUtil.severity.CRITICAL : ErrorUtil.severity.RECOVERABLE;
+			throw new Error(
 				severity,
-				shaka.util.Error.Category.NETWORK,
-				shaka.util.Error.Code.BAD_HTTP_STATUS,
+				ErrorUtil.category.NETWORK,
+				ErrorUtil.code.BAD_HTTP_STATUS,
 				uri,
 				status,
 				responseText,

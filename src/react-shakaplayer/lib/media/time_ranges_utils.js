@@ -139,7 +139,7 @@ export default class TimeRangesUtils {
 	 *   a gap.
 	 */
 	static getGapIndex(b, time) {
-		const Platform = shaka.util.Platform;
+		// const Platform = shaka.util.Platform;
 
 		if (!b || !b.length) {
 			return null;

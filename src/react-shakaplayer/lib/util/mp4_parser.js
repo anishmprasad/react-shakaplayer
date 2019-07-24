@@ -31,10 +31,10 @@ var goog = window.goog;
  */
 class Mp4Parser {
 	constructor() {
-		/** @private {!Object.<number, shaka.util.Mp4Parser.BoxType_>} */
+		/** @private {!Object.<number, Mp4Parser.BoxType_>} */
 		this.headers_ = [];
 
-		/** @private {!Object.<number, !shaka.util.Mp4Parser.CallbackType>} */
+		/** @private {!Object.<number, !Mp4Parser.CallbackType>} */
 		this.boxDefinitions_ = [];
 
 		/** @private {boolean} */
@@ -45,8 +45,8 @@ class Mp4Parser {
 	 * Declare a box type as a Box.
 	 *
 	 * @param {string} type
-	 * @param {!shaka.util.Mp4Parser.CallbackType} definition
-	 * @return {!shaka.util.Mp4Parser}
+	 * @param {!Mp4Parser.CallbackType} definition
+	 * @return {!Mp4Parser}
 	 * @export
 	 */
 	box(type, definition) {
@@ -60,8 +60,8 @@ class Mp4Parser {
 	 * Declare a box type as a Full Box.
 	 *
 	 * @param {string} type
-	 * @param {!shaka.util.Mp4Parser.CallbackType} definition
-	 * @return {!shaka.util.Mp4Parser}
+	 * @param {!Mp4Parser.CallbackType} definition
+	 * @return {!Mp4Parser}
 	 * @export
 	 */
 	fullBox(type, definition) {
@@ -108,7 +108,7 @@ class Mp4Parser {
 	 *
 	 * @param {number} absStart The absolute start position in the original
 	 *   byte array.
-	 * @param {!shaka.util.DataViewReader} reader
+	 * @param {!DataViewReader} reader
 	 * @param {boolean=} partialOkay If true, allow reading partial payloads
 	 *   from some boxes. If the goal is a child box, we can sometimes find it
 	 *   without enough data to find all child boxes.
@@ -128,6 +128,8 @@ class Mp4Parser {
 				break;
 			case 1:
 				size = reader.readUint64();
+				break;
+			default:
 				break;
 		}
 
@@ -213,7 +215,7 @@ class Mp4Parser {
 	 * binary blob and to parse the body's contents using the provided callback.
 	 *
 	 * @param {function(!Uint8Array)} callback
-	 * @return {!shaka.util.Mp4Parser.CallbackType}
+	 * @return {!Mp4Parser.CallbackType}
 	 * @export
 	 */
 	static allData(callback) {

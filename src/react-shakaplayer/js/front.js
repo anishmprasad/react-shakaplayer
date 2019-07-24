@@ -20,6 +20,7 @@
 import shakaDemoMain from './main';
 import shakaAssets from './common/assets';
 import AssetCard from './asset_card';
+import Dom from '../lib/util/dom_utils';
 
 var shaka = window.shaka;
 
@@ -96,7 +97,7 @@ class ShakaDemoFront {
 		hideButton.classList.add('mdl-js-ripple-effect');
 		hideButton.textContent = 'Dismiss'; // TODO: localize
 		hideButton.addEventListener('click', () => {
-			shaka.util.Dom.removeAllChildren(this.messageDiv_);
+			Dom.removeAllChildren(this.messageDiv_);
 			window.localStorage.setItem(hideName, 'true');
 		});
 		this.messageDiv_.appendChild(hideButton);
@@ -104,7 +105,7 @@ class ShakaDemoFront {
 
 	/** @private */
 	remakeAssetCards_() {
-		shaka.util.Dom.removeAllChildren(this.assetCardDiv_);
+		Dom.removeAllChildren(this.assetCardDiv_);
 
 		const assets = shakaAssets.testAssets.filter(asset => {
 			return asset.isFeatured && !asset.disabled;

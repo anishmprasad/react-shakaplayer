@@ -80,7 +80,7 @@ class OfflineScheme {
 			headers: { 'content-type': 'application/x-offline-manifest' }
 		};
 
-		return shaka.util.AbortableOperation.completed(response);
+		return AbortableOperation.completed(response);
 	}
 
 	/**

@@ -20,6 +20,8 @@
 // goog.require('shaka.log');
 // goog.require('shaka.util.ArrayUtils');
 
+import ArrayUtils from '../util/array_utils';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -148,7 +150,7 @@ class SessionDeleter {
 	 * @private
 	 */
 	static isCompatible_(a, b) {
-		const ArrayUtils = shaka.util.ArrayUtils;
+		// const ArrayUtils = shaka.util.ArrayUtils;
 
 		// TODO: Add a way to change the license server in DrmEngine to avoid
 		// resetting EME for different license servers.

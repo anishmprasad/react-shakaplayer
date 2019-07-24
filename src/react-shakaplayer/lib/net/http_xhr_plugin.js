@@ -26,6 +26,9 @@
 import HttpPluginUtils from '../net/http_plugin_utils';
 import NetworkingEngine from '../net/networking_engine';
 import AbortableOperation from '../util/abortable_operation';
+import Error from '../util/error';
+
+const ErrorUtil = new Error();
 
 var shaka = window.shaka;
 var goog = window.goog;
@@ -60,10 +63,10 @@ class HttpXHRPlugin {
 
 			xhr.onabort = () => {
 				reject(
-					new shaka.util.Error(
-						shaka.util.Error.Severity.RECOVERABLE,
-						shaka.util.Error.Category.NETWORK,
-						shaka.util.Error.Code.OPERATION_ABORTED,
+					new Error(
+						ErrorUtil.severity.RECOVERABLE,
+						ErrorUtil.category.NETWORK,
+						ErrorUtil.code.OPERATION_ABORTED,
 						uri,
 						requestType
 					)
@@ -96,16 +99,16 @@ class HttpXHRPlugin {
 					);
 					resolve(response);
 				} catch (error) {
-					window.asserts.assert(error instanceof shaka.util.Error, 'Wrong error type!');
+					window.asserts.assert(error instanceof Error, 'Wrong error type!');
 					reject(error);
 				}
 			};
 			xhr.onerror = event => {
 				reject(
-					new shaka.util.Error(
-						shaka.util.Error.Severity.RECOVERABLE,
-						shaka.util.Error.Category.NETWORK,
-						shaka.util.Error.Code.HTTP_ERROR,
+					new Error(
+						ErrorUtil.severity.RECOVERABLE,
+						ErrorUtil.category.NETWORK,
+						ErrorUtil.code.HTTP_ERROR,
 						uri,
 						event,
 						requestType
@@ -114,10 +117,10 @@ class HttpXHRPlugin {
 			};
 			xhr.ontimeout = event => {
 				reject(
-					new shaka.util.Error(
-						shaka.util.Error.Severity.RECOVERABLE,
-						shaka.util.Error.Category.NETWORK,
-						shaka.util.Error.Code.TIMEOUT,
+					new Error(
+						ErrorUtil.severity.RECOVERABLE,
+						ErrorUtil.category.NETWORK,
+						ErrorUtil.code.TIMEOUT,
 						uri,
 						requestType
 					)

@@ -270,7 +270,7 @@ class ManifestConverter {
 	 * @private
 	 */
 	isAudio_(stream) {
-		const ContentType = shaka.util.ManifestParserUtils.ContentType;
+		const ContentType = ManifestParserUtils.ContentType;
 		return stream.contentType == ContentType.AUDIO;
 	}
 
