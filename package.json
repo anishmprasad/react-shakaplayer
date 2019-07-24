@@ -1,8 +1,10 @@
 {
-	"name": "shakaplayer",
-	"version": "0.1.0",
+	"name": "react-shakaplayer",
+	"version": "1.0.0",
 	"private": true,
-	"dependencies": {
+	"main": "./dist/index.js",
+	"dependencies": {},
+	"peerDependencies": {
 		"awesomplete": "^1.1.4",
 		"dialog-polyfill": "^0.5.0",
 		"google-closure-library": "^20190709.0.0",
@@ -16,25 +18,16 @@
 		"tippy.js": "^4.3.4",
 		"typescript": "^3.5.3"
 	},
-	"scripts": {
-		"start": "react-scripts start",
-		"build": "react-scripts build",
-		"test": "react-scripts test",
-		"eject": "react-scripts eject"
+	"scripts": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/anishmprasad/react-shakaplayer.git"
 	},
-	"eslintConfig": {
-		"extends": "react-app"
+	"author": "anish.m.prasad",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/anishmprasad/react-shakaplayer/issues"
 	},
-	"browserslist": {
-		"production": [
-			">0.2%",
-			"not dead",
-			"not op_mini all"
-		],
-		"development": [
-			"last 1 chrome version",
-			"last 1 firefox version",
-			"last 1 safari version"
-		]
-	}
+	"homepage": "https://github.com/anishmprasad/react-shakaplayer#readme",
+	"description": ""
 }
