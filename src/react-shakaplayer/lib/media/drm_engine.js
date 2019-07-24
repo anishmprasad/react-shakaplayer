@@ -49,6 +49,8 @@ import StringUtils from '../util/string_utils'
 import Timer from '../util/timer'
 import Uint8ArrayUtils from '../util/uint8array_utils'
 
+const ErrorUtil = new Error()
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -398,9 +400,9 @@ class DrmEngine {
       // platforms (IE 11 & Safari).
       this.eventManager_.listenOnce(video, 'encrypted', (event) => {
         this.onError_(new Error(
-            Error.Severity.CRITICAL,
-            Error.Category.DRM,
-            Error.Code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.ENCRYPTED_CONTENT_WITHOUT_DRM_INFO));
       });
       return;
     }
@@ -412,9 +414,9 @@ class DrmEngine {
     let setMediaKeys = this.video_.setMediaKeys(this.mediaKeys_);
     setMediaKeys = setMediaKeys.catch((exception) => {
       return Promise.reject(new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.FAILED_TO_ATTACH_TO_VIDEO,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.FAILED_TO_ATTACH_TO_VIDEO,
           exception.message));
     });
 
@@ -456,9 +458,9 @@ class DrmEngine {
         }
       } catch (exception) {
         throw new Error(
-            Error.Severity.CRITICAL,
-            Error.Category.DRM,
-            Error.Code.INVALID_SERVER_CERTIFICATE,
+            ErrorUtil.severity.CRITICAL,
+            ErrorUtil.category.DRM,
+            ErrorUtil.code.INVALID_SERVER_CERTIFICATE,
             exception.message);
       }
     }
@@ -755,9 +757,9 @@ class DrmEngine {
   async queryMediaKeys_(configsByKeySystem) {
     if (configsByKeySystem.size == 1 && configsByKeySystem.has('')) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.NO_RECOGNIZED_KEY_SYSTEMS);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.NO_RECOGNIZED_KEY_SYSTEMS);
     }
 
     // If there are no tracks of a type, these should be not present.
@@ -802,9 +804,9 @@ class DrmEngine {
 
     if (!mediaKeySystemAccess) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.REQUESTED_KEY_SYSTEM_CONFIG_UNAVAILABLE);
     }
     this.destroyer_.ensureNotDestroyed();
 
@@ -836,9 +838,9 @@ class DrmEngine {
 
       if (!this.currentDrmInfo_.licenseServerUri) {
         throw new Error(
-            Error.Severity.CRITICAL,
-            Error.Category.DRM,
-            Error.Code.NO_LICENSE_SERVER_GIVEN,
+            ErrorUtil.severity.CRITICAL,
+            ErrorUtil.category.DRM,
+            ErrorUtil.code.NO_LICENSE_SERVER_GIVEN,
             this.currentDrmInfo_.keySystem);
       }
 
@@ -861,9 +863,9 @@ class DrmEngine {
 
       // We failed to create MediaKeys.  This generally shouldn't happen.
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.FAILED_TO_CREATE_CDM,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.FAILED_TO_CREATE_CDM,
           exception.message);
     }
   }
@@ -934,9 +936,9 @@ class DrmEngine {
       session = this.mediaKeys_.createSession('persistent-license');
     } catch (exception) {
       const error = new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.FAILED_TO_CREATE_SESSION,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.FAILED_TO_CREATE_SESSION,
           exception.message);
       this.onError_(error);
       return Promise.reject(error);
@@ -965,9 +967,9 @@ class DrmEngine {
         this.activeSessions_.delete(session);
 
         this.onError_(new Error(
-            Error.Severity.CRITICAL,
-            Error.Category.DRM,
-            Error.Code.OFFLINE_SESSION_REMOVED));
+            ErrorUtil.severity.CRITICAL,
+            ErrorUtil.category.DRM,
+            ErrorUtil.code.OFFLINE_SESSION_REMOVED));
         return Promise.resolve();
       }
 
@@ -985,9 +987,9 @@ class DrmEngine {
       this.activeSessions_.delete(session);
 
       this.onError_(new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.FAILED_TO_CREATE_SESSION,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.FAILED_TO_CREATE_SESSION,
           error.message));
     }
     return Promise.resolve();
@@ -1010,9 +1012,9 @@ class DrmEngine {
       }
     } catch (exception) {
       this.onError_(new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.FAILED_TO_CREATE_SESSION,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.FAILED_TO_CREATE_SESSION,
           exception.message));
       return;
     }
@@ -1048,9 +1050,9 @@ class DrmEngine {
       }
 
       this.onError_(new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.FAILED_TO_GENERATE_LICENSE_REQUEST,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.FAILED_TO_GENERATE_LICENSE_REQUEST,
           error.message, error, extended));
     });
   }
@@ -1121,9 +1123,9 @@ class DrmEngine {
       window.asserts.assert(error instanceof Error,
           'Wrong NetworkingEngine error type!');
       const shakaErr = new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.LICENSE_REQUEST_FAILED,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.LICENSE_REQUEST_FAILED,
           error);
       this.onError_(shakaErr);
       if (metadata && metadata.updatePromise) {
@@ -1145,9 +1147,9 @@ class DrmEngine {
     } catch (error) {
       // Session update failed!
       const shakaErr = new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.LICENSE_RESPONSE_REJECTED,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.LICENSE_RESPONSE_REJECTED,
           error.message);
       this.onError_(shakaErr);
       if (metadata && metadata.updatePromise) {
@@ -1432,9 +1434,9 @@ class DrmEngine {
 
     if (allExpired) {
       this.onError_(new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.DRM,
-          Error.Code.EXPIRED));
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.DRM,
+          ErrorUtil.code.EXPIRED));
     }
 
     this.playerInterface_.onKeyStatus(MapUtils.asObject(publicMap));

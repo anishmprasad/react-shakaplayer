@@ -21,6 +21,7 @@
 import shakaDemoMain from './main';
 import { ShakaDemoTextInput } from '../js/input';
 import ShakaDemoAssetInfo from '../js/common/asset';
+import Dom from '../lib/util/dom_utils';
 
 const shaka = window.shaka;
 

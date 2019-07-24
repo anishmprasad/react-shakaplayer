@@ -41,21 +41,17 @@ export default class WebmSegmentIndexParser {
    * @param {number} scaledPresentationTimeOffset
 
    * @return {!Array.<!SegmentReference>}
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    * @see http://www.matroska.org/technical/specs/index.html
    * @see http://www.webmproject.org/docs/container/
    */
 	static parse(cuesData, initData, uris, scaledPresentationTimeOffset) {
 		const tuple = WebmSegmentIndexParser.parseWebmContainer_(initData);
-		const parser = new shaka.util.EbmlParser(new DataView(cuesData));
+		const parser = new EbmlParser(new DataView(cuesData));
 		const cuesElement = parser.parseElement();
 		if (cuesElement.id != WebmSegmentIndexParser.CUES_ID) {
 			shaka.log.error('Not a Cues element.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_CUES_ELEMENT_MISSING
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.WEBM_CUES_ELEMENT_MISSING);
 		}
 
 		return WebmSegmentIndexParser.parseCues_(
@@ -76,32 +72,24 @@ export default class WebmSegmentIndexParser {
 	 * @return {{segmentOffset: number, timecodeScale: number, duration: number}}
 	 *   The segment's offset in bytes, the segment's timecode scale in seconds,
 	 *   and the duration in seconds.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @private
 	 */
 	static parseWebmContainer_(initData) {
-		const parser = new shaka.util.EbmlParser(new DataView(initData));
+		const parser = new EbmlParser(new DataView(initData));
 
 		// Check that the WebM container data starts with the EBML header, but
 		// skip its contents.
 		const ebmlElement = parser.parseElement();
 		if (ebmlElement.id != WebmSegmentIndexParser.EBML_ID) {
 			shaka.log.error('Not an EBML element.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.WEBM_EBML_HEADER_ELEMENT_MISSING);
 		}
 
 		const segmentElement = parser.parseElement();
 		if (segmentElement.id != WebmSegmentIndexParser.SEGMENT_ID) {
 			shaka.log.error('Not a Segment element.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_SEGMENT_ELEMENT_MISSING
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.WEBM_SEGMENT_ELEMENT_MISSING);
 		}
 
 		// This value is used as the initial offset to the first referenced segment.
@@ -119,10 +107,10 @@ export default class WebmSegmentIndexParser {
 	/**
 	 * Parses a WebM Info element to get the segment's timecode scale and
 	 * duration.
-	 * @param {!shaka.util.EbmlElement} segmentElement
+	 * @param {!EbmlElement} segmentElement
 	 * @return {{timecodeScale: number, duration: number}} The segment's timecode
 	 *   scale in seconds and duration in seconds.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @private
 	 */
 	static parseSegment_(segmentElement) {
@@ -143,11 +131,7 @@ export default class WebmSegmentIndexParser {
 
 		if (!infoElement) {
 			shaka.log.error('Not an Info element.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_INFO_ELEMENT_MISSING
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.WEBM_INFO_ELEMENT_MISSING);
 		}
 
 		return WebmSegmentIndexParser.parseInfo_(infoElement);
@@ -156,10 +140,10 @@ export default class WebmSegmentIndexParser {
 	/**
 	 * Parses a WebM Info element to get the segment's timecode scale and
 	 * duration.
-	 * @param {!shaka.util.EbmlElement} infoElement
+	 * @param {!EbmlElement} infoElement
 	 * @return {{timecodeScale: number, duration: number}} The segment's timecode
 	 *   scale in seconds and duration in seconds.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @private
 	 */
 	static parseInfo_(infoElement) {
@@ -181,11 +165,7 @@ export default class WebmSegmentIndexParser {
 			}
 		}
 		if (durationScale == null) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_DURATION_ELEMENT_MISSING
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.WEBM_DURATION_ELEMENT_MISSING);
 		}
 
 		// The timecode scale factor in units of [seconds / T].
@@ -198,14 +178,14 @@ export default class WebmSegmentIndexParser {
 
 	/**
 	 * Parses a WebM CuesElement.
-	 * @param {!shaka.util.EbmlElement} cuesElement
+	 * @param {!EbmlElement} cuesElement
 	 * @param {number} segmentOffset
 	 * @param {number} timecodeScale
 	 * @param {number} duration
 	 * @param {!Array.<string>} uris
 	 * @param {number} scaledPresentationTimeOffset
 	 * @return {!Array.<!SegmentReference>}
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @private
 	 */
 	static parseCues_(cuesElement, segmentOffset, timecodeScale, duration, uris, scaledPresentationTimeOffset) {
@@ -271,12 +251,12 @@ export default class WebmSegmentIndexParser {
 
 	/**
 	 * Parses a WebM CuePointElement to get an "unadjusted" segment reference.
-	 * @param {shaka.util.EbmlElement} cuePointElement
+	 * @param {EbmlElement} cuePointElement
 	 * @return {{unscaledTime: number, relativeOffset: number}} The referenced
 	 *   segment's start time in units of [T] (see parseInfo_()), and the
 	 *   referenced segment's offset in bytes, relative to a WebM Segment
 	 *   element.
-	 * @throws {shaka.util.Error}
+	 * @throws {Error}
 	 * @private
 	 */
 	static parseCuePoint_(cuePointElement) {
@@ -286,11 +266,7 @@ export default class WebmSegmentIndexParser {
 		const cueTimeElement = parser.parseElement();
 		if (cueTimeElement.id != WebmSegmentIndexParser.CUE_TIME_ID) {
 			shaka.log.warning('Not a CueTime element.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_CUE_TIME_ELEMENT_MISSING
-			);
+			throw new Error(Error.Severity.CRITICAL, Error.Category.MEDIA, Error.Code.WEBM_CUE_TIME_ELEMENT_MISSING);
 		}
 		const unscaledTime = cueTimeElement.getUint();
 
@@ -298,10 +274,10 @@ export default class WebmSegmentIndexParser {
 		const cueTrackPositionsElement = parser.parseElement();
 		if (cueTrackPositionsElement.id != WebmSegmentIndexParser.CUE_TRACK_POSITIONS_ID) {
 			shaka.log.warning('Not a CueTrackPositions element.');
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MEDIA,
-				shaka.util.Error.Code.WEBM_CUE_TRACK_POSITIONS_ELEMENT_MISSING
+			throw new Error(
+				Error.Severity.CRITICAL,
+				Error.Category.MEDIA,
+				Error.Code.WEBM_CUE_TRACK_POSITIONS_ELEMENT_MISSING
 			);
 		}
 

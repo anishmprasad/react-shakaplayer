@@ -1690,7 +1690,7 @@ class HlsParser {
    * @private
    */
   getStartTimeFromMp4Segment_(mediaData, initData) {
-    const Mp4Parser = Mp4Parser;
+    // const Mp4Parser = Mp4Parser;
 
     let timescale = 0;
     new Mp4Parser()
