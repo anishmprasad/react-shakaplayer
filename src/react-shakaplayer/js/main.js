@@ -1164,7 +1164,6 @@ class ShakaDemoMain {
       button.classList.add('mdl-button--accent');
       this.showNode_(container);
       this.remakeHash();
-      debugger
       // Dispatch an event so that a page can load any deferred content.
       this.dispatchEventWithName_('shaka-main-page-changed');
 

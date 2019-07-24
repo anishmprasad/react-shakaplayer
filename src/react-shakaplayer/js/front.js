@@ -61,7 +61,6 @@ class ShakaDemoFront {
 			this.updateOfflineProgress_();
 		});
 		document.addEventListener('shaka-main-page-changed', () => {
-			debugger;
 			if (!this.assetCardDiv_.childNodes.length && !container.classList.contains('hidden')) {
 				// Now that the page is showing, create the contents that we deferred
 				// until now.
@@ -106,13 +105,12 @@ class ShakaDemoFront {
 
 	/** @private */
 	remakeAssetCards_() {
-		debugger;
 		Dom.removeAllChildren(this.assetCardDiv_);
 
 		const assets = shakaAssets.testAssets.filter(asset => {
 			return asset.isFeatured && !asset.disabled;
 		});
-		debugger;
+
 		console.log(assets);
 		this.assetCards_ = assets.map(asset => {
 			return this.createAssetCardFor_(asset, this.assetCardDiv_);
@@ -128,7 +126,6 @@ class ShakaDemoFront {
 	 * @private
 	 */
 	createAssetCardFor_(asset, container) {
-		debugger;
 		return new AssetCard(container, asset, /* isFeatured = */ true, c => {
 			const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(asset, /* needOffline= */ false);
 			if (unsupportedReason) {
