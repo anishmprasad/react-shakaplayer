@@ -1052,7 +1052,7 @@ export default class DashParser {
           if (ref != 1) {
             return null;
           }
-          return new shaka.media.SegmentReference(
+          return new SegmentReference(
               1, 0, duration, (() => { return baseUris; }), 0, null);
         };
         streamInfo = {

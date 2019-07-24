@@ -734,7 +734,7 @@ class StreamingEngine {
    * within the presentation timeline.
    */
   seeked() {
-    const Iterables = Iterables;
+    // const Iterables = Iterables;
     const presentationTime = this.playerInterface_.getPresentationTime();
     const smallGapLimit = this.config_.smallGapLimit;
     const checkBuffered = (type) => {

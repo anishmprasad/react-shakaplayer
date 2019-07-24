@@ -33,6 +33,7 @@ import OverflowMenu from './overflow_menu';
 import Locales from '../dist/locales';
 import Constants from '../ui/constants';
 import Utils from '../ui/ui_utils';
+import FakeEvent from '../lib/util/fake_event';
 
 /*eslint-disable*/
 window.shaka = window.shaka || {};

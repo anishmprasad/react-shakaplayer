@@ -28,6 +28,8 @@ import NetworkingEngine from '../net/networking_engine';
 import OfflineUri from '../offline/offline_uri';
 import StorageMuxer from '../offline/storage_muxer';
 import AbortableOperation from '../util/abortable_operation';
+import Error from '../util/error';
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -56,13 +58,8 @@ class OfflineScheme {
 			return OfflineScheme.getSegment_(offlineUri.key(), offlineUri);
 		}
 
-		return shaka.util.AbortableOperation.failed(
-			new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.NETWORK,
-				shaka.util.Error.Code.MALFORMED_OFFLINE_URI,
-				uri
-			)
+		return AbortableOperation.failed(
+			new Error(Error.Severity.CRITICAL, Error.Category.NETWORK, Error.Code.MALFORMED_OFFLINE_URI, uri)
 		);
 	}
 

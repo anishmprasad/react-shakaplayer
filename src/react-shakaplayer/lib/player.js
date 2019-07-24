@@ -65,7 +65,7 @@ import MediaSourceEngine from '../lib/media/media_source_engine';
 import { MuxJSClosedCaptionParser, NoopCaptionParser } from '../lib/media/closed_caption_parser';
 import PeriodObserver from '../lib/media/period_observer';
 import PlayRateController from '../lib/media/play_rate_controller';
-import { Playhead, MediaSourcePlayhead} from '../lib/media/playhead';
+import { Playhead, MediaSourcePlayhead } from '../lib/media/playhead';
 import { PlayheadObserverManager } from '../lib/media/playhead_observer';
 import { PreferenceBasedCriteria } from '../lib/media/adaptation_set_criteria';
 import RegionObserver from '../lib/media/region_observer';
@@ -98,8 +98,10 @@ import AbortableOperation from '../lib/util/abortable_operation';
 
 import Deprecate from '../lib/deprecate/deprecate';
 
-import Timer from '../lib/util/timer'
-import TimeRangesUtils from '../lib/media/time_ranges_utils'
+import Timer from '../lib/util/timer';
+import TimeRangesUtils from '../lib/media/time_ranges_utils';
+
+const ErrorUtil = new Error();
 
 // console.log('Deprecate', Deprecate);
 
@@ -1003,7 +1005,9 @@ export default class Player extends FakeEventTarget {
 		events.onStart = () => shaka.log.info('Starting load of ' + assetUri + '...');
 		return new Promise((resolve, reject) => {
 			events.onSkip = () =>
-				reject(new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.NO_VIDEO_ELEMENT));
+				reject(
+					new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.PLAYER, ErrorUtil.code.NO_VIDEO_ELEMENT)
+				);
 
 			events.onEnd = () => resolve();
 			events.onCancel = () => reject(this.createAbortLoadError_());
@@ -1468,7 +1472,11 @@ export default class Player extends FakeEventTarget {
 
 				// We require all manifests to have already one period.
 				if (this.manifest_.periods.length == 0) {
-					throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.NO_PERIODS);
+					throw new Error(
+						ErrorUtil.severity.CRITICAL,
+						ErrorUtil.category.MANIFEST,
+						ErrorUtil.code.NO_PERIODS
+					);
 				}
 
 				// Make sure that all periods are either: audio-only, video-only, or
@@ -1909,9 +1917,9 @@ export default class Player extends FakeEventTarget {
 			fullyLoaded,
 			/* onAbort= */ () => {
 				const abortedError = new Error(
-					Error.Severity.CRITICAL,
-					Error.Category.PLAYER,
-					Error.Code.OPERATION_ABORTED
+					ErrorUtil.severity.CRITICAL,
+					ErrorUtil.category.PLAYER,
+					ErrorUtil.code.OPERATION_ABORTED
 				);
 				fullyLoaded.reject(abortedError);
 				return Promise.resolve(); // Abort complete.
@@ -3231,8 +3239,7 @@ export default class Player extends FakeEventTarget {
 	getStats() {
 		// If the Player is not in a fully-loaded state, then return an empty stats
 		// blob so that this call will never fail.
-		const loaded =
-			this.loadMode_ == Player.LoadMode.MEDIA_SOURCE || this.loadMode_ == Player.LoadMode.SRC_EQUALS;
+		const loaded = this.loadMode_ == Player.LoadMode.MEDIA_SOURCE || this.loadMode_ == Player.LoadMode.SRC_EQUALS;
 		if (!loaded) {
 			return Stats.getEmptyBlob();
 		}
@@ -3318,9 +3325,9 @@ export default class Player extends FakeEventTarget {
 		const periodDuration = nextPeriodStart - period.startTime;
 		if (periodDuration == Infinity) {
 			throw new Error(
-				Error.Severity.RECOVERABLE,
-				Error.Category.MANIFEST,
-				Error.Code.CANNOT_ADD_EXTERNAL_TEXT_TO_LIVE_STREAM
+				ErrorUtil.severity.RECOVERABLE,
+				ErrorUtil.category.MANIFEST,
+				ErrorUtil.code.CANNOT_ADD_EXTERNAL_TEXT_TO_LIVE_STREAM
 			);
 		}
 
@@ -3486,10 +3493,10 @@ export default class Player extends FakeEventTarget {
 	 * @private
 	 */
 	defaultStreamingFailureCallback_(error) {
-		const retryErrorCodes = [Error.Code.BAD_HTTP_STATUS, Error.Code.HTTP_ERROR, Error.Code.TIMEOUT];
+		const retryErrorCodes = [ErrorUtil.code.BAD_HTTP_STATUS, ErrorUtil.code.HTTP_ERROR, ErrorUtil.code.TIMEOUT];
 
 		if (this.isLive() && retryErrorCodes.includes(error.code)) {
-			error.severity = Error.Severity.RECOVERABLE;
+			error.severity = ErrorUtil.severity.RECOVERABLE;
 
 			shaka.log.warning('Live streaming error.  Retrying automatically...');
 			this.retryStreaming();
@@ -3577,15 +3584,15 @@ export default class Player extends FakeEventTarget {
 		// CONTENT_UNSUPPORTED_BY_BROWSER.
 		if (validPeriodsCount == 0) {
 			throw new Error(
-				Error.Severity.CRITICAL,
-				Error.Category.MANIFEST,
-				Error.Code.CONTENT_UNSUPPORTED_BY_BROWSER
+				ErrorUtil.severity.CRITICAL,
+				ErrorUtil.category.MANIFEST,
+				ErrorUtil.code.CONTENT_UNSUPPORTED_BY_BROWSER
 			);
 		}
 
 		// If only some of the periods are playable, throw UNPLAYABLE_PERIOD.
 		if (validPeriodsCount < periods.length) {
-			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.UNPLAYABLE_PERIOD);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MANIFEST, ErrorUtil.code.UNPLAYABLE_PERIOD);
 		}
 
 		for (const period of periods) {
@@ -3624,7 +3631,7 @@ export default class Player extends FakeEventTarget {
 		// special error when there were tracks but they were all filtered.
 		const hasPlayableVariant = variants.some(StreamUtils.isPlayable);
 		if (!hasPlayableVariant) {
-			throw new Error(Error.Severity.CRITICAL, Error.Category.MANIFEST, Error.Code.UNPLAYABLE_PERIOD);
+			throw new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.MANIFEST, ErrorUtil.code.UNPLAYABLE_PERIOD);
 		}
 
 		this.checkRestrictedVariants_(period.variants);
@@ -4342,9 +4349,9 @@ export default class Player extends FakeEventTarget {
 		const message = this.video_.error.message;
 
 		return new Error(
-			Error.Severity.CRITICAL,
-			Error.Category.MEDIA,
-			Error.Code.VIDEO_ERROR,
+			ErrorUtil.severity.CRITICAL,
+			ErrorUtil.category.MEDIA,
+			ErrorUtil.code.VIDEO_ERROR,
 			code,
 			extended,
 			message
@@ -4555,9 +4562,9 @@ export default class Player extends FakeEventTarget {
 				restrictedKeyStatuses: badKeyStatuses
 			};
 			throw new Error(
-				Error.Severity.CRITICAL,
-				Error.Category.MANIFEST,
-				Error.Code.RESTRICTIONS_CANNOT_BE_MET,
+				ErrorUtil.severity.CRITICAL,
+				ErrorUtil.category.MANIFEST,
+				ErrorUtil.code.RESTRICTIONS_CANNOT_BE_MET,
 				data
 			);
 		}
@@ -4879,7 +4886,7 @@ export default class Player extends FakeEventTarget {
 	 * @private
 	 */
 	createAbortLoadError_() {
-		return new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.LOAD_INTERRUPTED);
+		return new Error(ErrorUtil.severity.CRITICAL, ErrorUtil.category.PLAYER, ErrorUtil.code.LOAD_INTERRUPTED);
 	}
 
 	/**

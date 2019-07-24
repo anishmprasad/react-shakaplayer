@@ -1410,7 +1410,7 @@ class HlsParser {
       endByte = startByte + byteLength - 1;
     }
 
-    return new shaka.media.SegmentReference(
+    return new SegmentReference(
         position,
         startTime,
         endTime,

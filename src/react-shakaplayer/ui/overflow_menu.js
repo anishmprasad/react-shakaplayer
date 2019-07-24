@@ -36,6 +36,7 @@ import Locales from '../dist/locales';
 import Localization from '../ui/localization';
 import Utils from '../ui/ui_utils';
 import Dom from '../lib/util/dom_utils';
+import Iterables from '../lib/util/iterables';
 /*eslint-disable*/
 window.shaka = window.shaka || {};
 var shaka = window.shaka;
@@ -43,14 +44,14 @@ window.goog = window.goog || {};
 var goog = window.goog;
 
 /**
- * @extends {shaka.ui.Element}
+ * @extends {Element}
  * @final
  * @export
  */
 class OverflowMenu extends Element {
 	/**
 	 * @param {!HTMLElement} parent
-	 * @param {!shaka.ui.Controls} controls
+	 * @param {!Controls} controls
 	 */
 	constructor(parent, controls) {
 		super(parent, controls);
@@ -79,7 +80,7 @@ class OverflowMenu extends Element {
 			this.eventManager.listen(button, 'click', () => {
 				// Hide the submenus, display the overflow menu
 				this.controls.hideSettingsMenus();
-				shaka.ui.Utils.setDisplay(this.overflowMenu_, true);
+				Utils.setDisplay(this.overflowMenu_, true);
 
 				// If there are back to overflow menu buttons, there must be
 				// overflow menu buttons, but oh well
@@ -199,7 +200,7 @@ class OverflowMenu extends Element {
 			// first one, when the menu opens.
 			const isDisplayed = element => element.classList.contains('shaka-hidden') == false;
 
-			const Iterables = Iterables;
+			// const Iterables = Iterables;
 			if (Iterables.some(this.overflowMenu_.childNodes, isDisplayed)) {
 				// Focus on the first visible child of the overflow menu
 				const visibleElements = Iterables.filter(this.overflowMenu_.childNodes, isDisplayed);
