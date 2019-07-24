@@ -76,6 +76,8 @@ import Networking from '../util/networking'
 import OperationManager from '../util/operation_manager'
 import Timer from '../util/timer'
 
+const ErrorUtil = new Error()
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -302,9 +304,9 @@ class HlsParser {
 
     if (playlist.type != PlaylistType.MEDIA) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_INVALID_PLAYLIST_HIERARCHY);
     }
 
     const mediaSequenceTag = Utils.getFirstTagWithName(
@@ -367,9 +369,9 @@ class HlsParser {
     // See the error code for details.
     if (playlist.type != PlaylistType.MASTER) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_MASTER_PLAYLIST_NOT_PROVIDED);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_MASTER_PLAYLIST_NOT_PROVIDED);
     }
 
     const period = await this.createPeriod_(playlist);
@@ -377,9 +379,9 @@ class HlsParser {
     // Make sure that the parser has not been destroyed.
     if (!this.playerInterface_) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.PLAYER,
-          Error.Code.OPERATION_ABORTED);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.PLAYER,
+          ErrorUtil.code.OPERATION_ABORTED);
     }
 
     if (this.aesEncrypted_ && period.variants.length == 0) {
@@ -388,9 +390,9 @@ class HlsParser {
       shaka.log.info('No stream is created, because we don\'t support AES-128',
           'encryption yet');
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_AES_128_ENCRYPTION_NOT_SUPPORTED);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_AES_128_ENCRYPTION_NOT_SUPPORTED);
     }
 
     // HLS has no notion of periods.  We're treating the whole presentation as
@@ -1121,9 +1123,9 @@ class HlsParser {
     if (playlist.type != PlaylistType.MEDIA) {
       // EXT-X-MEDIA tags should point to media playlists.
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_INVALID_PLAYLIST_HIERARCHY);
     }
 
     /** @type {!Array.<!Tag>} */
@@ -1176,9 +1178,9 @@ class HlsParser {
 
     if (encrypted && !drmInfos.length) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_KEYFORMATS_NOT_SUPPORTED);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_KEYFORMATS_NOT_SUPPORTED);
     }
 
 
@@ -1362,9 +1364,9 @@ class HlsParser {
       return null;
     } else if (mapTags.length > 1) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
     }
 
     // Map tag example: #EXT-X-MAP:URI="main.mp4",BYTERANGE="720@0"
@@ -1561,7 +1563,7 @@ class HlsParser {
       // If the networking operation was aborted, we don't want to treat it as
       // a request failure. We surface the error so that the OPERATION_ABORTED
       // error will be handled correctly.
-      if (e.code == Error.Code.OPERATION_ABORTED) {
+      if (e.code == ErrorUtil.code.OPERATION_ABORTED) {
         throw e;
       }
 
@@ -1675,9 +1677,9 @@ class HlsParser {
     //    parser.
 
     throw new Error(
-        Error.Severity.CRITICAL,
-        Error.Category.MANIFEST,
-        Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+        ErrorUtil.severity.CRITICAL,
+        ErrorUtil.category.MANIFEST,
+        ErrorUtil.code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
   }
 
   /**
@@ -1714,9 +1716,9 @@ class HlsParser {
     if (!timescale) {
       shaka.log.error('Unable to find timescale in init segment!');
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
     }
 
     let startTime = 0;
@@ -1738,9 +1740,9 @@ class HlsParser {
 
     if (!parsedMedia) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
     }
     return startTime;
   }
@@ -1759,9 +1761,9 @@ class HlsParser {
 
     const fail = () => {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
     };
 
     let packetStart = 0;
@@ -1968,9 +1970,9 @@ class HlsParser {
 
     // Unable to guess codecs.
     throw new Error(
-        Error.Severity.CRITICAL,
-        Error.Category.MANIFEST,
-        Error.Code.HLS_COULD_NOT_GUESS_CODECS,
+        ErrorUtil.severity.CRITICAL,
+        ErrorUtil.category.MANIFEST,
+        ErrorUtil.code.HLS_COULD_NOT_GUESS_CODECS,
         codecs);
   }
 
@@ -2028,9 +2030,9 @@ class HlsParser {
 
     if (!contentMimeType) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_COULD_NOT_GUESS_MIME_TYPE,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_COULD_NOT_GUESS_MIME_TYPE,
           extension);
     }
 
@@ -2052,9 +2054,9 @@ class HlsParser {
     const attribute = tag.getAttribute(attributeName);
     if (!attribute) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_REQUIRED_ATTRIBUTE_MISSING,
           attributeName);
     }
 
@@ -2075,9 +2077,9 @@ class HlsParser {
     const tag = Utils.getFirstTagWithName(tags, tagName);
     if (!tag) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.MANIFEST,
-          Error.Code.HLS_REQUIRED_TAG_MISSING, tagName);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.MANIFEST,
+          ErrorUtil.code.HLS_REQUIRED_TAG_MISSING, tagName);
     }
 
     return tag;
@@ -2145,7 +2147,7 @@ class HlsParser {
           'Should only receive a Shaka error');
 
       // We will retry updating, so override the severity of the error.
-      error.severity = Error.Severity.RECOVERABLE;
+      error.severity = ErrorUtil.severity.RECOVERABLE;
       this.playerInterface_.onError(error);
 
       // Try again very soon.
@@ -2196,9 +2198,9 @@ class HlsParser {
   makeNetworkRequest_(request, type) {
     if (!this.operationManager_) {
       throw new Error(
-          Error.Severity.CRITICAL,
-          Error.Category.PLAYER,
-          Error.Code.OPERATION_ABORTED);
+          ErrorUtil.severity.CRITICAL,
+          ErrorUtil.category.PLAYER,
+          ErrorUtil.code.OPERATION_ABORTED);
     }
 
     const op = this.playerInterface_.networkingEngine.request(type, request);

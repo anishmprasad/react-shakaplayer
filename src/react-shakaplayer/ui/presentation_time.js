@@ -21,6 +21,8 @@
 // goog.require('shaka.util.Dom');
 
 import Localization from './localization';
+import Locales from '../dist/locales';
+import Constants from '../ui/constants';
 import Dom from '../lib/util/dom_utils';
 import Element from './element';
 import { Controls } from './controls';
