@@ -21,7 +21,7 @@ export default class AssetCard {
 	 * @param {function(!AssetCard)} remakeButtonsFn
 	 */
 	constructor(parentDiv, asset, isFeatured, remakeButtonsFn) {
-		console.log(parentDiv, asset, isFeatured, remakeButtonsFn);
+		// console.log(parentDiv, asset, isFeatured, remakeButtonsFn);
 		/** @private {!Element} */
 		this.card_ = document.createElement('div');
 		/** @private {!ShakaDemoAssetInfo} */

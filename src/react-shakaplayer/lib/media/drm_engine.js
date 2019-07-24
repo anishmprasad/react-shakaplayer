@@ -543,7 +543,7 @@ class DrmEngine {
    */
   newInitData(initDataType, initData) {
     // Aliases:
-    const Uint8ArrayUtils = Uint8ArrayUtils;
+    // const Uint8ArrayUtils = Uint8ArrayUtils;
 
     // Suppress duplicate init data.
     // Note that some init data are extremely large and can't portably be used
@@ -883,8 +883,8 @@ class DrmEngine {
       return null;
     }
 
-    const StringUtils = StringUtils;
-    const Uint8ArrayUtils = Uint8ArrayUtils;
+    // const StringUtils = StringUtils;
+    // const Uint8ArrayUtils = Uint8ArrayUtils;
     const keys = [];
     const keyIds = [];
 
@@ -1796,7 +1796,7 @@ class DrmEngine {
 
     for (const drmInfo of drmInfos) {
       // Aliases:
-      const Uint8ArrayUtils = Uint8ArrayUtils;
+      // const Uint8ArrayUtils = Uint8ArrayUtils;
 
       // Build an array of unique license servers.
       if (!licenseServers.includes(drmInfo.licenseServerUri)) {
