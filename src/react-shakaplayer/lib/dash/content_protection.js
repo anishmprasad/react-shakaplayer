@@ -26,6 +26,13 @@
 // goog.require('shaka.util.Uint8ArrayUtils');
 // goog.require('shaka.util.XmlUtils');
 
+import Error from '../util/error';
+import ManifestParserUtils from '../util/manifest_parser_utils';
+import Uint8ArrayUtils from '../util/uint8array_utils';
+import XmlUtils from '../util/xml_utils';
+
+const ErrorUtil = new Error();
+
 var shaka = window.shaka;
 
 /**
@@ -43,7 +50,7 @@ export default class ContentProtection {
 	 */
 	static parseFromAdaptationSet(elems, callback, ignoreDrmInfo) {
 		// const ContentProtection = ContentProtection;
-		// const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
 		const parsed = ContentProtection.parseElements_(elems);
 		/** @type {Array.<shaka.extern.InitDataOverride>} */
 		let defaultInit = null;
@@ -57,10 +64,10 @@ export default class ContentProtection {
 		keyIds.delete(null);
 
 		if (keyIds.size > 1) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_CONFLICTING_KEY_IDS
+			throw new Error(
+				ErrorUtil.severity.CRITICAL,
+				ErrorUtil.category.MANIFEST,
+				ErrorUtil.code.DASH_CONFLICTING_KEY_IDS
 			);
 		}
 
@@ -161,10 +168,10 @@ export default class ContentProtection {
 			});
 			// If we have filtered out all key-systems, throw an error.
 			if (context.drmInfos.length == 0) {
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.MANIFEST,
-					shaka.util.Error.Code.DASH_NO_COMMON_KEY_SYSTEM
+				throw new Error(
+					ErrorUtil.severity.CRITICAL,
+					ErrorUtil.category.MANIFEST,
+					ErrorUtil.code.DASH_NO_COMMON_KEY_SYSTEM
 				);
 			}
 		}
@@ -180,7 +187,7 @@ export default class ContentProtection {
 	 * @return {string}
 	 */
 	static getWidevineLicenseUrl(element) {
-		const mslaurlNode = shaka.util.XmlUtils.findChildNS(element.node, 'urn:microsoft', 'laurl');
+		const mslaurlNode = XmlUtils.findChildNS(element.node, 'urn:microsoft', 'laurl');
 		if (mslaurlNode) {
 			return mslaurlNode.getAttribute('licenseUrl') || '';
 		}
@@ -288,7 +295,7 @@ export default class ContentProtection {
 	 * @return {string}
 	 */
 	static getPlayReadyLicenseUrl(element) {
-		const proNode = shaka.util.XmlUtils.findChildNS(element.node, 'urn:microsoft:playready', 'pro');
+		const proNode = XmlUtils.findChildNS(element.node, 'urn:microsoft:playready', 'pro');
 
 		if (!proNode) {
 			return '';
@@ -297,7 +304,7 @@ export default class ContentProtection {
 		// const ContentProtection = ContentProtection;
 		const PLAYREADY_RECORD_TYPES = ContentProtection.PLAYREADY_RECORD_TYPES;
 
-		const bytes = shaka.util.Uint8ArrayUtils.fromBase64(proNode.textContent);
+		const bytes = Uint8ArrayUtils.fromBase64(proNode.textContent);
 		const records = ContentProtection.parseMsPro_(bytes.buffer);
 		const record = records.filter(record => {
 			return record.type === PLAYREADY_RECORD_TYPES.RIGHTS_MANAGEMENT;
@@ -307,8 +314,8 @@ export default class ContentProtection {
 			return '';
 		}
 
-		const xml = shaka.util.StringUtils.fromUTF16(record.value, true);
-		const rootElement = shaka.util.XmlUtils.parseXmlString(xml, 'WRMHEADER');
+		const xml = StringUtils.fromUTF16(record.value, true);
+		const rootElement = XmlUtils.parseXmlString(xml, 'WRMHEADER');
 		if (!rootElement) {
 			return '';
 		}
@@ -327,7 +334,7 @@ export default class ContentProtection {
 	 */
 	static convertElements_(defaultInit, callback, elements) {
 		// const ContentProtection = ContentProtection;
-		// const ManifestParserUtils = shaka.util.ManifestParserUtils;
+		// const ManifestParserUtils = ManifestParserUtils;
 		const defaultKeySystems = ContentProtection.defaultKeySystems_;
 		const licenseUrlParsers = ContentProtection.licenseUrlParsers_;
 
@@ -394,9 +401,9 @@ export default class ContentProtection {
 		/** @type {?string} */
 		let schemeUri = elem.getAttribute('schemeIdUri');
 		/** @type {?string} */
-		let keyId = shaka.util.XmlUtils.getAttributeNS(elem, NS, 'default_KID');
+		let keyId = XmlUtils.getAttributeNS(elem, NS, 'default_KID');
 		/** @type {!Array.<string>} */
-		const psshs = shaka.util.XmlUtils.findChildrenNS(elem, NS, 'pssh').map(shaka.util.XmlUtils.getContents);
+		const psshs = XmlUtils.findChildrenNS(elem, NS, 'pssh').map(XmlUtils.getContents);
 
 		if (!schemeUri) {
 			shaka.log.error('Missing required schemeIdUri attribute on', 'ContentProtection element', elem);
@@ -407,10 +414,10 @@ export default class ContentProtection {
 		if (keyId) {
 			keyId = keyId.replace(/-/g, '').toLowerCase();
 			if (keyId.includes(' ')) {
-				throw new shaka.util.Error(
-					shaka.util.Error.Severity.CRITICAL,
-					shaka.util.Error.Category.MANIFEST,
-					shaka.util.Error.Code.DASH_MULTIPLE_KEY_IDS_NOT_SUPPORTED
+				throw new Error(
+					ErrorUtil.severity.CRITICAL,
+					ErrorUtil.category.MANIFEST,
+					ErrorUtil.code.DASH_MULTIPLE_KEY_IDS_NOT_SUPPORTED
 				);
 			}
 		}
@@ -422,15 +429,15 @@ export default class ContentProtection {
 			init = psshs.map(pssh => {
 				return {
 					initDataType: 'cenc',
-					initData: shaka.util.Uint8ArrayUtils.fromBase64(pssh),
+					initData: Uint8ArrayUtils.fromBase64(pssh),
 					keyId: null
 				};
 			});
 		} catch (e) {
-			throw new shaka.util.Error(
-				shaka.util.Error.Severity.CRITICAL,
-				shaka.util.Error.Category.MANIFEST,
-				shaka.util.Error.Code.DASH_PSSH_BAD_ENCODING
+			throw new Error(
+				ErrorUtil.severity.CRITICAL,
+				ErrorUtil.category.MANIFEST,
+				ErrorUtil.code.DASH_PSSH_BAD_ENCODING
 			);
 		}
 

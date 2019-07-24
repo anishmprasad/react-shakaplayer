@@ -1,5 +1,6 @@
 import ShakaDemoAssetInfo from './asset'
 import { Source, KeySystem, Feature } from './config'
+import NetworkingEngine from '../../lib/net/networking_engine'
 
 // console.log({ShakaDemoAssetInfo})
 
@@ -64,7 +65,7 @@ shakaAssets.lastUplynkPrefix = '';
  * @param {shaka.extern.Response} response
  */
 shakaAssets.UplynkResponseFilter = (type, response) => {
-  if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+  if (type === NetworkingEngine.RequestType.MANIFEST) {
     // Parse a custom header that contains a value needed to build a proper
     // license server URL.
     if (response.headers['x-uplynk-prefix']) {

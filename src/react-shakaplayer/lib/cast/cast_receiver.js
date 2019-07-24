@@ -63,8 +63,8 @@ class CastReceiver extends FakeEventTarget {
     /** @private {Player} */
     this.player_ = player;
 
-    /** @private {shaka.util.EventManager} */
-    this.eventManager_ = new shaka.util.EventManager();
+    /** @private {EventManager} */
+    this.eventManager_ = new EventManager();
 
     /** @private {Object} */
     this.targets_ = {
@@ -102,8 +102,8 @@ class CastReceiver extends FakeEventTarget {
     /** @private {cast.receiver.CastMessageBus} */
     this.genericBus_ = null;
 
-    /** @private {shaka.util.Timer} */
-    this.pollTimer_ = new shaka.util.Timer(() => {
+    /** @private {Timer} */
+    this.pollTimer_ = new Timer(() => {
       this.pollAttributes_();
     });
 
@@ -173,11 +173,11 @@ class CastReceiver extends FakeEventTarget {
     manager.onSystemVolumeChanged = () => this.fakeVolumeChangeEvent_();
 
     this.genericBus_ = manager.getCastMessageBus(
-        shaka.cast.CastUtils.GENERIC_MESSAGE_NAMESPACE);
+        CastUtils.GENERIC_MESSAGE_NAMESPACE);
     this.genericBus_.onMessage = (event) => this.onGenericMessage_(event);
 
     this.shakaBus_ = manager.getCastMessageBus(
-        shaka.cast.CastUtils.SHAKA_MESSAGE_NAMESPACE);
+        CastUtils.SHAKA_MESSAGE_NAMESPACE);
     this.shakaBus_.onMessage = (event) => this.onShakaMessage_(event);
 
     if (goog.DEBUG) {
@@ -187,19 +187,19 @@ class CastReceiver extends FakeEventTarget {
       // browser is a Chromecast before starting the receiver manager.  We
       // wouldn't do browser detection except for debugging, so only do this in
       // uncompiled mode.
-      if (shaka.util.Platform.isChromecast()) {
+      if (Platform.isChromecast()) {
         manager.start();
       }
     } else {
       manager.start();
     }
 
-    for (const name of shaka.cast.CastUtils.VideoEvents) {
+    for (const name of CastUtils.VideoEvents) {
       this.eventManager_.listen(
           this.video_, name, (event) => this.proxyEvent_('video', event));
     }
 
-    for (const name of shaka.cast.CastUtils.PlayerEvents) {
+    for (const name of CastUtils.PlayerEvents) {
       this.eventManager_.listen(
           this.player_, name, (event) => this.proxyEvent_('player', event));
     }
@@ -390,14 +390,14 @@ class CastReceiver extends FakeEventTarget {
     // The poll timer may have been pre-empted by an event (e.g. timeupdate).
     // Calling |start| will cancel any pending calls and therefore will avoid us
     // polling too often.
-    this.pollTimer_.tickAfter(shaka.cast.CastReceiver.POLL_INTERVAL);
+    this.pollTimer_.tickAfter(CastReceiver.POLL_INTERVAL);
 
     const update = {
       'video': {},
       'player': {},
     };
 
-    for (const name of shaka.cast.CastUtils.VideoAttributes) {
+    for (const name of CastUtils.VideoAttributes) {
       update['video'][name] = this.video_[name];
     }
 
@@ -407,7 +407,7 @@ class CastReceiver extends FakeEventTarget {
 
     if (this.player_.isLive()) {
       const PlayerGetterMethodsThatRequireLive =
-          shaka.cast.CastUtils.PlayerGetterMethodsThatRequireLive;
+          CastUtils.PlayerGetterMethodsThatRequireLive;
       for (const name in PlayerGetterMethodsThatRequireLive) {
         const frequency = PlayerGetterMethodsThatRequireLive[name];
         if (this.updateNumber_ % frequency == 0) {
@@ -415,8 +415,8 @@ class CastReceiver extends FakeEventTarget {
         }
       }
     }
-    for (const name in shaka.cast.CastUtils.PlayerGetterMethods) {
-      const frequency = shaka.cast.CastUtils.PlayerGetterMethods[name];
+    for (const name in CastUtils.PlayerGetterMethods) {
+      const frequency = CastUtils.PlayerGetterMethods[name];
       if (this.updateNumber_ % frequency == 0) {
         update['player'][name] = /** @type {Object} */ (this.player_)[name]();
       }
@@ -520,7 +520,7 @@ class CastReceiver extends FakeEventTarget {
    * @private
    */
   onShakaMessage_(event) {
-    const message = shaka.cast.CastUtils.deserialize(event.data);
+    const message = CastUtils.deserialize(event.data);
     shaka.log.debug('CastReceiver: message', message);
 
     switch (message['type']) {
@@ -609,7 +609,7 @@ class CastReceiver extends FakeEventTarget {
    * @private
    */
   onGenericMessage_(event) {
-    const message = shaka.cast.CastUtils.deserialize(event.data);
+    const message = CastUtils.deserialize(event.data);
     shaka.log.debug('CastReceiver: message', message);
     // TODO(ismena): error message on duplicate request id from the same sender
     switch (message['type']) {
@@ -766,7 +766,7 @@ class CastReceiver extends FakeEventTarget {
       return;
     }
 
-    const serialized = shaka.cast.CastUtils.serialize(message);
+    const serialized = CastUtils.serialize(message);
     if (senderId) {
       bus.getCastChannel(senderId).send(serialized);
     } else {
@@ -779,7 +779,7 @@ class CastReceiver extends FakeEventTarget {
    * @private
    */
   getPlayState_() {
-    const playState = shaka.cast.CastReceiver.PLAY_STATE;
+    const playState = CastReceiver.PLAY_STATE;
     if (this.isIdle_) {
       return playState.IDLE;
     } else if (this.player_.isBuffering()) {

@@ -17,6 +17,7 @@
 
 import shakaAssets from './assets';
 import { Source, KeySystem } from './config';
+import NetworkingEngine from '../../lib/net/networking_engine';
 
 // console.log({ shakaAssets });
 
@@ -331,7 +332,7 @@ const ShakaDemoAssetInfo = class {
 	 * @private
 	 */
 	addLicenseRequestHeaders_(headers, requestType, request) {
-		if (requestType != shaka.net.NetworkingEngine.RequestType.LICENSE) {
+		if (requestType !== NetworkingEngine.RequestType.LICENSE) {
 			return;
 		}
 
