@@ -57,7 +57,7 @@
 // goog.require('shaka.util.StreamUtils');
 
 import ActiveStreamMap from '../lib/media/active_stream_map';
-import AdaptationSetCriteria from '../lib/media/adaptation_set_criteria';
+import {AdaptationSetCriteria,ExampleBasedCriteria} from '../lib/media/adaptation_set_criteria';
 import BufferingObserver from '../lib/media/buffering_observer';
 import DrmEngine from '../lib/media/drm_engine';
 import ManifestParser from '../lib/media/manifest_parser';

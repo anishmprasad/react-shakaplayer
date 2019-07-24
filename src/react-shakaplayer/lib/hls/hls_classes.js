@@ -29,7 +29,7 @@ var goog = window.goog;
 /**
  * HLS playlist class.
  */
-shaka.hls.Playlist = class {
+class Playlist {
 	/**
 	 * @param {string} absoluteUri An absolute, final URI after redirects.
 	 * @param {!shaka.hls.PlaylistType} type
@@ -53,12 +53,12 @@ shaka.hls.Playlist = class {
 		/** @const {Array.<!shaka.hls.Segment>} */
 		this.segments = segments || null;
 	}
-};
+}
 
 /**
  * @enum {number}
  */
-shaka.hls.PlaylistType = {
+const PlaylistType = {
 	MASTER: 0,
 	MEDIA: 1
 };
@@ -66,7 +66,7 @@ shaka.hls.PlaylistType = {
 /**
  * HLS tag class.
  */
-shaka.hls.Tag = class {
+class Tag {
 	/**
 	 * @param {number} id
 	 * @param {string} name
@@ -173,12 +173,12 @@ shaka.hls.Tag = class {
 		const attribute = this.getAttribute(name);
 		return attribute ? attribute.value : defaultValue || null;
 	}
-};
+}
 
 /**
  * HLS Attribute class.
  */
-shaka.hls.Attribute = class {
+class Attribute {
 	/**
 	 * Creates an HLS attribute object.
 	 *
@@ -192,12 +192,12 @@ shaka.hls.Attribute = class {
 		/** @const {string} */
 		this.value = value;
 	}
-};
+}
 
 /**
  * HLS segment class.
  */
-shaka.hls.Segment = class {
+class Segment {
 	/**
 	 * Creates an HLS segment object.
 	 *
@@ -215,4 +215,6 @@ shaka.hls.Segment = class {
 		 */
 		this.absoluteUri = absoluteUri;
 	}
-};
+}
+
+export { Segment, Attribute, Tag, PlaylistType, Playlist };

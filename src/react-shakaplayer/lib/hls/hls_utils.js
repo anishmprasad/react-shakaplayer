@@ -24,12 +24,12 @@ import ManifestParserUtils from '../util/manifest_parser_utils';
 var shaka = window.shaka;
 var goog = window.goog;
 
-shaka.hls.Utils = class {
+export default class Utils {
 	/**
 	 *
-	 * @param {!Array.<!shaka.hls.Tag>} tags
+	 * @param {!Array.<!Tag>} tags
 	 * @param {string} name
-	 * @return {!Array.<!shaka.hls.Tag>}
+	 * @return {!Array.<!Tag>}
 	 */
 	static filterTagsByName(tags, name) {
 		return tags.filter(tag => {
@@ -39,12 +39,12 @@ shaka.hls.Utils = class {
 
 	/**
 	 *
-	 * @param {!Array.<!shaka.hls.Tag>} tags
+	 * @param {!Array.<!Tag>} tags
 	 * @param {string} name
-	 * @return {?shaka.hls.Tag}
+	 * @return {?Tag}
 	 */
 	static getFirstTagWithName(tags, name) {
-		const tagsWithName = shaka.hls.Utils.filterTagsByName(tags, name);
+		const tagsWithName = Utils.filterTagsByName(tags, name);
 		if (!tagsWithName.length) {
 			return null;
 		}
@@ -53,10 +53,10 @@ shaka.hls.Utils = class {
 	}
 
 	/**
-	 * @param {!Array.<!shaka.hls.Tag>} tags An array of EXT-X-MEDIA tags.
+	 * @param {!Array.<!Tag>} tags An array of EXT-X-MEDIA tags.
 	 * @param {string} type
 	 * @param {string} groupId
-	 * @return {!Array.<!shaka.hls.Tag>} The first tag that has the given media
+	 * @return {!Array.<!Tag>} The first tag that has the given media
 	 *   type and group id.
 	 */
 	static findMediaTags(tags, type, groupId) {
@@ -87,4 +87,4 @@ shaka.hls.Utils = class {
 	static isComment(line) {
 		return /^#(?!EXT)/m.test(line);
 	}
-};
+}

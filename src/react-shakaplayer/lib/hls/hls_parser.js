@@ -50,7 +50,32 @@
 // goog.require('shaka.util.OperationManager');
 // goog.require('shaka.util.Timer');
 
+import Uri from '../../third_party/closure/goog/uri/uri'
+
+import ManifestTextParser from '../hls/manifest_text_parser'
+import { Playlist, PlaylistType, Tag} from '../hls/hls_classes'
+import Utils from '../hls/hls_utils'
+
+import DrmEngine from '../media/drm_engine'
+import { InitSegmentReference, SegmentReference} from '../media/segment_reference'
 import ManifestParser from '../media/manifest_parser'
+import PresentationTimeline from '../media/presentation_timeline'
+import SegmentIndex from '../media/segment_index'
+import DataUriPlugin from '../net/data_uri_plugin'
+import NetworkingEngine from '../net/networking_engine'
+import TextEngine from '../text/text_engine'
+import ArrayUtils from '../util/array_utils'
+import DataViewReader from '../util/data_view_reader'
+import Error from '../util/error'
+import Functional from '../util/functional'
+import LanguageUtils from '../util/language_utils'
+import ManifestParserUtils from '../util/manifest_parser_utils'
+import MimeUtils from '../util/mime_utils'
+import Mp4Parser from '../util/mp4_parser'
+import Networking from '../util/networking'
+import OperationManager from '../util/operation_manager'
+import Timer from '../util/timer'
+
 var shaka = window.shaka;
 var goog = window.goog;
 
@@ -76,7 +101,7 @@ class HlsParser {
     this.globalId_ = 1;
 
     /**
-     * @private {!Map.<number, shaka.hls.HlsParser.StreamInfo>}
+     * @private {!Map.<number, HlsParser.StreamInfo>}
      */
     // TODO: This is now only used for text codec detection, try to remove.
     this.mediaTagsToStreamInfosMap_ = new Map();
@@ -107,11 +132,11 @@ class HlsParser {
      * During parsing of updates, used by getStartTime_ to determine the start
      * time of the first segment from existing segment references.
      *
-     * @private {!Map.<string, shaka.hls.HlsParser.StreamInfo>}
+     * @private {!Map.<string, HlsParser.StreamInfo>}
      */
     this.uriToStreamInfosMap_ = new Map();
 
-    /** @private {?shaka.media.PresentationTimeline} */
+    /** @private {?PresentationTimeline} */
     this.presentationTimeline_ = null;
 
     /**
@@ -121,8 +146,8 @@ class HlsParser {
      */
     this.masterPlaylistUri_ = '';
 
-    /** @private {shaka.hls.ManifestTextParser} */
-    this.manifestTextParser_ = new shaka.hls.ManifestTextParser();
+    /** @private {ManifestTextParser} */
+    this.manifestTextParser_ = new ManifestTextParser();
 
     /**
      * This is the number of seconds we want to wait between finishing a
@@ -139,14 +164,14 @@ class HlsParser {
      * to trigger the next update. The timer will only be started if the content
      * is live content.
      *
-     * @private {shaka.util.Timer}
+     * @private {Timer}
      */
-    this.updatePlaylistTimer_ = new shaka.util.Timer(() => {
+    this.updatePlaylistTimer_ = new Timer(() => {
       this.onUpdate_();
     });
 
-    /** @private {shaka.hls.HlsParser.PresentationType_} */
-    this.presentationType_ = shaka.hls.HlsParser.PresentationType_.VOD;
+    /** @private {HlsParser.PresentationType_} */
+    this.presentationType_ = HlsParser.PresentationType_.VOD;
 
     /** @private {?shaka.extern.Manifest} */
     this.manifest_ = null;
@@ -157,10 +182,10 @@ class HlsParser {
     /** @private {number} */
     this.minTargetDuration_ = Infinity;
 
-    /** @private {shaka.util.OperationManager} */
-    this.operationManager_ = new shaka.util.OperationManager();
+    /** @private {OperationManager} */
+    this.operationManager_ = new OperationManager();
 
-    /** @private {!Array.<!Array.<!shaka.media.SegmentReference>>} */
+    /** @private {!Array.<!Array.<!SegmentReference>>} */
     this.segmentsToNotifyByStream_ = [];
 
     /** A map from closed captions' group id, to a map of closed captions info.
@@ -260,29 +285,29 @@ class HlsParser {
   /**
    * Updates a stream.
    *
-   * @param {!shaka.hls.HlsParser.StreamInfo} streamInfo
+   * @param {!HlsParser.StreamInfo} streamInfo
    * @return {!Promise}
-   * @throws shaka.util.Error
+   * @throws Error
    * @private
    */
   async updateStream_(streamInfo) {
-    const PresentationType = shaka.hls.HlsParser.PresentationType_;
+    const PresentationType = HlsParser.PresentationType_;
 
     const manifestUri = streamInfo.absoluteMediaPlaylistUri;
     const response = await this.requestManifest_(manifestUri);
 
-    /** @type {shaka.hls.Playlist} */
+    /** @type {Playlist} */
     const playlist = this.manifestTextParser_.parsePlaylist(
         response.data, response.uri);
 
-    if (playlist.type != shaka.hls.PlaylistType.MEDIA) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
+    if (playlist.type != PlaylistType.MEDIA) {
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
     }
 
-    const mediaSequenceTag = shaka.hls.Utils.getFirstTagWithName(
+    const mediaSequenceTag = Utils.getFirstTagWithName(
         playlist.tags, 'EXT-X-MEDIA-SEQUENCE');
 
     const startPosition = mediaSequenceTag ? Number(mediaSequenceTag.value) : 0;
@@ -304,7 +329,7 @@ class HlsParser {
     // #EXT-X-ENDLIST tag will be appended.
     // If that happened, treat the rest of the EVENT presentation as VOD.
     const endListTag =
-        shaka.hls.Utils.getFirstTagWithName(playlist.tags, 'EXT-X-ENDLIST');
+        Utils.getFirstTagWithName(playlist.tags, 'EXT-X-ENDLIST');
 
     if (endListTag) {
       // Convert the presentation to VOD and set the duration to the last
@@ -327,7 +352,7 @@ class HlsParser {
    * Parses the manifest.
    *
    * @param {!ArrayBuffer} data
-   * @throws shaka.util.Error When there is a parsing error.
+   * @throws Error When there is a parsing error.
    * @return {!Promise}
    * @private
    */
@@ -340,21 +365,21 @@ class HlsParser {
 
     // We don't support directly providing a Media Playlist.
     // See the error code for details.
-    if (playlist.type != shaka.hls.PlaylistType.MASTER) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_MASTER_PLAYLIST_NOT_PROVIDED);
+    if (playlist.type != PlaylistType.MASTER) {
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_MASTER_PLAYLIST_NOT_PROVIDED);
     }
 
     const period = await this.createPeriod_(playlist);
 
     // Make sure that the parser has not been destroyed.
     if (!this.playerInterface_) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.PLAYER,
-          shaka.util.Error.Code.OPERATION_ABORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.PLAYER,
+          Error.Code.OPERATION_ABORTED);
     }
 
     if (this.aesEncrypted_ && period.variants.length == 0) {
@@ -362,10 +387,10 @@ class HlsParser {
       // when the playlist is encrypted with AES-128.
       shaka.log.info('No stream is created, because we don\'t support AES-128',
           'encryption yet');
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_AES_128_ENCRYPTION_NOT_SUPPORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_AES_128_ENCRYPTION_NOT_SUPPORTED);
     }
 
     // HLS has no notion of periods.  We're treating the whole presentation as
@@ -412,7 +437,7 @@ class HlsParser {
       // the availability window equal to the presentation delay.  The player
       // will be able to buffer ahead three segments, but the seek window will
       // be zero-sized.
-      const PresentationType = shaka.hls.HlsParser.PresentationType_;
+      const PresentationType = HlsParser.PresentationType_;
 
       if (this.presentationType_ == PresentationType.LIVE) {
         // This defaults to the presentation delay, which has the effect of
@@ -430,7 +455,7 @@ class HlsParser {
       }
 
       const rolloverSeconds =
-          shaka.hls.HlsParser.TS_ROLLOVER_ / shaka.hls.HlsParser.TS_TIMESCALE_;
+          HlsParser.TS_ROLLOVER_ / HlsParser.TS_TIMESCALE_;
       let offset = 0;
       while (maxFirstTimestamp >= rolloverSeconds) {
         offset += rolloverSeconds;
@@ -485,7 +510,7 @@ class HlsParser {
   /**
    * Parses a playlist into a Period object.
    *
-   * @param {!shaka.hls.Playlist} playlist
+   * @param {!Playlist} playlist
    * @return {!Promise.<!shaka.extern.Period>}
    * @private
    */
@@ -493,9 +518,9 @@ class HlsParser {
     const tags = playlist.tags;
 
     const mediaTags =
-        shaka.hls.Utils.filterTagsByName(playlist.tags, 'EXT-X-MEDIA');
+        Utils.filterTagsByName(playlist.tags, 'EXT-X-MEDIA');
     const textStreamTags = mediaTags.filter((tag) => {
-      const type = shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
+      const type = HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
       return type == 'SUBTITLES';
     });
 
@@ -504,7 +529,7 @@ class HlsParser {
     });
 
     const closedCaptionsTags = mediaTags.filter((tag) => {
-      const type = shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
+      const type = HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
       return type == 'CLOSED-CAPTIONS';
     });
     this.parseClosedCaptions_(closedCaptionsTags);
@@ -514,13 +539,13 @@ class HlsParser {
     // streams have been created, so that we can push text codecs found on the
     // variant tag back into the created text streams.
     const variantTags =
-        shaka.hls.Utils.filterTagsByName(tags, 'EXT-X-STREAM-INF');
+        Utils.filterTagsByName(tags, 'EXT-X-STREAM-INF');
     const variantsPromises = variantTags.map((tag) => {
       return this.createVariantsForTag_(tag, playlist);
     });
 
     const allVariants = await Promise.all(variantsPromises);
-    let variants = allVariants.reduce(shaka.util.Functional.collapseArrays, []);
+    let variants = allVariants.reduce(Functional.collapseArrays, []);
     // Filter out null variants.
     variants = variants.filter((variant) => variant != null);
 
@@ -532,15 +557,15 @@ class HlsParser {
   }
 
   /**
-   * @param {!shaka.hls.Tag} tag
-   * @param {!shaka.hls.Playlist} playlist
+   * @param {!Tag} tag
+   * @param {!Playlist} playlist
    * @return {!Promise.<!Array.<!shaka.extern.Variant>>}
    * @private
    */
   async createVariantsForTag_(tag, playlist) {
     window.asserts.assert(tag.name == 'EXT-X-STREAM-INF',
         'Should only be called on variant tags!');
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     // These are the default codecs to assume if none are specified.
     //
@@ -553,13 +578,13 @@ class HlsParser {
     // Strip out internal whitespace while splitting on commas:
     /** @type {!Array.<string>} */
     let codecs =
-    shaka.hls.HlsParser.filterDuplicateCodecs_(codecsString.split(/\s*,\s*/));
+    HlsParser.filterDuplicateCodecs_(codecsString.split(/\s*,\s*/));
     const resolutionAttr = tag.getAttribute('RESOLUTION');
     let width = null;
     let height = null;
     const frameRate = tag.getAttributeValue('FRAME-RATE');
     const bandwidth =
-    Number(shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'BANDWIDTH'));
+    Number(HlsParser.getRequiredAttributeValue_(tag, 'BANDWIDTH'));
 
     if (resolutionAttr) {
       const resBlocks = resolutionAttr.value.split('x');
@@ -570,13 +595,13 @@ class HlsParser {
     // After filtering, this is a list of the media tags we will process to
     // combine with the variant tag (EXT-X-STREAM-INF) we are working on.
     let mediaTags =
-        shaka.hls.Utils.filterTagsByName(playlist.tags, 'EXT-X-MEDIA');
+        Utils.filterTagsByName(playlist.tags, 'EXT-X-MEDIA');
 
     // Do not create stream info from closed captions media tags, which are
     // embedded in video streams.
     mediaTags = mediaTags.filter((tag) => {
       const type =
-          shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
+          HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
       return type != 'CLOSED-CAPTIONS';
     });
 
@@ -598,10 +623,10 @@ class HlsParser {
     // Find any associated audio or video groups and create streams for them.
     if (audioGroupId) {
       mediaTags =
-          shaka.hls.Utils.findMediaTags(mediaTags, 'AUDIO', audioGroupId);
+          Utils.findMediaTags(mediaTags, 'AUDIO', audioGroupId);
     } else if (videoGroupId) {
       mediaTags =
-          shaka.hls.Utils.findMediaTags(mediaTags, 'VIDEO', videoGroupId);
+          Utils.findMediaTags(mediaTags, 'VIDEO', videoGroupId);
     }
 
     // There may be a codec string for the text stream.  We should identify
@@ -614,7 +639,7 @@ class HlsParser {
       const subGroupId = tag.getAttributeValue('SUBTITLES');
       if (subGroupId) {
         const textTags =
-            shaka.hls.Utils.findMediaTags(mediaTags, 'SUBTITLES', subGroupId);
+            Utils.findMediaTags(mediaTags, 'SUBTITLES', subGroupId);
         window.asserts.assert(textTags.length == 1,
             'Exactly one text tag expected!');
         if (textTags.length) {
@@ -627,7 +652,7 @@ class HlsParser {
       }
 
       // Remove this entry from the list of codecs that belong to audio/video.
-      shaka.util.ArrayUtils.remove(codecs, textCodecs);
+      ArrayUtils.remove(codecs, textCodecs);
     }
 
     const promises = mediaTags.map((tag) => {
@@ -680,7 +705,7 @@ class HlsParser {
       }
     } else if (audioStreamInfos.length) {
       const streamURI =
-      shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'URI');
+      HlsParser.getRequiredAttributeValue_(tag, 'URI');
       const firstAudioStreamURI =
           audioStreamInfos[0].verbatimMediaPlaylistUri;
       if (streamURI == firstAudioStreamURI) {
@@ -746,7 +771,7 @@ class HlsParser {
 
   /**
    * Filters out unsupported codec strings from an array of stream infos.
-   * @param {!Array.<shaka.hls.HlsParser.StreamInfo>} streamInfos
+   * @param {!Array.<HlsParser.StreamInfo>} streamInfos
    * @private
    */
   filterLegacyCodecs_(streamInfos) {
@@ -764,8 +789,8 @@ class HlsParser {
   }
 
   /**
-   * @param {!Array.<!shaka.hls.HlsParser.StreamInfo>} audioInfos
-   * @param {!Array.<!shaka.hls.HlsParser.StreamInfo>} videoInfos
+   * @param {!Array.<!HlsParser.StreamInfo>} audioInfos
+   * @param {!Array.<!HlsParser.StreamInfo>} videoInfos
    * @param {number} bandwidth
    * @param {?string} width
    * @param {?string} height
@@ -774,7 +799,7 @@ class HlsParser {
    * @private
    */
   createVariants_(audioInfos, videoInfos, bandwidth, width, height, frameRate) {
-    // const DrmEngine = shaka.media.DrmEngine;
+    // const DrmEngine = DrmEngine;
 
     for (const info of videoInfos) {
       this.addVideoAttributes_(info.stream, width, height, frameRate);
@@ -845,7 +870,7 @@ class HlsParser {
    * @private
    */
   createVariant_(audio, video, bandwidth, drmInfos) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
 
     // Since both audio and video are of the same type, this assertion will
     // catch certain mistakes at runtime that the compiler would miss.
@@ -870,8 +895,8 @@ class HlsParser {
   /**
    * Parses an EXT-X-MEDIA tag with TYPE="SUBTITLES" into a text stream.
    *
-   * @param {!shaka.hls.Tag} tag
-   * @param {!shaka.hls.Playlist} playlist
+   * @param {!Tag} tag
+   * @param {!Playlist} playlist
    * @return {!Promise.<?shaka.extern.Stream>}
    * @private
    */
@@ -879,7 +904,7 @@ class HlsParser {
     window.asserts.assert(tag.name == 'EXT-X-MEDIA',
         'Should only be called on media tags!');
 
-    const type = shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
+    const type = HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
     window.asserts.assert(type == 'SUBTITLES',
         'Should only be called on tags with TYPE="SUBTITLES"!');
 
@@ -894,31 +919,31 @@ class HlsParser {
    * Parses an EXT-X-MEDIA tag with TYPE="CLOSED-CAPTIONS", add store the values
    * into the map of group id to closed captions.
    *
-   * @param {!Array.<shaka.hls.Tag>} tags
+   * @param {!Array.<Tag>} tags
    * @private
    */
   parseClosedCaptions_(tags) {
     for (const tag of tags) {
       window.asserts.assert(tag.name == 'EXT-X-MEDIA',
           'Should only be called on media tags!');
-      const type = shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
+      const type = HlsParser.getRequiredAttributeValue_(tag, 'TYPE');
       window.asserts.assert(type == 'CLOSED-CAPTIONS',
           'Should only be called on tags with TYPE="CLOSED-CAPTIONS"!');
 
-      // const LanguageUtils = shaka.util.LanguageUtils;
+      // const LanguageUtils = LanguageUtils;
       const languageValue = tag.getAttributeValue('LANGUAGE') || 'und';
       const language = LanguageUtils.normalize(languageValue);
 
       // The GROUP-ID value is a quoted-string that specifies the group to which
       // the Rendition belongs.
       const groupId =
-          shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'GROUP-ID');
+          HlsParser.getRequiredAttributeValue_(tag, 'GROUP-ID');
 
       // The value of INSTREAM-ID is a quoted-string that specifies a Rendition
       // within the segments in the Media Playlist. This attribute is REQUIRED
       // if the TYPE attribute is CLOSED-CAPTIONS.
       const instreamId =
-          shaka.hls.HlsParser.getRequiredAttributeValue_(tag, 'INSTREAM-ID');
+          HlsParser.getRequiredAttributeValue_(tag, 'INSTREAM-ID');
       if (!this.groupIdToClosedCaptionsMap_.get(groupId)) {
         this.groupIdToClosedCaptionsMap_.set(groupId, new Map());
       }
@@ -929,16 +954,16 @@ class HlsParser {
   /**
    * Parse EXT-X-MEDIA media tag into a Stream object.
    *
-   * @param {shaka.hls.Tag} tag
+   * @param {Tag} tag
    * @param {!Array.<string>} allCodecs
-   * @return {!Promise.<?shaka.hls.HlsParser.StreamInfo>}
+   * @return {!Promise.<?HlsParser.StreamInfo>}
    * @private
    */
   async createStreamInfoFromMediaTag_(tag, allCodecs) {
     window.asserts.assert(tag.name == 'EXT-X-MEDIA',
         'Should only be called on media tags!');
 
-    const HlsParser = shaka.hls.HlsParser;
+    // const HlsParser = HlsParser;
     const verbatimMediaPlaylistUri = HlsParser.getRequiredAttributeValue_(
         tag, 'URI');
 
@@ -952,12 +977,12 @@ class HlsParser {
         HlsParser.getRequiredAttributeValue_(tag, 'TYPE').toLowerCase();
     // Shaka recognizes the content types 'audio', 'video' and 'text'.
     // The HLS 'subtitles' type needs to be mapped to 'text'.
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
+    const ContentType = ManifestParserUtils.ContentType;
     if (type == 'subtitles') {
       type = ContentType.TEXT;
     }
 
-    // const LanguageUtils = shaka.util.LanguageUtils;
+    // const LanguageUtils = LanguageUtils;
     const language = LanguageUtils.normalize(/** @type {string} */(
       tag.getAttributeValue('LANGUAGE', 'und')));
     const name = tag.getAttributeValue('NAME');
@@ -1012,17 +1037,17 @@ class HlsParser {
   /**
    * Parse an EXT-X-STREAM-INF media tag into a Stream object.
    *
-   * @param {!shaka.hls.Tag} tag
+   * @param {!Tag} tag
    * @param {!Array.<string>} allCodecs
    * @param {string} type
-   * @return {!Promise.<?shaka.hls.HlsParser.StreamInfo>}
+   * @return {!Promise.<?HlsParser.StreamInfo>}
    * @private
    */
   async createStreamInfoFromVariantTag_(tag, allCodecs, type) {
     window.asserts.assert(tag.name == 'EXT-X-STREAM-INF',
         'Should only be called on media tags!');
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    const HlsParser = shaka.hls.HlsParser;
+    const ContentType = ManifestParserUtils.ContentType;
+    // const HlsParser = HlsParser;
     const verbatimMediaPlaylistUri = HlsParser.getRequiredAttributeValue_(
         tag, 'URI');
 
@@ -1071,14 +1096,14 @@ class HlsParser {
    * @param {?string} name
    * @param {?number} channelsCount
    * @param {Map.<string, string>} closedCaptions
-   * @return {!Promise.<?shaka.hls.HlsParser.StreamInfo>}
-   * @throws shaka.util.Error
+   * @return {!Promise.<?HlsParser.StreamInfo>}
+   * @throws Error
    * @private
    */
   async createStreamInfo_(verbatimMediaPlaylistUri, allCodecs, type, language,
       primary, name, channelsCount, closedCaptions) {
     // TODO: Refactor, too many parameters
-    let absoluteMediaPlaylistUri = shaka.hls.Utils.constructAbsoluteUri(
+    let absoluteMediaPlaylistUri = Utils.constructAbsoluteUri(
         this.masterPlaylistUri_, verbatimMediaPlaylistUri);
 
     /** @type {string} */
@@ -1089,23 +1114,23 @@ class HlsParser {
     absoluteMediaPlaylistUri = response.uri;
 
     // Record the redirected, final URI of this media playlist when we parse it.
-    /** @type {!shaka.hls.Playlist} */
+    /** @type {!Playlist} */
     const playlist = this.manifestTextParser_.parsePlaylist(
         response.data, absoluteMediaPlaylistUri);
 
-    if (playlist.type != shaka.hls.PlaylistType.MEDIA) {
+    if (playlist.type != PlaylistType.MEDIA) {
       // EXT-X-MEDIA tags should point to media playlists.
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_INVALID_PLAYLIST_HIERARCHY);
     }
 
-    /** @type {!Array.<!shaka.hls.Tag>} */
+    /** @type {!Array.<!Tag>} */
     const drmTags = [];
     if (playlist.segments) {
       for (const segment of playlist.segments) {
-        const segmentKeyTags = shaka.hls.Utils.filterTagsByName(segment.tags,
+        const segmentKeyTags = Utils.filterTagsByName(segment.tags,
             'EXT-X-KEY');
         drmTags.push(...segmentKeyTags);
       }
@@ -1119,7 +1144,7 @@ class HlsParser {
     // TODO: May still need changes to support key rotation.
     for (const drmTag of drmTags) {
       const method =
-          shaka.hls.HlsParser.getRequiredAttributeValue_(drmTag, 'METHOD');
+          HlsParser.getRequiredAttributeValue_(drmTag, 'METHOD');
       if (method != 'NONE') {
         encrypted = true;
 
@@ -1133,9 +1158,9 @@ class HlsParser {
         }
 
         const keyFormat =
-            shaka.hls.HlsParser.getRequiredAttributeValue_(drmTag, 'KEYFORMAT');
+            HlsParser.getRequiredAttributeValue_(drmTag, 'KEYFORMAT');
         const drmParser =
-            shaka.hls.HlsParser.KEYFORMATS_TO_DRM_PARSERS_[keyFormat];
+            HlsParser.KEYFORMATS_TO_DRM_PARSERS_[keyFormat];
 
         const drmInfo = drmParser ? drmParser(drmTag) : null;
         if (drmInfo) {
@@ -1150,10 +1175,10 @@ class HlsParser {
     }
 
     if (encrypted && !drmInfos.length) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_KEYFORMATS_NOT_SUPPORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_KEYFORMATS_NOT_SUPPORTED);
     }
 
 
@@ -1168,7 +1193,7 @@ class HlsParser {
     /** @type {string} */
     const mimeType = mimeTypeArg;
 
-    const mediaSequenceTag = shaka.hls.Utils.getFirstTagWithName(playlist.tags,
+    const mediaSequenceTag = Utils.getFirstTagWithName(playlist.tags,
         'EXT-X-MEDIA-SEQUENCE');
 
     const startPosition = mediaSequenceTag ? Number(mediaSequenceTag.value) : 0;
@@ -1179,14 +1204,14 @@ class HlsParser {
     const minTimestamp = segments[0].startTime;
     const lastEndTime = segments[segments.length - 1].endTime;
     const duration = lastEndTime - minTimestamp;
-    /** @type {!shaka.media.SegmentIndex} */
-    const segmentIndex = new shaka.media.SegmentIndex(segments);
+    /** @type {!SegmentIndex} */
+    const segmentIndex = new SegmentIndex(segments);
 
     const initSegmentReference = this.createInitSegmentReference_(playlist);
 
     let kind = undefined;
-    if (type == shaka.util.ManifestParserUtils.ContentType.TEXT) {
-      kind = shaka.util.ManifestParserUtils.TextStreamKind.SUBTITLE;
+    if (type == ManifestParserUtils.ContentType.TEXT) {
+      kind = ManifestParserUtils.TextStreamKind.SUBTITLE;
     }
 
 
@@ -1234,16 +1259,16 @@ class HlsParser {
 
 
   /**
-   * @param {!shaka.hls.Playlist} playlist
+   * @param {!Playlist} playlist
    * @private
    */
   determinePresentationType_(playlist) {
-    const PresentationType = shaka.hls.HlsParser.PresentationType_;
+    const PresentationType = HlsParser.PresentationType_;
     const presentationTypeTag =
-        shaka.hls.Utils.getFirstTagWithName(playlist.tags,
+        Utils.getFirstTagWithName(playlist.tags,
             'EXT-X-PLAYLIST-TYPE');
     const endListTag =
-        shaka.hls.Utils.getFirstTagWithName(playlist.tags, 'EXT-X-ENDLIST');
+        Utils.getFirstTagWithName(playlist.tags, 'EXT-X-ENDLIST');
 
     const isVod = (presentationTypeTag && presentationTypeTag.value == 'VOD') ||
         endListTag;
@@ -1284,7 +1309,7 @@ class HlsParser {
 
   /**
    * @param {number} lastTimestamp
-   * @throws shaka.util.Error
+   * @throws Error
    * @private
    */
   createPresentationTimeline_(lastTimestamp) {
@@ -1323,30 +1348,30 @@ class HlsParser {
 
 
   /**
-   * @param {!shaka.hls.Playlist} playlist
-   * @return {shaka.media.InitSegmentReference}
+   * @param {!Playlist} playlist
+   * @return {InitSegmentReference}
    * @private
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    */
   createInitSegmentReference_(playlist) {
     const mapTags =
-        shaka.hls.Utils.filterTagsByName(playlist.tags, 'EXT-X-MAP');
+        Utils.filterTagsByName(playlist.tags, 'EXT-X-MAP');
     // TODO: Support multiple map tags?
     // For now, we don't support multiple map tags and will throw an error.
     if (!mapTags.length) {
       return null;
     } else if (mapTags.length > 1) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_MULTIPLE_MEDIA_INIT_SECTIONS_FOUND);
     }
 
     // Map tag example: #EXT-X-MAP:URI="main.mp4",BYTERANGE="720@0"
     const mapTag = mapTags[0];
     const verbatimInitSegmentUri =
-        shaka.hls.HlsParser.getRequiredAttributeValue_(mapTag, 'URI');
-    const absoluteInitSegmentUri = shaka.hls.Utils.constructAbsoluteUri(
+        HlsParser.getRequiredAttributeValue_(mapTag, 'URI');
+    const absoluteInitSegmentUri = Utils.constructAbsoluteUri(
         playlist.absoluteUri, verbatimInitSegmentUri);
 
     let startByte = 0;
@@ -1361,21 +1386,21 @@ class HlsParser {
       endByte = startByte + byteLength - 1;
     }
 
-    return new shaka.media.InitSegmentReference(
+    return new InitSegmentReference(
         () => [absoluteInitSegmentUri],
         startByte,
         endByte);
   }
 
   /**
-   * Parses one shaka.hls.Segment object into a shaka.media.SegmentReference.
+   * Parses one Segment object into a SegmentReference.
    *
-   * @param {!shaka.hls.Playlist} playlist
-   * @param {shaka.media.SegmentReference} previousReference
-   * @param {!shaka.hls.Segment} hlsSegment
+   * @param {!Playlist} playlist
+   * @param {SegmentReference} previousReference
+   * @param {!Segment} hlsSegment
    * @param {number} position
    * @param {number} startTime
-   * @return {!shaka.media.SegmentReference}
+   * @return {!SegmentReference}
    * @private
    */
   createSegmentReference_(
@@ -1393,7 +1418,7 @@ class HlsParser {
     let startByte = 0;
     let endByte = null;
     const byterange =
-         shaka.hls.Utils.getFirstTagWithName(tags, 'EXT-X-BYTERANGE');
+         Utils.getFirstTagWithName(tags, 'EXT-X-BYTERANGE');
 
     // If BYTERANGE is not specified, the segment consists of the entire
     // resource.
@@ -1434,21 +1459,21 @@ class HlsParser {
   }
 
   /**
-   * Parses shaka.hls.Segment objects into shaka.media.SegmentReferences.
+   * Parses Segment objects into SegmentReferences.
    *
    * @param {string} verbatimMediaPlaylistUri
-   * @param {!shaka.hls.Playlist} playlist
+   * @param {!Playlist} playlist
    * @param {number} startPosition
    * @param {string} mimeType
    * @param {string} codecs
-   * @return {!Promise<!Array.<!shaka.media.SegmentReference>>}
+   * @return {!Promise<!Array.<!SegmentReference>>}
    * @private
    */
   async createSegments_(
       verbatimMediaPlaylistUri, playlist, startPosition, mimeType, codecs) {
-    /** @type {Array.<!shaka.hls.Segment>} */
+    /** @type {Array.<!Segment>} */
     const hlsSegments = playlist.segments;
-    /** @type {!Array.<!shaka.media.SegmentReference>} */
+    /** @type {!Array.<!SegmentReference>} */
     const references = [];
 
     window.asserts.assert(hlsSegments.length, 'Playlist should have segments!');
@@ -1494,13 +1519,13 @@ class HlsParser {
    * Try to fetch a partial segment, and fall back to a full segment if we have
    * to.
    *
-   * @param {!shaka.media.AnySegmentReference} reference
+   * @param {!AnySegmentReference} reference
    * @return {!Promise.<shaka.extern.Response>}
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    * @private
    */
   async fetchPartialSegment_(reference) {
-    const RequestType = shaka.net.NetworkingEngine.RequestType;
+    const RequestType = NetworkingEngine.RequestType;
 
     // Create two requests:
     //  1. A partial request meant to fetch the smallest part of the segment
@@ -1508,13 +1533,13 @@ class HlsParser {
     //  2. A full request meant as a fallback for when the server does not
     //     support partial requests.
 
-    const partialRequest = shaka.util.Networking.createSegmentRequest(
+    const partialRequest = Networking.createSegmentRequest(
         reference.getUris(),
         reference.startByte,
-        reference.startByte + shaka.hls.HlsParser.PARTIAL_SEGMENT_SIZE_ - 1,
+        reference.startByte + HlsParser.PARTIAL_SEGMENT_SIZE_ - 1,
         this.config_.retryParameters);
 
-    const fullRequest = shaka.util.Networking.createSegmentRequest(
+    const fullRequest = Networking.createSegmentRequest(
         reference.getUris(),
         reference.startByte,
         reference.endByte,
@@ -1536,7 +1561,7 @@ class HlsParser {
       // If the networking operation was aborted, we don't want to treat it as
       // a request failure. We surface the error so that the OPERATION_ABORTED
       // error will be handled correctly.
-      if (e.code == shaka.util.Error.Code.OPERATION_ABORTED) {
+      if (e.code == Error.Code.OPERATION_ABORTED) {
         throw e;
       }
 
@@ -1562,12 +1587,12 @@ class HlsParser {
    * or by downloading it and parsing it otherwise.
    *
    * @param {string} verbatimMediaPlaylistUri
-   * @param {shaka.media.InitSegmentReference} initSegmentRef
-   * @param {!shaka.media.SegmentReference} segmentRef
+   * @param {InitSegmentReference} initSegmentRef
+   * @param {!SegmentReference} segmentRef
    * @param {string} mimeType
    * @param {string} codecs
    * @return {!Promise.<number>}
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    * @private
    */
   async getStartTime_(
@@ -1649,10 +1674,10 @@ class HlsParser {
     //    system work to allow additional formats to be "plugged-into" the
     //    parser.
 
-    throw new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.MANIFEST,
-        shaka.util.Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+    throw new Error(
+        Error.Severity.CRITICAL,
+        Error.Category.MANIFEST,
+        Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
   }
 
   /**
@@ -1661,11 +1686,11 @@ class HlsParser {
    * @param {!ArrayBuffer} mediaData
    * @param {!ArrayBuffer} initData
    * @return {number}
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    * @private
    */
   getStartTimeFromMp4Segment_(mediaData, initData) {
-    const Mp4Parser = shaka.util.Mp4Parser;
+    const Mp4Parser = Mp4Parser;
 
     let timescale = 0;
     new Mp4Parser()
@@ -1688,10 +1713,10 @@ class HlsParser {
 
     if (!timescale) {
       shaka.log.error('Unable to find timescale in init segment!');
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
     }
 
     let startTime = 0;
@@ -1712,10 +1737,10 @@ class HlsParser {
         }).parse(mediaData, true /* partialOkay */);
 
     if (!parsedMedia) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
     }
     return startTime;
   }
@@ -1725,18 +1750,18 @@ class HlsParser {
    *
    * @param {!ArrayBuffer} data
    * @return {number}
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    * @private
    */
   getStartTimeFromTsSegment_(data) {
-    const reader = new shaka.util.DataViewReader(
-        new DataView(data), shaka.util.DataViewReader.Endianness.BIG_ENDIAN);
+    const reader = new DataViewReader(
+        new DataView(data), DataViewReader.Endianness.BIG_ENDIAN);
 
     const fail = () => {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_COULD_NOT_PARSE_SEGMENT_START_TIME);
     };
 
     let packetStart = 0;
@@ -1834,7 +1859,7 @@ class HlsParser {
       // Reconstruct the PTS as a float.  Avoid bitwise operations to combine
       // because bitwise ops treat the values as 32-bit ints.
       const pts = ptsHigh3 * (1 << 30) + ptsLow30;
-      return pts / shaka.hls.HlsParser.TS_TIMESCALE_;
+      return pts / HlsParser.TS_TIMESCALE_;
     }
   }
 
@@ -1845,11 +1870,11 @@ class HlsParser {
    * @param {string} codecs
    * @param {!ArrayBuffer} data
    * @return {number}
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    * @private
    */
   getStartTimeFromTextSegment_(mimeType, codecs, data) {
-    const fullMimeType = shaka.util.MimeUtils.getFullType(mimeType, codecs);
+    const fullMimeType = MimeUtils.getFullType(mimeType, codecs);
     if (!TextEngine.isTypeSupported(fullMimeType)) {
       // We won't be able to parse this, but it will be filtered out anyway.
       // So we don't have to care about the start time.
@@ -1876,7 +1901,7 @@ class HlsParser {
       // include both. Since all known browsers support changing profiles
       // without any other work, just ignore them  See also:
       // https://github.com/google/shaka-player/issues/1817
-      const shortCodec = shaka.util.MimeUtils.getCodecBase(codec);
+      const shortCodec = MimeUtils.getCodecBase(codec);
       if (!seen.has(shortCodec)) {
         ret.push(codec);
         seen.add(shortCodec);
@@ -1898,8 +1923,8 @@ class HlsParser {
    * @private
    */
   guessCodecsSafe_(contentType, codecs) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    const HlsParser = shaka.hls.HlsParser;
+    const ContentType = ManifestParserUtils.ContentType;
+    // const HlsParser = HlsParser;
     const formats = HlsParser.CODEC_REGEXPS_BY_CONTENT_TYPE_[contentType];
 
     for (const format of formats) {
@@ -1927,7 +1952,7 @@ class HlsParser {
    * @param {!Array.<string>} codecs
    * @return {string}
    * @private
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    */
   guessCodecs_(contentType, codecs) {
     if (codecs.length == 1) {
@@ -1942,10 +1967,10 @@ class HlsParser {
     }
 
     // Unable to guess codecs.
-    throw new shaka.util.Error(
-        shaka.util.Error.Severity.CRITICAL,
-        shaka.util.Error.Category.MANIFEST,
-        shaka.util.Error.Code.HLS_COULD_NOT_GUESS_CODECS,
+    throw new Error(
+        Error.Severity.CRITICAL,
+        Error.Category.MANIFEST,
+        Error.Code.HLS_COULD_NOT_GUESS_CODECS,
         codecs);
   }
 
@@ -1954,21 +1979,21 @@ class HlsParser {
    *
    * @param {string} contentType
    * @param {string} codecs
-   * @param {!shaka.hls.Playlist} playlist
+   * @param {!Playlist} playlist
    * @return {!Promise.<string>}
    * @private
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    */
   async guessMimeType_(contentType, codecs, playlist) {
-    const ContentType = shaka.util.ManifestParserUtils.ContentType;
-    const HlsParser = shaka.hls.HlsParser;
-    const RequestType = shaka.net.NetworkingEngine.RequestType;
+    const ContentType = ManifestParserUtils.ContentType;
+    // const HlsParser = HlsParser;
+    const RequestType = NetworkingEngine.RequestType;
 
     window.asserts.assert(playlist.segments.length,
         'Playlist should have segments!');
     const firstSegmentUri = playlist.segments[0].absoluteUri;
 
-    const parsedUri = new goog.Uri(firstSegmentUri);
+    const parsedUri = new Uri(firstSegmentUri);
     const extension = parsedUri.getPath().split('.').pop();
     const map = HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_[contentType];
 
@@ -1992,7 +2017,7 @@ class HlsParser {
 
     // If unable to guess mime type, request a segment and try getting it
     // from the response.
-    const headRequest = shaka.net.NetworkingEngine.makeRequest(
+    const headRequest = NetworkingEngine.makeRequest(
         [firstSegmentUri], this.config_.retryParameters);
     headRequest.method = 'HEAD';
 
@@ -2002,10 +2027,10 @@ class HlsParser {
     const contentMimeType = response.headers['content-type'];
 
     if (!contentMimeType) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_COULD_NOT_GUESS_MIME_TYPE,
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_COULD_NOT_GUESS_MIME_TYPE,
           extension);
     }
 
@@ -2017,19 +2042,19 @@ class HlsParser {
    * Find the attribute and returns its value.
    * Throws an error if attribute was not found.
    *
-   * @param {shaka.hls.Tag} tag
+   * @param {Tag} tag
    * @param {string} attributeName
    * @return {string}
    * @private
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    */
   static getRequiredAttributeValue_(tag, attributeName) {
     const attribute = tag.getAttribute(attributeName);
     if (!attribute) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_REQUIRED_ATTRIBUTE_MISSING,
           attributeName);
     }
 
@@ -2040,19 +2065,19 @@ class HlsParser {
    * Returns a tag with a given name.
    * Throws an error if tag was not found.
    *
-   * @param {!Array.<shaka.hls.Tag>} tags
+   * @param {!Array.<Tag>} tags
    * @param {string} tagName
-   * @return {!shaka.hls.Tag}
+   * @return {!Tag}
    * @private
-   * @throws {shaka.util.Error}
+   * @throws {Error}
    */
   getRequiredTag_(tags, tagName) {
-    const tag = shaka.hls.Utils.getFirstTagWithName(tags, tagName);
+    const tag = Utils.getFirstTagWithName(tags, tagName);
     if (!tag) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.MANIFEST,
-          shaka.util.Error.Code.HLS_REQUIRED_TAG_MISSING, tagName);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.MANIFEST,
+          Error.Code.HLS_REQUIRED_TAG_MISSING, tagName);
     }
 
     return tag;
@@ -2082,9 +2107,9 @@ class HlsParser {
    * @private
    */
   requestManifest_(absoluteUri) {
-    const RequestType = shaka.net.NetworkingEngine.RequestType;
+    const RequestType = NetworkingEngine.RequestType;
 
-    const request = shaka.net.NetworkingEngine.makeRequest(
+    const request = NetworkingEngine.makeRequest(
         [absoluteUri], this.config_.retryParameters);
 
     return this.makeNetworkRequest_(request, RequestType.MANIFEST);
@@ -2116,11 +2141,11 @@ class HlsParser {
       const delay = this.updatePlaylistDelay_;
       this.updatePlaylistTimer_.tickAfter(/* seconds= */ delay);
     } catch (error) {
-      window.asserts.assert(error instanceof shaka.util.Error,
+      window.asserts.assert(error instanceof Error,
           'Should only receive a Shaka error');
 
       // We will retry updating, so override the severity of the error.
-      error.severity = shaka.util.Error.Severity.RECOVERABLE;
+      error.severity = Error.Severity.RECOVERABLE;
       this.playerInterface_.onError(error);
 
       // Try again very soon.
@@ -2134,13 +2159,13 @@ class HlsParser {
    * @private
    */
   isLive_() {
-    const PresentationType = shaka.hls.HlsParser.PresentationType_;
+    const PresentationType = HlsParser.PresentationType_;
     return this.presentationType_ != PresentationType.VOD;
   }
 
 
   /**
-   * @param {shaka.hls.HlsParser.PresentationType_} type
+   * @param {HlsParser.PresentationType_} type
    * @private
    */
   setPresentationType_(type) {
@@ -2164,16 +2189,16 @@ class HlsParser {
    * request will not be made.
    *
    * @param {shaka.extern.Request} request
-   * @param {shaka.net.NetworkingEngine.RequestType} type
+   * @param {NetworkingEngine.RequestType} type
    * @return {!Promise.<shaka.extern.Response>}
    * @private
    */
   makeNetworkRequest_(request, type) {
     if (!this.operationManager_) {
-      throw new shaka.util.Error(
-          shaka.util.Error.Severity.CRITICAL,
-          shaka.util.Error.Category.PLAYER,
-          shaka.util.Error.Code.OPERATION_ABORTED);
+      throw new Error(
+          Error.Severity.CRITICAL,
+          Error.Category.PLAYER,
+          Error.Code.OPERATION_ABORTED);
     }
 
     const op = this.playerInterface_.networkingEngine.request(type, request);
@@ -2183,12 +2208,12 @@ class HlsParser {
   }
 
   /**
-   * @param {!shaka.hls.Tag} drmTag
+   * @param {!Tag} drmTag
    * @return {?shaka.extern.DrmInfo}
    * @private
    */
   static widevineDrmParser_(drmTag) {
-    const HlsParser = shaka.hls.HlsParser;
+    // const HlsParser = HlsParser;
     const method = HlsParser.getRequiredAttributeValue_(drmTag, 'METHOD');
     shaka.Deprecate.deprecateFeature(
         2, 6,
@@ -2202,11 +2227,11 @@ class HlsParser {
     }
 
     const uri = HlsParser.getRequiredAttributeValue_(drmTag, 'URI');
-    const parsedData = shaka.net.DataUriPlugin.parseRaw(uri);
+    const parsedData = DataUriPlugin.parseRaw(uri);
 
     // The data encoded in the URI is a PSSH box to be used as init data.
     const pssh = new Uint8Array(parsedData.data);
-    const drmInfo = shaka.util.ManifestParserUtils.createDrmInfo(
+    const drmInfo = ManifestParserUtils.createDrmInfo(
         'com.widevine.alpha', [
           {initDataType: 'cenc', initData: pssh},
         ]);
@@ -2226,7 +2251,7 @@ class HlsParser {
 /**
  * @typedef {{
  *   stream: !shaka.extern.Stream,
- *   segmentIndex: !shaka.media.SegmentIndex,
+ *   segmentIndex: !SegmentIndex,
  *   drmInfos: !Array.<shaka.extern.DrmInfo>,
  *   verbatimMediaPlaylistUri: string,
  *   absoluteMediaPlaylistUri: string,
@@ -2240,7 +2265,7 @@ class HlsParser {
  *
  * @property {!shaka.extern.Stream} stream
  *   The Stream itself.
- * @property {!shaka.media.SegmentIndex} segmentIndex
+ * @property {!SegmentIndex} segmentIndex
  *   SegmentIndex of the stream.
  * @property {!Array.<shaka.extern.DrmInfo>} drmInfos
  *   DrmInfos of the stream.  There may be multiple for multi-DRM content.
@@ -2368,20 +2393,20 @@ HlsParser.EXTENSION_MAP_BY_CONTENT_TYPE_ = {
 
 
 /**
- * @typedef {function(!shaka.hls.Tag):?shaka.extern.DrmInfo}
+ * @typedef {function(!Tag):?shaka.extern.DrmInfo}
  * @private
  */
 HlsParser.DrmParser_;
 
 
 /**
- * @const {!Object.<string, shaka.hls.HlsParser.DrmParser_>}
+ * @const {!Object.<string, HlsParser.DrmParser_>}
  * @private
  */
 HlsParser.KEYFORMATS_TO_DRM_PARSERS_ = {
   /* TODO: https://github.com/google/shaka-player/issues/382
   'com.apple.streamingkeydelivery':
-      shaka.hls.HlsParser.fairplayDrmParser_,
+      HlsParser.fairplayDrmParser_,
   */
   'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed':
       HlsParser.widevineDrmParser_,

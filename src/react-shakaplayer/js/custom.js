@@ -369,6 +369,7 @@ export default class ShakaDemoCustom {
 	 * @private
 	 */
 	createAssetCardFor_(asset) {
+		debugger;
 		const savedList = this.savedList_;
 		return new AssetCard(savedList, asset, /* isFeatured = */ false, c => {
 			c.addButton('Play', () => {

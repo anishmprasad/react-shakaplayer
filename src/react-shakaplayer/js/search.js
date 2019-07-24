@@ -80,6 +80,7 @@ class ShakaDemoSearch {
 	 * @private
 	 */
 	createAssetCardFor_(asset) {
+		debugger;
 		const resultsDiv = this.resultsDiv_;
 		return new AssetCard(resultsDiv, asset, /* isFeatured = */ false, c => {
 			const unsupportedReason = shakaDemoMain.getAssetUnsupportedReason(asset, /* needOffline= */ false);

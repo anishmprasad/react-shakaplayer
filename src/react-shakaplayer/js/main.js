@@ -37,10 +37,11 @@ import Player from '../lib/player'
 import SimpleTextDisplayer from '../lib/text/simple_text_displayer'
 import TextDisplayer from '../ui/text_displayer'
 import localeJson from '../ui/locales/en-GB.json'
+import {componentHandler} from '../externs/mdl'
 
 // console.log({ localeJson})
 
-// console.log('shakaAssets', shakaAssets)
+console.log('shakaAssets', shakaAssets)
 
 
 const errorUtils = new error()
@@ -169,23 +170,22 @@ class ShakaDemoMain {
     this.container_ = /** @type {!HTMLElement} */(
       document.getElementsByClassName('video-container')[0]);
 
-    if (navigator.serviceWorker) {
-      console.debug('Registering service worker.');
-      try {
-        const registration =
-            await navigator.serviceWorker.register('./service_worker.js');
-        console.debug('Service worker registered!', registration.scope);
-      } catch (error) {
-        console.error('Service worker registration failed!', error);
-      }
-    }
+    // if (navigator.serviceWorker) {
+    //   console.debug('Registering service worker.');
+    //   try {
+    //     const registration =
+    //         await navigator.serviceWorker.register('./service_worker.js');
+    //     console.debug('Service worker registered!', registration.scope);
+    //   } catch (error) {
+    //     console.error('Service worker registration failed!', error);
+    //   }
+    // }
 
     this.setupPlayer_();
     this.readHash_();
     window.addEventListener('hashchange', () => this.hashChanged_());
 
     await this.setupStorage_();
-
     // The main page is loaded. Dispatch an event, so the various
     // configurations will load themselves.
     this.dispatchEventWithName_('shaka-main-loaded');
@@ -568,7 +568,6 @@ class ShakaDemoMain {
 
     // const obj = await response.json();
     const obj = localeJson
-    // debugger
     const map = new Map();
     for (const key in obj) {
       map.set(key, obj[key]);
@@ -1165,7 +1164,7 @@ class ShakaDemoMain {
       button.classList.add('mdl-button--accent');
       this.showNode_(container);
       this.remakeHash();
-
+      debugger
       // Dispatch an event so that a page can load any deferred content.
       this.dispatchEventWithName_('shaka-main-page-changed');
 
