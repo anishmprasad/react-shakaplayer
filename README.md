@@ -164,18 +164,6 @@ attributes.
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
-## Important Links ##
-
- * [development roadmap](roadmap.md)
- * [hosted demo](http://shaka-player-demo.appspot.com) (sources in `demo/`)
- * [hosted builds on cdnjs](https://cdnjs.com/libraries/shaka-player)
- * [hosted builds on Google Hosted Libraries](https://developers.google.com/speed/libraries/#shaka-player)
- * [announcement list](https://groups.google.com/forum/#!forum/shaka-player-users)
-     ([join](docs/announcement-list-join-group.png) for release and survey
-      announcements)
- * [hosted API docs](http://shaka-player-demo.appspot.com/docs/api/index.html)
- * [tutorials](http://shaka-player-demo.appspot.com/docs/api/tutorial-welcome.html)
-
 
 ## Contributing ##
 
