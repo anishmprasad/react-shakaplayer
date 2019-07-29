@@ -164,14 +164,6 @@ attributes.
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
-
-## Contributing ##
-
-If you have improvements or fixes, we would love to have your contributions.
-Please read CONTRIBUTING.md for more information on the process we would like
-contributors to follow.
-
-
 ## FAQ ##
 
 For general help and before filing any bugs, please read the
