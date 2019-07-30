@@ -49,14 +49,6 @@ We support iOS through Apple's native HLS player.  We provide the same top-level
 API, but we just set the video's `src` element to the manfiest/media.  So we are
 dependent on the browser supporting the manifests.
 
-### Shaka Player Embedded (for native iOS)
-
-We have another project called [Shaka Player Embedded][] that offers the same
-features and similar APIs for native apps on iOS.  This project uses its own
-media stack, which allows it to play content that would otherwise not be
-supported.  This supports both DASH and HLS manifests.
-
-[Shaka Player Embedded]: https://github.com/google/shaka-player-embedded
 
 
 ## Manifest format support matrix
@@ -66,9 +58,6 @@ supported.  This supports both DASH and HLS manifests.
 |DASH  |**Y**          |**Y**| -   |**Y**                |
 |HLS   |**Y**          |**Y**|**Y**| -                   |
 
-You can also create a [manifest parser plugin][] to support custom manifest formats.
-
-[manifest parser plugin]: https://shaka-player-demo.appspot.com/docs/api/tutorial-manifest-parser.html
 
 
 ## DASH features
@@ -86,10 +75,10 @@ DASH features supported:
 
 DASH features **not** supported:
  - Xlink with actuate=onRequest
- - Manifests without any segment info: https://github.com/google/shaka-player/issues/1088
+ - Manifests without any segment info
  - Changing codecs during a presentation (unsupported by MSE)
  - Multiple trick mode tracks for the same resolution at varying framerates or bitrates
- - Timescales so large that timestamps cannot be represented as integers in JavaScript (2^53): https://github.com/google/shaka-player/issues/1667
+ - Timescales so large that timestamps cannot be represented as integers in JavaScript (2^53)
 
 
 ## HLS features
@@ -104,10 +93,10 @@ HLS features supported:
  - Encrypted content with FairPlay (Safari on macOS and iOS only)
 
 HLS features **not** supported:
- - Encrypted content with PlayReady: https://github.com/google/shaka-player/issues/1145
- - Key rotation: https://github.com/google/shaka-player/issues/917
- - I-frame-only playlists: https://github.com/google/shaka-player/issues/742
- - Raw AAC (without an MP4 container): https://github.com/google/shaka-player/issues/1083
+ - Encrypted content with PlayReady
+ - Key rotation
+ - I-frame-only playlists
+ - Raw AAC (without an MP4 container)
 
 [mux.js]: https://github.com/videojs/mux.js/releases
 
@@ -159,8 +148,6 @@ Subtitles are rendered by the browser by default.  Applications can create a
 [text display plugin][] for customer rendering to go beyond browser-supported
 attributes.
 
-[cueing data]: https://www.webmproject.org/docs/container/#cueing-data
-[text display plugin]: https://nightly-dot-shaka-player-demo.appspot.com/docs/api/shaka.extern.TextDisplayer.html
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
