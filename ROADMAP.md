@@ -1,4 +1,4 @@
-# Shaka Player Roadmap
+# react-shakaplayer Roadmap
 
 This doc shows all past and planned future milestones for Shaka Player, with
 brief details about the goals and rough dates of each milestone.  This is not a
