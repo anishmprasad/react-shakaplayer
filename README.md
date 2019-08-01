@@ -151,11 +151,6 @@ attributes.
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
-## FAQ ##
-
-For general help and before filing any bugs, please read the
-[FAQ](docs/tutorials/faq.md).
-
 ## UNDER ACTIVE DEVELOPMENT
 
 Apache-2.0
