@@ -5,7 +5,7 @@ adaptive media formats (such as [DASH][] and [HLS][]) in a browser, without
 using plugins or Flash.  Instead, Shaka Player uses the open web standards
 [MediaSource Extensions][] and [Encrypted Media Extensions][].
 
-Shaka Player also supports [offline storage and playback][] of media using
+Shaka Player also supports offline storage and playback of media using
 [IndexedDB][].  Content can be stored on any browser.  Storage of licenses
 depends on browser support.
 
@@ -21,7 +21,6 @@ For details on what's coming next, see our [development roadmap](ROADMAP.md).
 [MediaSource Extensions]: https://www.w3.org/TR/media-source/
 [Encrypted Media Extensions]: https://www.w3.org/TR/encrypted-media/
 [IndexedDB]: https://www.w3.org/TR/IndexedDB-2/
-[offline storage and playback]: https://shaka-player-demo.appspot.com/docs/api/tutorial-offline.html
 
 
 ## Platform and browser support matrix
