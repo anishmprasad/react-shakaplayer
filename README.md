@@ -152,7 +152,13 @@ attributes.
 
 ## UNDER ACTIVE DEVELOPMENT
 
-## Licence
+## Issues
 
-Apache-2.0
+Please [file an issue](https://github.com/Anishmprasad/react-shakaplayer/issues) if you find a bug, or need help.
+
+
+## License
+
+The MIT License (MIT)
+Copyright (c) 2019 Anish M Prasad
 
