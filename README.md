@@ -160,5 +160,6 @@ Please [file an issue](https://github.com/Anishmprasad/react-shakaplayer/issues)
 ## License
 
 The MIT License (MIT)
+
 Copyright (c) 2019 Anish M Prasad
 
