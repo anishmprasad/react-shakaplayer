@@ -2,8 +2,7 @@
 
 This doc shows all past and planned future milestones for Shaka Player, with
 brief details about the goals and rough dates of each milestone.  This is not a
-comprehensive list of features or fixes for each release.  For that, see
-CHANGELOG.md.
+comprehensive list of features or fixes for each release.
 
 The goals of future milestones are fluid until we begin that development cycle,
 so the exact milestone for future features is not pre-determined.
