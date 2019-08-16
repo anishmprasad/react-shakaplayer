@@ -150,12 +150,6 @@ attributes.
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
 
 
-## UNDER ACTIVE DEVELOPMENT
-
-## Issues
-
-Please [file an issue](https://github.com/Anishmprasad/react-shakaplayer/issues) if you find a bug, or need help.
-
 ## Disclaimer
 This plugin is not officially commisioned/supported by Google. The trademark "Google" is registered by "Google, Inc."
 
