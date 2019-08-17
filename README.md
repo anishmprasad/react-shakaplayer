@@ -151,6 +151,7 @@ attributes.
 
 
 ## Disclaimer
+
 This plugin is not officially commisioned/supported by Google. The trademark "Google" is registered by "Google, Inc."
 
 ## License
