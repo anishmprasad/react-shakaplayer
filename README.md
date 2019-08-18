@@ -144,7 +144,7 @@ Shaka Player supports:
     - Supported in both XML form and embedded in MP4
 
 Subtitles are rendered by the browser by default.  Applications can create a
-[text display plugin][] for customer rendering to go beyond browser-supported
+text display plugin for customer rendering to go beyond browser-supported
 attributes.
 
 <!-- TODO: replace with a link to a TextDisplayer tutorial -->
