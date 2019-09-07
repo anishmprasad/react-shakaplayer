@@ -1,10 +1,9 @@
 {
 	"name": "react-shakaplayer",
 	"version": "1.0.2",
-	"private": true,
 	"main": "./dist/index.js",
 	"dependencies": {
-		"shaka-player": "^2.5.4"
+		"shaka-player": "^2.5.5"
 	},
 	"peerDependencies": {
 		"awesomplete": "^1.1.4",
