@@ -43,6 +43,7 @@ function ShakaPlayer({ src, config, chromeless, className, ...rest }: any, ref :
         ui.destroy();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep shaka.Player.configure in sync.
