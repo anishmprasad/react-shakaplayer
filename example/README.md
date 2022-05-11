@@ -1,2 +1,2 @@
 
-# react-shakaplayer demo
+# react-shakaplayer
