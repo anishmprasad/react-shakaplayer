@@ -158,5 +158,5 @@ This plugin is not officially commisioned/supported by Google. The trademark "Go
 
 Apache-2.0
 
-Copyright (c) 2021 Anish M Prasad
+Copyright (c) 2022 Anish M Prasad
 
