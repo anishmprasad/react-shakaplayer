@@ -1,7 +1,7 @@
 
 # react-shakaplayer
 
-An Example for react shakaplayer
+An example for react-shakaplayer
 
 
 # Licence 
